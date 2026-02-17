@@ -1,0 +1,492 @@
+/**
+ * ============================================================================
+ * indelible.blob - Main Application
+ * ============================================================================
+ * 
+ * Decentralized photo/video verification platform using Walrus and Sui.
+ * 
+ * ARCHITECTURE:
+ * - Modular component-based design
+ * - Custom hooks for business logic
+ * - Service layer for external integrations
+ * - Type-safe throughout
+ * 
+ * NAVIGATION:
+ * - Camera: Capture photos and videos
+ * - Library: Browse sessions and captures
+ * - Session Detail: View captures in a session
+ * - Capture Detail: Full metadata view
+ * 
+ * FEATURES:
+ * - GPS-tagged captures
+ * - Walrus decentralized storage
+ * - Sui blockchain verification
+ * - Session-based organization
+ * - Persistent local storage
+ */
+
+import React, { useState, useEffect, useCallback } from 'react';
+import { StyleSheet, View, Text, TouchableOpacity, Alert } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
+import { LinearGradient } from 'expo-linear-gradient';
+import { MotiView } from 'moti';
+import * as Haptics from 'expo-haptics';
+
+// Hooks
+import { useSessions } from './src/hooks/useSessions';
+import { useCapture } from './src/hooks/useCapture';
+
+// Components
+import { VisionCameraView } from './src/components/Camera/VisionCameraView';
+import { SessionList, SessionDetail, CaptureDetail } from './src/components/Library';
+import { LoadingSpinner, IdentityModal } from './src/components/UI';
+import { DiagnosticsHub } from './src/components/Diagnostics/DiagnosticsHub';
+
+// Services
+import { LocationService } from './src/services/location';
+import { IdentityService } from './src/services/identity';
+import { SensorService } from './src/services/sensors';
+import { blobLog } from './src/utils/logger';
+
+// Types & Constants
+import { COLORS } from './src/constants/config';
+import type { CapturedPhoto, CapturedVideo, GPSData, CaptureSessionData } from '@shared/types';
+
+export default function App() {
+  console.log('TRACE: [App.tsx] App rendering...');
+
+  // Navigation
+  const [currentView, setCurrentView] = useState<'camera' | 'library' | 'session-detail' | 'capture-detail' | 'diagnostics'>('camera');
+
+  // Selected items
+  const [selectedSession, setSelectedSession] = useState<CaptureSessionData | null>(null);
+  const [selectedCapture, setSelectedCapture] = useState<CapturedPhoto | CapturedVideo | null>(null);
+
+  // Location
+  const [currentLocation, setCurrentLocation] = useState<GPSData | null>(null);
+  const [locationPermission, setLocationPermission] = useState(false);
+
+  // Identity
+  const [showIdentityModal, setShowIdentityModal] = useState(false);
+  const [user, setUser] = useState(IdentityService.getCurrentUser());
+
+  // Hooks
+  const {
+    sessions,
+    activeSession,
+    loading: sessionsLoading,
+    startSession,
+    endSession,
+    addCapture,
+    updateCapture,
+    deleteSession
+  } = useSessions();
+
+  const {
+    processCapture,
+    processingQueue
+  } = useCapture();
+
+  // ==========================================================================
+  // INITIALIZE APP
+  // ==========================================================================
+
+  useEffect(() => {
+    const initialize = async () => {
+      try {
+        console.log('TRACE: [App.tsx] initialize starting...');
+
+        const granted = await LocationService.requestPermissions();
+        setLocationPermission(granted);
+
+        if (granted) {
+          // Delay tracking slightly after permission to allow UI to settle
+          setTimeout(() => {
+            LocationService.startTracking((location) => {
+              setCurrentLocation(location);
+            }).catch(err => {
+              console.error('Tracking Start Error:', err);
+            });
+          }, 1000);
+        }
+        // Hardware Sensors
+        await SensorService.startTracking();
+
+        console.log('TRACE: [App.tsx] initialize complete');
+      } catch (error) {
+        console.error('TRACE: [App.tsx] initialization error:', error);
+      }
+    };
+
+    initialize();
+
+    return () => {
+      LocationService.stopTracking();
+      SensorService.stopTracking();
+    };
+  }, []);
+
+  // ==========================================================================
+  // HANDLE START SESSION (ANDROID-COMPATIBLE)
+  // ==========================================================================
+
+  const handleStartSession = useCallback(async () => {
+    blobLog.info('🎬 Start Session button pressed');
+
+    if (!IdentityService.isAuthenticated()) {
+      blobLog.info('   User not authenticated. Triggering Identity Modal...');
+      setShowIdentityModal(true);
+      return;
+    }
+
+    if (!currentLocation) {
+      Alert.alert('GPS Required', 'Waiting for GPS location. Please wait or go outdoors for better signal.');
+      return;
+    }
+
+    if (activeSession) {
+      Alert.alert('Session Active', 'End the current session first');
+      return;
+    }
+
+    const sessionName = `Session ${sessions.length + 1}`;
+    blobLog.info(`   Creating session: ${sessionName}`);
+
+    // Provide tactile feedback for session start
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    await startSession(currentLocation, sessionName);
+  }, [currentLocation, activeSession, sessions.length, startSession]);
+
+  // ==========================================================================
+  // HANDLE END SESSION
+  // ==========================================================================
+
+  const handleEndSession = useCallback(async () => { // Changed to async
+    if (!activeSession) {
+      Alert.alert('No Active Session', 'There is no active session to end');
+      return;
+    }
+
+    Alert.alert(
+      'End Session',
+      `End "${activeSession.name}" with ${activeSession.totalAssets} captures?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'End Session',
+          style: 'destructive',
+          onPress: () => endSession(),
+        },
+      ]
+    );
+  }, [activeSession, endSession]);
+
+  // ==========================================================================
+  // HANDLE CAPTURE
+  // ==========================================================================
+
+  const handleCapture = useCallback(async (capture: CapturedPhoto | CapturedVideo, isSovereign: boolean) => {
+    blobLog.info(`📸 New capture received (Sovereign Mode: ${isSovereign}): ${capture.uri}`);
+
+    addCapture(capture);
+
+    try {
+      await processCapture(capture, isSovereign, (status, updatedCapture) => {
+        blobLog.info(`   Processing status: ${status}`);
+        updateCapture(updatedCapture);
+      });
+    } catch (error: any) {
+      console.error('❌ Capture processing failed:', error);
+
+      // STRICT MODE HANDLING
+      if (error.message.includes('Strict Provenance')) {
+        Alert.alert(
+          '⚠️ Integrity Check Failed',
+          'The hardware signature for this capture could not be verified. This is required for Gold/Silver provenance.',
+          [
+            {
+              text: 'Discard',
+              style: 'destructive',
+              onPress: () => {
+                // Ideally delete the partial capture, but for now just leave it as failed
+                blobLog.warn('User discarded failed capture');
+              }
+            },
+            {
+              text: '🔄 Retry Signature',
+              onPress: async () => {
+                blobLog.info('User retrying signature...');
+                // Recursive retry
+                handleCapture(capture, isSovereign);
+              }
+            }
+          ]
+        );
+      } else {
+        Alert.alert('Processing Failed', error.message);
+      }
+    }
+  }, [addCapture, processCapture, updateCapture]);
+
+  // ==========================================================================
+  // NAVIGATION HANDLERS
+  // ==========================================================================
+
+  const handleSelectSession = useCallback((session: CaptureSessionData) => {
+    setSelectedSession(session);
+    setCurrentView('session-detail');
+  }, []);
+
+  const handleSelectCapture = useCallback((capture: CapturedPhoto | CapturedVideo) => {
+    setSelectedCapture(capture);
+    setCurrentView('capture-detail');
+  }, []);
+
+  const handleBackToLibrary = useCallback(() => {
+    setSelectedSession(null);
+    setCurrentView('library');
+  }, []);
+
+  const handleBackToSession = useCallback(() => {
+    setSelectedCapture(null);
+    setCurrentView('session-detail');
+  }, []);
+
+  // ==========================================================================
+  // RENDER: LOADING
+  // ==========================================================================
+
+  if (sessionsLoading) {
+    return (
+      <View style={styles.container}>
+        <LinearGradient
+          colors={[COLORS.backgroundDark, COLORS.background]}
+          style={styles.gradient}
+        >
+          <LoadingSpinner size="large" message="Loading indelible.blob..." />
+        </LinearGradient>
+      </View>
+    );
+  }
+
+  // ==========================================================================
+  // RENDER: MAIN APP
+  // ==========================================================================
+
+  return (
+    <View style={styles.container}>
+      <StatusBar style="light" />
+
+      {/* Main Content Area */}
+      <MotiView
+        key={currentView}
+        from={{ opacity: 0, scale: 0.95, translateY: 10 }}
+        animate={{ opacity: 1, scale: 1, translateY: 0 }}
+        transition={{ type: 'timing', duration: 400 }}
+        style={styles.content}
+      >
+        {currentView === 'camera' && (
+          <View style={styles.cameraContainer}>
+            <VisionCameraView
+              activeSession={activeSession}
+              currentLocation={currentLocation}
+              onCapture={handleCapture}
+              onNavigate={(view: any) => setCurrentView(view)}
+            />
+
+            {/* Bottom Navigation */}
+            <View style={styles.bottomNav}>
+              <TouchableOpacity
+                style={styles.navButton}
+                onPress={() => setCurrentView('library')}
+              >
+                <Text style={styles.navButtonText}>📚 Library ({sessions.length})</Text>
+              </TouchableOpacity>
+
+              {activeSession ? (
+                <TouchableOpacity
+                  style={[styles.navButton, styles.navButtonDanger]}
+                  onPress={handleEndSession}
+                >
+                  <Text style={styles.navButtonText}>⏹️  End Session</Text>
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity
+                  style={[styles.navButton, styles.navButtonPrimary]}
+                  onPress={handleStartSession}
+                  disabled={!locationPermission || !currentLocation}
+                >
+                  <Text style={styles.navButtonText}>
+                    {!locationPermission ? '📍 GPS Required' : !currentLocation ? '📍 Waiting...' : '▶️  Start Session'}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
+        )}
+
+        {currentView === 'diagnostics' && (
+          <DiagnosticsHub onBack={() => setCurrentView('camera')} />
+        )}
+
+        {currentView === 'library' && (
+          <LinearGradient
+            colors={[COLORS.backgroundDark, COLORS.background]}
+            style={styles.gradient}
+          >
+            <View style={styles.libraryHeader}>
+              <TouchableOpacity
+                style={styles.backButton}
+                onPress={() => setCurrentView('camera')}
+              >
+                <Text style={styles.backButtonText}>← Camera</Text>
+              </TouchableOpacity>
+              <Text style={styles.libraryTitle}>Library</Text>
+              <View style={styles.placeholder} />
+            </View>
+
+            <SessionList
+              sessions={sessions}
+              onSelectSession={handleSelectSession}
+              onDeleteSession={deleteSession}
+            />
+          </LinearGradient>
+        )}
+
+        {currentView === 'session-detail' && selectedSession && (
+          <SessionDetail
+            session={selectedSession}
+            onSelectCapture={handleSelectCapture}
+            onBack={handleBackToLibrary}
+            onDeleteSession={deleteSession}
+          />
+        )}
+
+        {currentView === 'capture-detail' && selectedCapture && (
+          <CaptureDetail
+            capture={selectedCapture}
+            onBack={handleBackToSession}
+          />
+        )}
+      </MotiView>
+
+      {processingQueue.length > 0 && (
+        <View style={styles.processingIndicator}>
+          <Text style={styles.processingText}>
+            ⚙️ Processing {processingQueue.length} capture{processingQueue.length > 1 ? 's' : ''}...
+          </Text>
+        </View>
+      )}
+
+      <IdentityModal
+        visible={showIdentityModal}
+        onClose={() => setShowIdentityModal(false)}
+        onLoginSuccess={() => {
+          const loggedInUser = IdentityService.getCurrentUser();
+          setUser(loggedInUser);
+          setShowIdentityModal(false);
+
+          // Auto-start session if location is present
+          if (currentLocation && !activeSession) {
+            const sessionName = `Session ${sessions.length + 1}`;
+            blobLog.info(`   Auto-starting session after login: ${sessionName}`);
+            startSession(currentLocation, sessionName);
+          }
+        }}
+      />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.backgroundDark,
+  },
+  content: {
+    flex: 1,
+  },
+  gradient: {
+    flex: 1,
+  },
+  cameraContainer: {
+    flex: 1,
+  },
+  bottomNav: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingBottom: 20,
+    backgroundColor: 'transparent',
+  },
+  navButton: {
+    width: '30%',
+    maxWidth: 120,
+    backgroundColor: COLORS.glass,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.glassBorder,
+  },
+  navButtonPrimary: {
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
+  },
+  navButtonDanger: {
+    backgroundColor: COLORS.error,
+    borderColor: COLORS.error,
+  },
+  navButtonText: {
+    color: COLORS.text,
+    fontSize: 12,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  libraryHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 60,
+    paddingBottom: 20,
+  },
+  backButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+  },
+  backButtonText: {
+    color: COLORS.primary,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  libraryTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: COLORS.text,
+  },
+  placeholder: {
+    width: 60,
+  },
+  processingIndicator: {
+    position: 'absolute',
+    top: 100,
+    left: 20,
+    right: 20,
+    backgroundColor: COLORS.info,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  processingText: {
+    color: COLORS.text,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+});
