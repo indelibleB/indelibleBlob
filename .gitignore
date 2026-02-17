@@ -14,3 +14,10 @@ ios/build/
 # Env
 .env
 .env.local
+
+# Tools & Binaries
+tools/sui/sui-debug
+tools/sui/sui-node
+tools/sui/sui
+tools/sui/move-analyzer
+

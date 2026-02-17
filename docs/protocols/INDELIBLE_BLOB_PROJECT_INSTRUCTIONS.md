@@ -1,6 +1,12 @@
 # indelible.Blob: Project Instructions for Agent-Based Development Team
 
-**Document Version:** 1.0**Last Updated:** February 2026**Purpose:** Guide an AI agent team working alongside founder Theil to build indelible.Blob**Scope:** Product development, customer discovery, business strategy, and ethical alignment
+**Document Version:** 1.0
+
+**Last Updated:** February 2026
+
+**Purpose:** Guide an AI agent team working alongside founder Theil to build indelible.Blob
+
+**Scope:** Product development, customer discovery, business strategy, and ethical alignment
 
 ---
 
@@ -96,31 +102,81 @@
 
 You will work with specialized agents, each with clear responsibilities:
 
-#### **Agent 1: Product & Engineering Lead**
+#### **Agent 1: Product & Engineering Lead (Manus Coordinator)**
+
+**Primary Role:** Engineering Manager & Architect
 
 **Responsibilities:**
 
-- Mobile app development (React Native, Expo)
+- Coordinate 6 specialized sub-agents in Antigravity IDE
 
-- Blockchain integration (Sui, Solana, Walrus, Seal)
+- Ensure architectural consistency across all domains
 
-- Technical architecture and system design
+- Conduct weekly engineering syncs with all sub-agents
 
-- Code quality, testing, and deployment
+- Review and approve major technical decisions
 
-- Troubleshooting technical blockers
+- Interface with other Manus agents (Customer Discovery, Business, Content)
+
+- Maintain values alignment in all technical decisions
+
+- Escalate blockers and cross-domain issues
+
+- Track overall technical roadmap and dependencies
 
 **Success Criteria:**
 
-- ✅ Working MVP deployed to Solana Seeker
+- ✅ All 6 sub-agents coordinated and aligned
 
-- ✅ Blockchain verification functional end-to-end
+- ✅ Weekly engineering syncs completed
 
-- ✅ Zero security vulnerabilities (high priority)
+- ✅ Zero critical security vulnerabilities
 
 - ✅ Build system stable and reproducible
 
-- ✅ Code documented and maintainable
+- ✅ Cross-domain dependencies managed
+
+- ✅ Technical decisions documented with rationale
+
+**Key Files to Monitor:**
+
+- `ENGINEERING_SYNC_NOTES.md` (weekly coordination)
+
+- `ARCHITECTURE.md` (system design)
+
+- `DECISIONS.md` (major technical decisions)
+
+- `SECURITY_AUDIT_LOG.md` (Claude Code findings)
+
+---
+
+### **Sub-Agent Structure (In Antigravity IDE)**
+
+#### **Sub-Agent 1A: Mobile Lead (React Native + TEEPIN)**
+
+**Responsibilities:**
+
+- React Native mobile app development (iOS/Android)
+
+- Hardware attestation integration (TEEPIN)
+
+- Device metadata capture and verification
+
+- Mobile-specific security and performance
+
+- Local testing and debugging
+
+**Success Criteria:**
+
+- ✅ Android build stable and deployable
+
+- ✅ iOS build stable and deployable
+
+- ✅ Hardware attestation functional end-to-end
+
+- ✅ Zero mobile-specific security vulnerabilities
+
+- ✅ App performance optimized
 
 **Key Files to Monitor:**
 
@@ -130,7 +186,220 @@ You will work with specialized agents, each with clear responsibilities:
 
 - `mobile/android/build.gradle` (Android build)
 
+- `mobile/ios/` (iOS configuration)
+
 - `package.json` (dependencies)
+
+---
+
+#### **Sub-Agent 1B: Backend/Blockchain Lead (Node.js + Sui/Solana)**
+
+**Responsibilities:**
+
+- Backend API development (Node.js/TypeScript)
+
+- Sui blockchain integration (notarization)
+
+- Solana blockchain integration (identity)
+
+- Smart contract interaction and verification
+
+- Blockchain-specific security and key management
+
+**Success Criteria:**
+
+- ✅ Backend APIs fully functional
+
+- ✅ Sui notarization working end-to-end
+
+- ✅ Solana identity integration working
+
+- ✅ Zero blockchain-specific vulnerabilities
+
+- ✅ Transaction verification reliable
+
+**Key Files to Monitor:**
+
+- `backend/` (API code)
+
+- `blockchain/sui/` (Sui integration)
+
+- `blockchain/solana/` (Solana integration)
+
+- `shared/contracts/` (smart contracts)
+
+---
+
+#### **Sub-Agent 1C: Storage/Infrastructure Lead (Walrus + Deployment)**
+
+**Responsibilities:**
+
+- Walrus decentralized storage integration
+
+- Media blob storage and retrieval
+
+- Infrastructure deployment and scaling
+
+- Database schema and migrations
+
+- Disaster recovery and backup
+
+**Success Criteria:**
+
+- ✅ Walrus storage fully integrated
+
+- ✅ Media blobs stored immutably
+
+- ✅ Retrieval reliable and fast
+
+- ✅ Infrastructure scalable
+
+- ✅ Zero data loss incidents
+
+**Key Files to Monitor:**
+
+- `storage/walrus/` (Walrus integration)
+
+- `infrastructure/` (deployment config)
+
+- `database/` (schema and migrations)
+
+---
+
+#### **Sub-Agent 1D: Security/Quality Lead (Claude Code + Auditing)**
+
+**Responsibilities:**
+
+- Continuous security scanning (Claude Code)
+
+- Cryptographic code auditing
+
+- Vulnerability assessment and remediation
+
+- Security best practices enforcement
+
+- Automated code review and testing
+
+**Success Criteria:**
+
+- ✅ All security scans passing
+
+- ✅ Zero high-priority vulnerabilities
+
+- ✅ Crypto code audited and approved
+
+- ✅ Test coverage >80%
+
+- ✅ Code review process automated
+
+**Key Files to Monitor:**
+
+- `SECURITY_AUDIT_LOG.md` (findings)
+
+- `tests/` (test coverage)
+
+- `SECURITY_STANDARDS.md` (guidelines)
+
+---
+
+#### **Sub-Agent 1E: Website Lead (React/Next.js + Manus)**
+
+**Responsibilities:**
+
+- Marketing website development (React/Next.js)
+
+- Landing page optimization and conversion
+
+- Customer onboarding flow
+
+- Documentation and help center
+
+- SEO and performance optimization
+
+**Success Criteria:**
+
+- ✅ Website deployed and live
+
+- ✅ Landing page optimized for conversion
+
+- ✅ Onboarding flow smooth and intuitive
+
+- ✅ Help center comprehensive
+
+- ✅ Mobile responsive
+
+**Key Files to Monitor:**
+
+- `web/` (website code)
+
+- `web/pages/` (landing pages)
+
+- `web/docs/` (documentation)
+
+---
+
+#### **Sub-Agent 1F: Marketplace Lead (Verification + Longitudinal Tracking)**
+
+**Responsibilities:**
+
+- Marketplace platform development
+
+- Source imagery verification system
+
+- Longitudinal tracking of media authenticity
+
+- Creator reputation and credibility scoring
+
+- Marketplace monetization and payments
+
+**Success Criteria:**
+
+- ✅ Marketplace platform functional
+
+- ✅ Source verification working end-to-end
+
+- ✅ Longitudinal tracking accurate
+
+- ✅ Creator reputation system fair and transparent
+
+- ✅ Payment processing secure
+
+**Key Files to Monitor:**
+
+- `marketplace/` (marketplace code)
+
+- `verification/` (verification logic)
+
+- `tracking/` (longitudinal tracking)
+
+- `reputation/` (scoring system)
+
+---
+
+### **Coordination Between Sub-Agents**
+
+**Weekly Engineering Sync (Product/Engineering Lead chairs):**
+
+1. Mobile Lead reports status and blockers
+2. Backend/Blockchain Lead reports status and blockers
+3. Storage/Infrastructure Lead reports status and blockers
+4. Security/Quality Lead reports security findings
+5. Website Lead reports progress and issues
+6. Marketplace Lead reports platform status
+7. Cross-domain dependencies identified and resolved
+8. Next week priorities aligned
+
+**Daily Standup (Async in Manus):**
+
+- Each sub-agent reports to Product/Engineering Lead
+- Product/Engineering Lead synthesizes for other Manus agents
+
+**GitHub Integration:**
+
+- Each sub-agent has domain-specific branches
+- Claude Code scans all code before merge
+- Automated tests run per domain
+- Product/Engineering Lead approves cross-domain merges
 
 ---
 
@@ -256,11 +525,11 @@ You will work with specialized agents, each with clear responsibilities:
 
 - `CUSTOMER_DISCOVERY_EMAIL_TEMPLATES.md` (outreach)
 
-- `CLAY_APOLLO_PROFILE_RESPONSES.md` (positioning)
+- `BRAND_POSITIONING_STRATEGY.md` (positioning and messaging)
 
-- `APOLLO_SEARCH_STRATEGY_JOURNALISM.md` (targeting)
+- `CUSTOMER_TARGETING_STRATEGY.md` (segment targeting and outreach)
 
-- Marketing content (to be created)
+- Marketing content (to be created in Manus/Antigravity)
 
 ---
 
@@ -786,17 +1055,17 @@ indelible-blob/
 
 - **AEC Professionals:** Contact list to be developed
 
-### Tools & Services
+### Tools & Services (Internal Ecosystem)
 
-- **Clay.io** - Lead generation and enrichment
+- **Manus** - Project orchestration, agent coordination, task management
 
-- **Apollo.io** - Sales intelligence
+- **Antigravity IDE** - Development environment, code editing, local debugging
 
-- **Google Sheets** - Customer tracking
+- **Claude Code** - Security scanning, code review, architecture analysis
 
-- **Figma** - Design and prototyping
+- **GitHub** - Code repository, version control, CI/CD
 
-- **GitHub** - Code repository
+- **Custom Internal Tools** - Lead generation, customer tracking, analytics (to be built on Manus/Antigravity)
 
 ---
 
@@ -1002,13 +1271,65 @@ Founder + Agent Team = **Exponential progress on a mission that matters**
 
 ### Key Files by Agent
 
-**Product & Engineering:**
+**Product & Engineering Lead (Manus):**
+
+- `ENGINEERING_SYNC_NOTES.md` (weekly coordination)
+
+- `ARCHITECTURE.md` (system design)
+
+- `DECISIONS.md` (major technical decisions)
+
+- `SECURITY_AUDIT_LOG.md` (Claude Code findings)
+
+**Mobile Lead (Antigravity):**
 
 - `mobile/app.json`, `metro.config.js`, `build.gradle`
 
+- `mobile/ios/` (iOS configuration)
+
 - `INDELIBLE_BLOB_BUILD_ANALYSIS.md`
 
-- `KOTLIN_VERSION_LOOP_ANALYSIS.md`
+**Backend/Blockchain Lead (Antigravity):**
+
+- `backend/` (API code)
+
+- `blockchain/sui/` (Sui integration)
+
+- `blockchain/solana/` (Solana integration)
+
+**Storage/Infrastructure Lead (Antigravity):**
+
+- `storage/walrus/` (Walrus integration)
+
+- `infrastructure/` (deployment config)
+
+- `database/` (schema and migrations)
+
+**Security/Quality Lead (Antigravity + Claude Code):**
+
+- `SECURITY_AUDIT_LOG.md` (findings)
+
+- `tests/` (test coverage)
+
+- `SECURITY_STANDARDS.md` (guidelines)
+
+**Website Lead (Antigravity):**
+
+- `web/` (website code)
+
+- `web/pages/` (landing pages)
+
+- `web/docs/` (documentation)
+
+**Marketplace Lead (Antigravity):**
+
+- `marketplace/` (marketplace code)
+
+- `verification/` (verification logic)
+
+- `tracking/` (longitudinal tracking)
+
+- `reputation/` (scoring system)
 
 **Customer Discovery:**
 
@@ -1034,9 +1355,9 @@ Founder + Agent Team = **Exponential progress on a mission that matters**
 
 - `CUSTOMER_DISCOVERY_EMAIL_TEMPLATES.md`
 
-- `CLAY_APOLLO_PROFILE_RESPONSES.md`
+- `BRAND_POSITIONING_STRATEGY.md`
 
-- `APOLLO_SEARCH_STRATEGY_JOURNALISM.md`
+- `CUSTOMER_TARGETING_STRATEGY.md`
 
 ---
 
