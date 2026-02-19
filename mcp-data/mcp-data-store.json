@@ -30,6 +30,21 @@
         "posted_at": "2026-02-19T15:58:01.860611",
         "received_at": null,
         "status": "pending"
+      },
+      {
+        "id": "INSTR_003",
+        "target_agent": "antigravity",
+        "step_number": "Step 6",
+        "title": "Claude Code Integration",
+        "instructions": "Execute the Claude Code integration following STEP_6_CLAUDE_CODE_INTEGRATION_INSTRUCTIONS.md",
+        "priority": "high",
+        "timeline_hours": 4,
+        "dependencies": [
+          "Step 5"
+        ],
+        "posted_at": "2026-02-19T16:24:46.596879",
+        "received_at": null,
+        "status": "pending"
       }
     ],
     "in_progress": [],
@@ -62,6 +77,21 @@
           "Step 5"
         ],
         "posted_at": "2026-02-19T15:58:01.860611",
+        "received_at": null,
+        "status": "pending"
+      },
+      {
+        "id": "INSTR_003",
+        "target_agent": "antigravity",
+        "step_number": "Step 6",
+        "title": "Claude Code Integration",
+        "instructions": "Execute the Claude Code integration following STEP_6_CLAUDE_CODE_INTEGRATION_INSTRUCTIONS.md",
+        "priority": "high",
+        "timeline_hours": 4,
+        "dependencies": [
+          "Step 5"
+        ],
+        "posted_at": "2026-02-19T16:24:46.596879",
         "received_at": null,
         "status": "pending"
       }
