@@ -1,15 +1,15 @@
-# indelible.Blob Founding Documents Index
+# Founding Documents Index
 ## Master Guide to All Constitutional & Operational Documents
 
-**Version:** 1.0  
-**Adopted:** February 17, 2026  
+**Version:** 1.1 (Hybrid Alignment)
+**Adopted:** February 19, 2026
 **Purpose:** Provide a master index and quick reference for all founding documents
 
 ---
 
 ## The Four Core Founding Documents
 
-### 1. INDELIBLE_BLOB_CONSTITUTION.md
+### 1. CONSTITUTION.md
 **The Master Document - Our North Star**
 
 **What it contains:**
@@ -41,7 +41,7 @@
 
 ---
 
-### 2. INDELIBLE_BLOB_OPERATIONS_MANUAL.md
+### 2. OPERATIONS_MANUAL.md
 **How We Work Together - Daily Operations**
 
 **What it contains:**
@@ -77,7 +77,7 @@
 
 ---
 
-### 3. INDELIBLE_BLOB_TECHNICAL_ARCHITECTURE.md
+### 3. TECHNICAL_ARCHITECTURE.md
 **What We Build - Technical Design**
 
 **What it contains:**
@@ -113,7 +113,7 @@
 
 ---
 
-### 4. INDELIBLE_BLOB_AGENT_PLAYBOOKS.md
+### 4. AGENT_PLAYBOOKS.md
 **Role-Specific Guides - How to Excel in Your Role**
 
 **What it contains:**
@@ -152,7 +152,7 @@
 
 ## Supporting Documents
 
-### INDELIBLE_BLOB_ORGANIZATIONAL_STRUCTURE.md
+### ORGANIZATIONAL_STRUCTURE.md
 **Visual Flowchart - How We're Organized**
 
 **What it contains:**
@@ -181,32 +181,17 @@
 
 These documents are maintained by specific agents and updated regularly:
 
-### DECISIONS.md
+### docs/decisions/DECISIONS.md
 **Owner:** All agents (collectively)  
 **Updated:** Every decision  
 **Contains:** All major decisions with rationale, context, and implications
 
-### ENGINEERING_SYNC_NOTES.md
-**Owner:** Executive Engineer  
-**Updated:** Every Friday after engineering sync  
-**Contains:** Progress, dependencies, security updates, decisions, next steps
-
-### CUSTOMER_DISCOVERY_LOG.md
-**Owner:** Customer Discovery & Validation Lead  
-**Updated:** Every customer conversation  
-**Contains:** All customer conversations, insights, and learnings
-
-### FINANCIAL_MODELS.md
-**Owner:** Business & Strategy Lead  
-**Updated:** Weekly  
-**Contains:** Financial projections, metrics, CAC, LTV, churn, NPS
-
-### SECURITY_AUDIT_LOG.md
+### docs/protocols/SECURITY_STANDARDS.md
 **Owner:** Security/Quality Lead  
-**Updated:** Every Claude Code scan  
-**Contains:** Vulnerabilities found, fixes applied, security metrics
+**Updated:** As standards evolve  
+**Contains:** Cryptographic and security standards
 
-### ARCHITECTURE.md
+### ARCHITECTURE.md (to be created)
 **Owner:** Executive Engineer  
 **Updated:** As architecture evolves  
 **Contains:** Technical architecture decisions and rationale
@@ -218,14 +203,11 @@ These documents are maintained by specific agents and updated regularly:
 ### For the Founder
 
 **Daily:**
-- Review DECISIONS.md for any major decisions
-- Scan ENGINEERING_SYNC_NOTES.md for blockers
+- Review `docs/decisions/DECISIONS.md` for any major decisions
 - Monitor escalations
 
 **Weekly:**
 - Attend engineering sync (Friday 2 PM MST)
-- Review CUSTOMER_DISCOVERY_LOG.md for insights
-- Review FINANCIAL_MODELS.md for progress
 
 **Monthly:**
 - Attend leadership sync (First Friday 10 AM MST)
@@ -244,13 +226,10 @@ These documents are maintained by specific agents and updated regularly:
 **Daily:**
 - Read Operations Manual Part 1 (daily operations)
 - Submit daily standup
-- Review other agents' standups
-- Monitor escalations
 
 **Weekly:**
 - Attend weekly sync (Friday 2 PM MST)
 - Review Agent Playbooks for your role
-- Update relevant working documents
 
 **Monthly:**
 - Attend leadership sync (First Friday 10 AM MST)
@@ -268,7 +247,6 @@ These documents are maintained by specific agents and updated regularly:
 **Weekly:**
 - Attend engineering sync (Friday 2 PM MST)
 - Review cross-team dependencies
-- Update relevant working documents
 
 **Monthly:**
 - Review Constitution for values alignment
@@ -285,9 +263,7 @@ These documents are maintained by specific agents and updated regularly:
 
 **Weekly:**
 - Lead engineering sync (Friday 2 PM MST)
-- Update ENGINEERING_SYNC_NOTES.md
 - Report to Manus Product & Engineering Lead
-- Review SECURITY_AUDIT_LOG.md
 
 **Monthly:**
 - Review all major decisions
@@ -300,7 +276,6 @@ These documents are maintained by specific agents and updated regularly:
 - Scan all PRs before merge
 - Identify vulnerabilities
 - Provide remediation guidance
-- Update SECURITY_AUDIT_LOG.md
 
 **Weekly:**
 - Provide security summary for engineering sync
@@ -315,15 +290,10 @@ These documents are maintained by specific agents and updated regularly:
 ## Document Maintenance Schedule
 
 ### Daily
-- DECISIONS.md (new decisions)
-- ENGINEERING_SYNC_NOTES.md (standups)
-- CUSTOMER_DISCOVERY_LOG.md (conversations)
-- SECURITY_AUDIT_LOG.md (scans)
+- `docs/decisions/DECISIONS.md` (new decisions)
 
 ### Weekly
-- FINANCIAL_MODELS.md (updated with new data)
-- ENGINEERING_SYNC_NOTES.md (sync notes)
-- ARCHITECTURE.md (if needed)
+- `ARCHITECTURE.md` (if needed)
 
 ### Monthly
 - Review all documents for accuracy
@@ -344,18 +314,18 @@ These documents are maintained by specific agents and updated regularly:
 ### Week 1: Foundation
 
 **Day 1:**
-- Read INDELIBLE_BLOB_CONSTITUTION.md (2 hours)
-- Read INDELIBLE_BLOB_OPERATIONS_MANUAL.md (2 hours)
+- Read `CONSTITUTION.md` (2 hours)
+- Read `OPERATIONS_MANUAL.md` (2 hours)
 - Meet with Founder (30 min)
 
 **Day 2:**
-- Read INDELIBLE_BLOB_TECHNICAL_ARCHITECTURE.md (2 hours) - Engineering only
-- Read INDELIBLE_BLOB_ORGANIZATIONAL_STRUCTURE.md (1 hour)
+- Read `TECHNICAL_ARCHITECTURE.md` (2 hours) - Engineering only
+- Read `ORGANIZATIONAL_STRUCTURE.md` (1 hour)
 - Review GitHub repository (1 hour)
 
 **Day 3:**
-- Read INDELIBLE_BLOB_AGENT_PLAYBOOKS.md - Your role section (2 hours)
-- Review DECISIONS.md (1 hour)
+- Read `AGENT_PLAYBOOKS.md` - Your role section (2 hours)
+- Review `docs/decisions/DECISIONS.md` (1 hour)
 - Meet with your direct manager (30 min)
 
 **Day 4-5:**
@@ -382,10 +352,6 @@ These documents are maintained by specific agents and updated regularly:
 | Agent Playbooks | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Organizational Structure | ✅ | ✅ | ✅ | ✅ | ✅ |
 | DECISIONS.md | ✅ | ✅ | ✅ | ✅ | ✅ |
-| ENGINEERING_SYNC_NOTES.md | ✅ | ✅ | ✅ | ✅ | ✅ |
-| CUSTOMER_DISCOVERY_LOG.md | ✅ | ✅ | - | - | - |
-| FINANCIAL_MODELS.md | ✅ | ✅ | - | - | - |
-| SECURITY_AUDIT_LOG.md | ✅ | ✅ | ✅ | ✅ | ✅ |
 | ARCHITECTURE.md | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 ---
@@ -393,18 +359,15 @@ These documents are maintained by specific agents and updated regularly:
 ## Document Hierarchy
 
 ```
-INDELIBLE_BLOB_CONSTITUTION.md (Master - North Star)
-├── INDELIBLE_BLOB_OPERATIONS_MANUAL.md (How we work)
-├── INDELIBLE_BLOB_TECHNICAL_ARCHITECTURE.md (What we build)
-├── INDELIBLE_BLOB_AGENT_PLAYBOOKS.md (Role-specific guides)
-└── INDELIBLE_BLOB_ORGANIZATIONAL_STRUCTURE.md (Visual structure)
+CONSTITUTION.md (Master - North Star)
+├── OPERATIONS_MANUAL.md (How we work)
+├── TECHNICAL_ARCHITECTURE.md (What we build)
+├── AGENT_PLAYBOOKS.md (Role-specific guides)
+└── ORGANIZATIONAL_STRUCTURE.md (Visual structure)
 
 Working Documents (Updated regularly)
-├── DECISIONS.md
-├── ENGINEERING_SYNC_NOTES.md
-├── CUSTOMER_DISCOVERY_LOG.md
-├── FINANCIAL_MODELS.md
-├── SECURITY_AUDIT_LOG.md
+├── docs/decisions/DECISIONS.md
+├── docs/protocols/SECURITY_STANDARDS.md
 └── ARCHITECTURE.md
 ```
 
@@ -412,15 +375,13 @@ Working Documents (Updated regularly)
 
 ## Accessing These Documents
 
-All founding documents are stored in the Manus project under "Files":
-- INDELIBLE_BLOB_CONSTITUTION.md
-- INDELIBLE_BLOB_OPERATIONS_MANUAL.md
-- INDELIBLE_BLOB_TECHNICAL_ARCHITECTURE.md
-- INDELIBLE_BLOB_AGENT_PLAYBOOKS.md
-- INDELIBLE_BLOB_ORGANIZATIONAL_STRUCTURE.md
-- INDELIBLE_BLOB_FOUNDING_DOCUMENTS_INDEX.md (this file)
-
-Working documents are also stored in the Manus project and updated regularly.
+All founding documents are stored in the **docs/** directory of the repository:
+- `docs/CONSTITUTION.md`
+- `docs/OPERATIONS_MANUAL.md`
+- `docs/TECHNICAL_ARCHITECTURE.md`
+- `docs/AGENT_PLAYBOOKS.md`
+- `docs/ORGANIZATIONAL_STRUCTURE.md`
+- `docs/FOUNDING_DOCUMENTS_INDEX.md` (this file)
 
 All code and technical documentation is stored in GitHub:
 - https://github.com/illuminatedmovement/indelible-blob
