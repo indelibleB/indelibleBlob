@@ -1,0 +1,33 @@
+{
+    "name": "indelible-blob-security",
+    "description": "Security and quality scanning for indelible.Blob",
+    "version": "1.0.0",
+    "scanning": {
+        "enabled": true,
+        "on_save": true,
+        "on_commit": true,
+        "on_pr": true
+    },
+    "rules": {
+        "critical": [
+            "security",
+            "cryptography",
+            "authentication"
+        ],
+        "high": [
+            "performance",
+            "standards",
+            "architecture"
+        ],
+        "medium": [
+            "code_quality",
+            "documentation"
+        ]
+    },
+    "seal_encryption": {
+        "enabled": true,
+        "check_key_management": true,
+        "check_encryption_strength": true,
+        "check_user_controls": true
+    }
+}
