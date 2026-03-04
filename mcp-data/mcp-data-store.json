@@ -1,6 +1,14 @@
 {
+  "_meta": {
+    "description": "MCP coordination data store for indelible.Blob agent team. Pending instructions are active tasks for Antigravity. Completed instructions are archived here for historical reference.",
+    "last_cleaned": "2026-03-04",
+    "cleaned_by": "Agent 1 — Product & Engineering Lead",
+    "note": "Stale duplicate Step 6 instructions (INSTR_001–003, Feb 19) cleared. Step 6 (Claude Code Integration) was completed as of Feb 21. See docs/CHECKLIST.md Step 5 for confirmation."
+  },
   "instructions": {
-    "pending": [
+    "pending": [],
+    "in_progress": [],
+    "completed": [
       {
         "id": "INSTR_001",
         "target_agent": "antigravity",
@@ -9,92 +17,17 @@
         "instructions": "Execute the Claude Code integration following STEP_6_CLAUDE_CODE_INTEGRATION_INSTRUCTIONS.md",
         "priority": "high",
         "timeline_hours": 4,
-        "dependencies": [
-          "Step 5"
-        ],
+        "dependencies": ["Step 5"],
         "posted_at": "2026-02-19T15:52:53.736206",
-        "received_at": null,
-        "status": "pending"
-      },
-      {
-        "id": "INSTR_002",
-        "target_agent": "antigravity",
-        "step_number": "Step 6",
-        "title": "Claude Code Integration",
-        "instructions": "Execute the Claude Code integration following STEP_6_CLAUDE_CODE_INTEGRATION_INSTRUCTIONS.md",
-        "priority": "high",
-        "timeline_hours": 4,
-        "dependencies": [
-          "Step 5"
-        ],
-        "posted_at": "2026-02-19T15:58:01.860611",
-        "received_at": null,
-        "status": "pending"
-      },
-      {
-        "id": "INSTR_003",
-        "target_agent": "antigravity",
-        "step_number": "Step 6",
-        "title": "Claude Code Integration",
-        "instructions": "Execute the Claude Code integration following STEP_6_CLAUDE_CODE_INTEGRATION_INSTRUCTIONS.md",
-        "priority": "high",
-        "timeline_hours": 4,
-        "dependencies": [
-          "Step 5"
-        ],
-        "posted_at": "2026-02-19T16:24:46.596879",
-        "received_at": null,
-        "status": "pending"
+        "completed_at": "2026-02-21",
+        "status": "completed",
+        "note": "Duplicate instructions INSTR_002 and INSTR_003 were identical — merged into this single completed record."
       }
     ],
-    "in_progress": [],
-    "completed": [],
-    "history": [
-      {
-        "id": "INSTR_001",
-        "target_agent": "antigravity",
-        "step_number": "Step 6",
-        "title": "Claude Code Integration",
-        "instructions": "Execute the Claude Code integration following STEP_6_CLAUDE_CODE_INTEGRATION_INSTRUCTIONS.md",
-        "priority": "high",
-        "timeline_hours": 4,
-        "dependencies": [
-          "Step 5"
-        ],
-        "posted_at": "2026-02-19T15:52:53.736206",
-        "received_at": null,
-        "status": "pending"
-      },
-      {
-        "id": "INSTR_002",
-        "target_agent": "antigravity",
-        "step_number": "Step 6",
-        "title": "Claude Code Integration",
-        "instructions": "Execute the Claude Code integration following STEP_6_CLAUDE_CODE_INTEGRATION_INSTRUCTIONS.md",
-        "priority": "high",
-        "timeline_hours": 4,
-        "dependencies": [
-          "Step 5"
-        ],
-        "posted_at": "2026-02-19T15:58:01.860611",
-        "received_at": null,
-        "status": "pending"
-      },
-      {
-        "id": "INSTR_003",
-        "target_agent": "antigravity",
-        "step_number": "Step 6",
-        "title": "Claude Code Integration",
-        "instructions": "Execute the Claude Code integration following STEP_6_CLAUDE_CODE_INTEGRATION_INSTRUCTIONS.md",
-        "priority": "high",
-        "timeline_hours": 4,
-        "dependencies": [
-          "Step 5"
-        ],
-        "posted_at": "2026-02-19T16:24:46.596879",
-        "received_at": null,
-        "status": "pending"
-      }
-    ]
+    "history": []
+  },
+  "status_reports": {
+    "latest": null,
+    "archive": []
   }
 }
