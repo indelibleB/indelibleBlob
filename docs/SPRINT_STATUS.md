@@ -5,8 +5,24 @@
 ---
 
 ## Sprint: MONOLITH Hackathon Final Sprint
-**Deadline:** March 9, 2026 @ 00:00 MST | **Days Remaining:** 5
-**Last Updated:** March 4, 2026 by Agent 1 (Product & Engineering Lead)
+**Submission Target:** March 7, 2026 @ 12:00 PM MST (Noon) | **Days Remaining:** 3.5
+**Hard Deadline:** March 9, 2026 @ 00:00 UTC
+**Last Updated:** March 4, 2026 by Coordination Hub (Manus) + C.I.C.
+
+---
+
+## 🎉 MILESTONE: Full Capture-to-Chain Pipeline Confirmed — March 4, 2026
+
+End-to-end pipeline verified on live Seeker device:
+- ✅ TEEPIN GOLD grade attestation
+- ✅ zkLogin: ZK Proof derived, Sui address `0xcf674ec930b7ce3f18bcfbad638cc854a14ebe8215187479cc5f9c8b5d7669dd`
+- ✅ Session bind: zero wallet popups during capture
+- ✅ Neural fingerprint: 23–75ms
+- ✅ Walrus upload: `dyejKf7s-6RQV12NILkS4lMLsxnLqavY5Prh8xnhcqg`
+- ✅ Sui on-chain recording: `GST9BVMuuvH4GqEJA1wneEG1xvQ9aijs3J6grNXFKYzb`
+- ✅ Video capture: full pipeline processed
+
+**The core product works. All remaining work is features, polish, and presentation.**
 
 ---
 
@@ -16,23 +32,42 @@
 |---|---|---|---|
 | TEEPIN hardware attestation | ✅ Done | 1A | GOLD grade confirmed on Seeker |
 | MWA (Solana) wallet connection | ✅ Done | 1A | Session binding functional |
-| Walrus uploads (public + encrypted) | ✅ Done | 1C | Stable |
-| Hybrid Identity (MWA + Session Delegate) | ✅ Done | 1A | Complete |
-| BlobMark watermark | ✅ Done | 1A | Glassmorphic Passport strip on photos |
+| zkLogin — full pipeline | ✅ Done | 1A | ZK Prover, Enoki, address derivation all working |
+| Session Keys (zero-popup capture) | ✅ Done | 1A | Confirmed in live test |
+| Neural Fingerprinting (pHash) | ✅ Done | 1A | 23–75ms on device |
+| BlobMark Glassmorphic Passport | ✅ Done | 1A | Applied to all captures |
+| Walrus uploads | ✅ Done | 1C | Stable, testnet confirmed |
+| Sui blockchain recording | ✅ Done | 1A | Live transaction verified |
 | Trust Grading (GOLD/SILVER) | ✅ Done | 1A | Strict enforcement active |
-| Gas Management (testnet) | ✅ Done | 1A | GasManager service operational |
-| zkLogin — OAuth + Enoki salt + address derivation | ✅ Done | 1A | Working end-to-end |
-| zkLogin — ZK Prover API call | 🔴 **P0 Blocker** | 1A | ~20 lines. `https://prover.mystenlabs.com/v1` |
-| Slush/WalletConnect pairing | 🟡 In Progress | 1A | Relay connected. Method names fixed. Test pending. |
-| Session Keys (ephemeral key signing) | 🟡 In Progress | 1A | Blocked on zkLogin prover completion |
-| SKR balance check + capture gating | 🔴 **P0** | 1A | Not started. Blocked on auth completion. |
-| SKR transfer for paid captures | 🔴 **P0** | 1A | Not started. Blocked on auth completion. |
-| Verification endpoint (`POST /verify`) | 🟠 P1 | 1B | Not started. Task assignment pending today. |
-| Signed Data Package | 🟠 P1 | 1B | Not started. |
-| Creator allocation UI (3 sliders + 33.33% floor) | 🟠 P1 | 1A | Not started. |
-| Governance voting UI | 🟠 P1 | 1A | Not started. |
-| Neural Fingerprinting (pHash) | 🟡 In Progress | 1A | Pivoted from LSB steganography |
-| Demo preparation | 🔴 Not started | All | Must begin by Mar 7 |
+| Hybrid Identity (MWA + Session Delegate) | ✅ Done | 1A | Complete |
+| Gas Management | ✅ Done | 1A | GasManager operational |
+| **SKR balance check + capture gating** | 🔴 **P0** | 1A | Start today |
+| **SKR transfer for paid captures** | 🔴 **P0** | 1A | Start today |
+| **Seal Encryption Layer (Sovereign Mode)** | 🔴 **P0** | 1A + 1D | `shared/services/seal.ts` exists — wire mobile UI |
+| **Security audit (SKR + Seal + Session Keys)** | 🔴 **P0** | 1D + Claude Code | Complete by Mar 5 EOD |
+| **Android APK (final build)** | 🔴 **P0** | 1A | Mar 6 EOD |
+| **Website polish** | 🔴 **P0** | 1E | Mar 6 EOD |
+| **Walrus Sites deployment** | 🔴 **P0** | 1E + 1C | Mar 6 EOD — becomes submission URL |
+| Verification endpoint (`POST /verify`) | 🟠 P1 | 1B | Mar 6 |
+| Signed Data Package (JSON + Ed25519) | 🟠 P1 | 1B | Mar 6 |
+| Creator Allocation UI (3 sliders + 33.33% floor) | 🟠 P1 | 1A | Mar 6 |
+| Governance voting UI | 🟠 P1 | 1A | Mar 6 |
+| Slush/WalletConnect pairing | 🟡 P1 (max 1hr) | 1A | Drop if not resolved quickly |
+| Demo video (2–3 min, Seeker device) | 🔴 **P0** | C.I.C. | Mar 7 AM |
+| Pitch narrative (Align Nexus) | 🔴 **P0** | Agent 3 + Agent 4 | Mar 7 AM |
+
+---
+
+## Final Sprint Schedule
+
+| Day | Date | Focus | Hard Cutoff |
+|---|---|---|---|
+| **Day 1** | March 4 (today) | SKR integration + Seal encryption layer | EOD: Auth + SKR gating complete |
+| **Day 2** | March 5 | Verification endpoint + Creator Allocation UI + Security audit | EOD: All P0 features complete |
+| **Day 3** | March 6 | Website polish + Walrus Sites deployment + Demo recording prep | EOD: APK built, website live |
+| **Day 3.5** | March 7 AM | Demo video, pitch narrative, submission creation | 12:00 PM MST: Submit |
+
+**March 6 EOD = Feature Freeze. No new code after that point.**
 
 ---
 
@@ -40,35 +75,15 @@
 
 | Decision | Outcome |
 |---|---|
-| Auth architecture | zkLogin (primary) + Slush/WC (secondary). Session Keys. Zero-popup capture. |
-| Revenue model | Creator-Directed Allocation. 33.33% Treasury floor. Creator controls remaining 66.67%. |
-| Public verification | Free forever. Non-negotiable. |
-| Beachhead market | Insurance & Adjusting. Verification Bundle is MVP product. |
+| Session Keys architecture | Immutable. Zero-popup capture is non-negotiable. |
+| zkLogin as primary auth | Ship with zkLogin. Slush is P1 with 1-hour time cap. |
+| Public verification | Free forever. Constitutional value. |
+| Seal Sovereign Mode | P0 — ships with first launch. |
+| Revenue model | Creator-Directed Allocation. 33.33% Treasury floor. |
 | SKR discount | 25% off for SKR payment. No fiat premium. |
-| C2PA | Strategic imperative — present in demo, not built this sprint. |
-| Marketplace scope | API is MVM. Peer-to-peer marketplace is post-hackathon. |
+| Walrus Sites for website | Deploy to mainnet. This is the submission URL. |
+| Beachhead market | Insurance & Adjusting. Verification Bundle is MVP product. |
 | Cross-chain architecture | Solana (identity + commerce) + Sui (provenance) + Walrus (storage). Locked. |
-
----
-
-## Critical Path (5 Days)
-
-| Date | Must Complete | Owner |
-|---|---|---|
-| **Mar 4 (today)** | ZK Prover API call; Slush pairing test; fund zkLogin testnet address; assign 1B task | 1A, Agent 1 |
-| **Mar 5** | SKR balance check + capture gating; end-to-end capture test on Seeker | 1A |
-| **Mar 6** | Verification endpoint + Signed Data Package; Creator allocation UI | 1B, 1A |
-| **Mar 7** | Governance voting UI; demo script drafted; all P1 items closed or deferred | 1A, All |
-| **Mar 8** | Demo polish; submission materials prepared | All |
-| **Mar 9 00:00** | **SUBMISSION DEADLINE** | Founder |
-
----
-
-## Active Blockers
-
-1. **ZK Prover API call** — 1A must implement before any other Sui signing work proceeds
-2. **1B task assignment** — Backend Lead has no active sprint task. Agent 1 to assign today.
-3. **1F economics input** — Marketplace Lead input needed for Creator Allocation UI schema
 
 ---
 
@@ -76,11 +91,14 @@
 
 | Agent | Role | Sprint Status |
 |---|---|---|
+| Coordination Hub (Manus) | Cross-agent synthesis + C.I.C. partner | Active |
 | Agent 1 (Manus) | Product & Engineering Lead | Active |
-| 1A (Antigravity) | Mobile Lead | Active — blocked on ZK Prover |
-| 1B (Antigravity) | Backend/Blockchain Lead | Needs task assignment |
-| 1C (Antigravity) | Storage/Infrastructure Lead | Ready — Walrus stable |
-| 1D (Antigravity) | Security/Quality Lead | Active — ongoing audit |
-| 1E (Antigravity) | Website Lead | Deferred post-hackathon |
-| 1F (Antigravity) | Marketplace Lead | Needs engagement |
-| Agent 5 (Manus) | Research Lead | Active — Phase 1 complete |
+| 1A (Antigravity) | Mobile Lead | Active — executing SKR + Seal |
+| 1B (Antigravity) | Backend/Blockchain Lead | Active — verification endpoint |
+| 1C (Antigravity) | Storage/Infrastructure Lead | Active — Walrus Sites deployment |
+| 1D (Antigravity) | Security/Quality Lead | Active — audit all new code |
+| 1E (Antigravity) | Website Lead | Active — final sprint activated |
+| Claude Code | Security advisor + pair programmer | Active via IDE extension |
+| Agent 3 (Manus) | Business Strategy Lead | Active — pitch narrative |
+| Agent 4 (Manus) | Content & Communications Lead | Active — demo script |
+| Agent 5 (Manus) | Research Lead | Phase 2 post-hackathon |
