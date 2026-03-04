@@ -1,85 +1,142 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal } from 'react-native';
-import { ConnectButton, useCurrentAccount } from '@mysten/dapp-kit';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Platform, Alert } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ShieldCheck, Fingerprint } from 'lucide-react-native';
+import { Globe, Smartphone, ShieldCheck } from 'lucide-react-native';
 import { COLORS, FONTS } from '../../constants/config';
-import { BlurView } from 'expo-blur';
+import { useSuiWallet } from '../../contexts/SuiWalletContext';
+import { useZkLogin } from '../../hooks/useZkLogin';
+import { useSlushWallet } from '../../hooks/useSlushWallet';
 
 interface LoginModalProps {
     visible: boolean;
     onClose: () => void;
-    onLoginSuccess: () => void;
+    onLoginSuccess: (address: string) => void;
 }
 
 export function LoginModal({ visible, onClose, onLoginSuccess }: LoginModalProps) {
-    const currentAccount = useCurrentAccount();
+    const { address, provider } = useSuiWallet();
+    const insets = useSafeAreaInsets();
 
-    // Effect: Auto-close if account becomes available
+    const { loginWithGoogle, derivedAddress, isDeriving, error: zkLoginError } = useZkLogin();
+    const { connectToSlush, isConnecting: isConnectingSlush } = useSlushWallet();
+
+    const [connectingState, setConnectingState] = useState<'idle' | 'zklogin' | 'slush'>('idle');
+
+    // Auto-close if address is set from any source
     React.useEffect(() => {
-        if (currentAccount) {
-            onLoginSuccess();
+        if (address && visible) {
+            onLoginSuccess(address);
         }
-    }, [currentAccount, onLoginSuccess]);
+    }, [address, visible, onLoginSuccess]);
+
+    // Handle zkLogin success
+    React.useEffect(() => {
+        if (derivedAddress && visible) {
+            onLoginSuccess(derivedAddress);
+            setConnectingState('idle');
+        }
+    }, [derivedAddress, visible, onLoginSuccess]);
+
+    // Handle zkLogin error
+    React.useEffect(() => {
+        if (zkLoginError && visible) {
+            Alert.alert('zkLogin Error', zkLoginError);
+            setConnectingState('idle');
+        }
+    }, [zkLoginError, visible]);
+
+    const handleZkLogin = async () => {
+        setConnectingState('zklogin');
+        await loginWithGoogle();
+        // Result handled by effects watching derivedAddress / zkLoginError
+    };
+
+    const handleSlushLogin = async () => {
+        setConnectingState('slush');
+        await connectToSlush();
+        // Reset immediately because deep link pushes user to external app
+        setConnectingState('idle');
+    };
+
+    if (!visible) return null;
 
     return (
-        <Modal
-            visible={visible}
-            transparent={true}
-            animationType="slide"
-            onRequestClose={onClose}
-        >
-            <View style={styles.overlay}>
-                <BlurView intensity={20} style={StyleSheet.absoluteFill} />
+        <View style={styles.overlay}>
+            <LinearGradient
+                colors={[COLORS.backgroundDark, 'rgba(10, 10, 15, 0.98)']}
+                style={[styles.container, { paddingBottom: Math.max(insets.bottom + 20, 40) }]}
+            >
+                <View style={styles.iconContainer}>
+                    <ShieldCheck color={COLORS.primary} size={56} />
+                </View>
 
-                <LinearGradient
-                    colors={[COLORS.backgroundDark, 'rgba(10, 10, 15, 0.95)']}
-                    style={styles.container}
+                <Text style={styles.title}>Secure Hardware Bind</Text>
+                <Text style={styles.subtitle}>
+                    Authenticate with a supported Sui protocol to pair your hardware Seed Vault and establish cryptographic provenance.
+                </Text>
+
+                {/* zkLogin Option (Google) */}
+                <TouchableOpacity
+                    style={[styles.authButton, styles.zkLoginButton, connectingState !== 'idle' && styles.disabled]}
+                    onPress={handleZkLogin}
+                    disabled={connectingState !== 'idle'}
                 >
-                    <View style={styles.iconContainer}>
-                        <Fingerprint color={COLORS.primary} size={64} />
-                    </View>
-
-                    <Text style={styles.title}>Authenticate Session</Text>
-                    <Text style={styles.subtitle}>
-                        Connect a wallet to establish a secure provenance chain for your captures.
+                    {connectingState === 'zklogin' || isDeriving ? (
+                        <ActivityIndicator color="#000" style={styles.loader} />
+                    ) : (
+                        <Globe color="#000" size={24} style={styles.buttonIcon} />
+                    )}
+                    <Text style={styles.zkLoginText}>
+                        {connectingState === 'zklogin' || isDeriving ? 'Verifying Identity...' : 'Continue with Google'}
                     </Text>
+                </TouchableOpacity>
 
-                    <View style={styles.connectWrapper}>
-                        {/* 
-                            NOTE: @mysten/dapp-kit's ConnectButton is web-optimized. 
-                            For React Native, we might need a custom button calling useConnect() 
-                            if the standard storage adapter doesn't play nice.
-                            For now, assuming the standard button works or we wrap it.
-                        */}
-                        <ConnectButton
-                            connectText="Connect Wallet"
-                            style={{ backgroundColor: COLORS.primary, borderRadius: 12 }}
-                        />
-                    </View>
+                {/* Slush Wallet — Roadmapped (Pending Mysten Native SDK) */}
+                <TouchableOpacity
+                    style={[
+                        styles.authButton,
+                        styles.slushWalletButton,
+                        styles.disabled
+                    ]}
+                    disabled={true}
+                >
+                    <Smartphone color={COLORS.textSecondary} size={24} style={styles.buttonIcon} />
+                    <Text style={[styles.nativeWalletText, { color: COLORS.textSecondary }]}>
+                        Slush Wallet — Coming Soon
+                    </Text>
+                </TouchableOpacity>
 
-                    <TouchableOpacity onPress={onClose} style={styles.cancelButton}>
-                        <Text style={styles.cancelText}>Start as Guest (No Provenance)</Text>
-                    </TouchableOpacity>
-                </LinearGradient>
-            </View>
-        </Modal>
+                <Text style={styles.fineprint}>
+                    zkLogin uses Google authentication to derive a Sui address for metadata provenance signing. Native Slush wallet integration is on the roadmap pending Mysten mobile SDK support.
+                </Text>
+
+            </LinearGradient>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
     overlay: {
-        flex: 1,
+        ...StyleSheet.absoluteFillObject,
         justifyContent: 'flex-end',
+        backgroundColor: 'rgba(0, 0, 0, 0.85)',
+        zIndex: 999,
     },
     container: {
-        borderTopLeftRadius: 24,
-        borderTopRightRadius: 24,
-        padding: 32,
-        paddingBottom: 60,
+        width: '100%',
+        borderTopLeftRadius: 32,
+        borderTopRightRadius: 32,
+        paddingHorizontal: 24,
+        paddingTop: 40,
         alignItems: 'center',
         borderTopWidth: 1,
-        borderTopColor: COLORS.glassBorder,
+        borderTopColor: 'rgba(255, 255, 255, 0.1)',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: -10 },
+        shadowOpacity: 0.5,
+        shadowRadius: 20,
+        elevation: 20,
     },
     iconContainer: {
         width: 100,
@@ -93,31 +150,63 @@ const styles = StyleSheet.create({
         borderColor: COLORS.primary,
     },
     title: {
-        fontSize: 24,
+        fontSize: 26,
         fontFamily: FONTS.bold,
         color: COLORS.text,
-        marginBottom: 8,
+        marginBottom: 12,
+        textAlign: 'center',
     },
     subtitle: {
-        fontSize: 14,
-        fontFamily: FONTS.regular,
+        fontSize: 15,
+        fontFamily: FONTS.medium,
         color: COLORS.textSecondary,
         textAlign: 'center',
         marginBottom: 32,
-        lineHeight: 20,
+        lineHeight: 22,
+        paddingHorizontal: 10,
     },
-    connectWrapper: {
+    authButton: {
         width: '100%',
-        height: 50,
+        height: 60,
+        borderRadius: 16,
+        flexDirection: 'row',
         justifyContent: 'center',
+        alignItems: 'center',
         marginBottom: 16,
     },
-    cancelButton: {
-        padding: 12,
+    zkLoginButton: {
+        backgroundColor: COLORS.primary,
     },
-    cancelText: {
-        color: COLORS.textSecondary,
-        fontSize: 14,
-        fontFamily: FONTS.medium,
+    slushWalletButton: {
+        backgroundColor: '#0066FF',
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.1)',
+    },
+    disabled: {
+        opacity: 0.6,
+    },
+    buttonIcon: {
+        marginRight: 12,
+    },
+    loader: {
+        marginRight: 12,
+    },
+    zkLoginText: {
+        color: '#000',
+        fontSize: 17,
+        fontFamily: FONTS.semiBold,
+    },
+    nativeWalletText: {
+        color: COLORS.text,
+        fontSize: 17,
+        fontFamily: FONTS.semiBold,
+    },
+    fineprint: {
+        marginTop: 16,
+        fontSize: 12,
+        fontFamily: FONTS.regular,
+        color: 'rgba(255, 255, 255, 0.4)',
+        textAlign: 'center',
+        lineHeight: 18,
     },
 });

@@ -1,0 +1,107 @@
+# Dependabot configuration for indelible.Blob
+# Automatically creates PRs for dependency updates
+# Documentation: https://docs.github.com/en/code-security/dependabot
+
+version: 2
+updates:
+  # Mobile workspace (React Native + Expo)
+  - package-ecosystem: "npm"
+    directory: "/mobile"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/Denver" # MST
+    open-pull-requests-limit: 5
+    reviewers:
+      - "theilman24" # Replace with actual GitHub username
+    assignees:
+      - "theilman24"
+    labels:
+      - "dependencies"
+      - "security"
+      - "mobile"
+    commit-message:
+      prefix: "chore(mobile)"
+      include: "scope"
+    # Critical security updates
+    allow:
+      - dependency-type: "direct"
+      - dependency-type: "indirect"
+    # Blockchain SDKs - auto-merge patch/minor updates
+    groups:
+      blockchain-sdks:
+        patterns:
+          - "@mysten/sui"
+          - "@solana/web3.js"
+          - "@solana-mobile/*"
+        update-types:
+          - "patch"
+          - "minor"
+      expo-ecosystem:
+        patterns:
+          - "expo*"
+          - "@expo/*"
+          - "react-native"
+        update-types:
+          - "patch"
+      security-libraries:
+        patterns:
+          - "expo-secure-store"
+          - "@mysten/seal"
+        update-types:
+          - "patch"
+          - "minor"
+
+  # Website workspace (React + Vite)
+  - package-ecosystem: "npm"
+    directory: "/website"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/Denver"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "theilman24"
+    labels:
+      - "dependencies"
+      - "security"
+      - "website"
+    commit-message:
+      prefix: "chore(website)"
+      include: "scope"
+
+  # Shared library workspace
+  - package-ecosystem: "npm"
+    directory: "/shared"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/Denver"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "theilman24"
+    labels:
+      - "dependencies"
+      - "security"
+      - "shared"
+    commit-message:
+      prefix: "chore(shared)"
+      include: "scope"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 3
+    reviewers:
+      - "theilman24"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "chore(ci)"
+      include: "scope"

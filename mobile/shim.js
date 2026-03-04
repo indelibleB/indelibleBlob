@@ -1,5 +1,5 @@
 import 'react-native-get-random-values';
-import 'react-native-url-polyfill/auto'; // [NEW] Essential for Sui RPC
+// import 'react-native-url-polyfill/auto'; // REMOVED: RN 0.74+ has built-in URL, this causes 'property is not configurable' crash
 import { Buffer } from 'buffer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -23,24 +23,8 @@ if (typeof global.localStorage === 'undefined') {
     };
 }
 
-// 0.1 Aggressive DOM Polyfills for Web3 UI Kits
-// Many web-first libraries (like @mysten/dapp-kit) extend HTMLElement or check window
-if (typeof global.self === 'undefined') global.self = global;
-if (typeof global.window === 'undefined') global.window = global;
-if (typeof global.document === 'undefined') {
-    global.document = {
-        readyState: 'complete',
-        addEventListener: (type, listener) => { },
-        removeEventListener: (type, listener) => { },
-        createElement: () => ({ style: {} }),
-        head: { appendChild: () => { } },
-        body: { appendChild: () => { } },
-    };
-}
-if (typeof global.navigator === 'undefined') global.navigator = { userAgent: 'ReactNative' };
-if (typeof global.location === 'undefined') global.location = { href: '', protocol: 'https:' };
-if (typeof global.HTMLElement === 'undefined') global.HTMLElement = class HTMLElement { };
-if (typeof global.CustomEvent === 'undefined') global.CustomEvent = class CustomEvent { };
+
+
 
 // 1. Install Buffer reference
 if (typeof global.Buffer === 'undefined') {
@@ -71,15 +55,13 @@ if (typeof global.TextEncoder === 'undefined') {
 
 // 5. Event Polyfill (Required for some Web3/URL libs)
 if (typeof global.Event === 'undefined') {
-    global.Event = class Event {
-        constructor(type, eventInitDict) {
-            this.type = type;
-            this.bubbles = eventInitDict?.bubbles || false;
-            this.cancelable = eventInitDict?.cancelable || false;
-            this.defaultPrevented = false;
-            this.composed = eventInitDict?.composed || false;
-            this.timeStamp = Date.now();
-        }
+    global.Event = function Event(type, eventInitDict) {
+        this.type = type;
+        this.bubbles = eventInitDict?.bubbles || false;
+        this.cancelable = eventInitDict?.cancelable || false;
+        this.defaultPrevented = false;
+        this.composed = eventInitDict?.composed || false;
+        this.timeStamp = Date.now();
     };
 }
 
@@ -92,17 +74,13 @@ if (typeof global.ReadableStream === 'undefined' || typeof global.stream === 'un
         const stream = require('stream-browserify');
         global.stream = stream;
         global.ReadableStream = stream.Readable;
-        console.log('✅ [shim.js] stream-browserify loaded:', {
-            stream: typeof stream,
-            Readable: typeof stream.Readable
-        });
     } catch (e) {
         console.error('⚠️ [shim.js] Failed to load stream-browserify:', e.message);
     }
 }
 
-// 7. Crypto Polyfill (Hybrid: Node + Web)
-// We need both 'crypto-browserify' (for createHash, etc.) AND 'react-native-get-random-values' (for getRandomValues)
+// 7. Crypto — getRandomValues only (from react-native-get-random-values, imported at top of file)
+// No Node.js crypto polyfill needed: Sui SDK uses @noble/curves, Solana uses MWA/Seed Vault.
 if (typeof global.crypto === 'undefined') {
     global.crypto = {};
 }
@@ -115,19 +93,3 @@ if (!global.crypto.getRandomValues) {
         console.warn('⚠️ [shim.js] react-native-get-random-values failed:', e.message);
     }
 }
-
-// Extend with Node.js crypto methods
-try {
-    const nodeCrypto = require('crypto-browserify');
-    // Copy all properties from nodeCrypto to global.crypto, but don't overwrite existing ones like getRandomValues
-    Object.assign(global.crypto, nodeCrypto, global.crypto);
-
-    console.log('✅ [shim.js] Hybrid Crypto loaded:', {
-        createHash: typeof global.crypto.createHash,
-        getRandomValues: typeof global.crypto.getRandomValues,
-    });
-} catch (e) {
-    console.error('⚠️ [shim.js] Failed to load crypto-browserify:', e.message);
-}
-
-console.log('✅ [shim.js] Polyfills installed successfully');

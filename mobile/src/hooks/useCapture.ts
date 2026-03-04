@@ -30,14 +30,23 @@ import { SensorService } from '../services/sensors';
 import { TrustManager } from '../services/trust';
 import { SensorForensics } from '../services/forensics';
 import { hashFile } from '../utils/helpers';
+import { useSuiWallet } from '../contexts/SuiWalletContext';
+import { useSlushWallet } from './useSlushWallet';
 import type { CapturedPhoto, CapturedVideo, UploadStatus, Capture } from '@shared/types';
 import { readAsStringAsync } from 'expo-file-system';
 import { Buffer } from 'buffer';
 import { applyWatermark } from '../utils/watermark';
 import { appendBumper } from '../utils/video_bumper';
 import { createFingerprint } from '../utils/neural_hash';
+import { SecureStorage, SECURE_STORAGE_KEYS } from '../services/secureStorage';
+import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
+import { decodeSuiPrivateKey } from '@mysten/sui/cryptography';
+import { getZkLoginSignature } from '@mysten/sui/zklogin';
 
 export function useCapture() {
+  const { client } = useSuiWallet();
+  const { provider } = useSlushWallet();
+
   // ============================================================================
   // STATE
   // ============================================================================
@@ -102,25 +111,17 @@ export function useCapture() {
       let teepinSignature = '';
       let teepinPublicKey = '';
 
-      // Only request TEEPIN Hardware Attestation if user has GOLD (Seeker/MWA) identity
+      // Fetch current identity to grab the bound Seed Vault address
       const currentIdentity = IdentityService.getCurrentUser();
       const isGoldGrade = currentIdentity?.provenanceGrade === 'GOLD' && currentIdentity?.solanaAddress;
 
-      if (isGoldGrade) {
-        try {
-          const attestation = await SolanaService.signCaptureHash(contentHash);
-          if (attestation) {
-            teepinSignature = attestation.signature;
-            teepinPublicKey = attestation.publicKey;
-            blobLog.success(`✅ TEEPIN Signature generated`);
-          }
-        } catch (error) {
-          blobLog.warn('⚠️ TEEPIN Hardware Attestation failed:', error);
-
-          if (CAPTURE_CONFIG.STRICT_PROVENANCE) {
-            throw new Error('Strict Provenance Check Failed: Hardware Signature Required. Please retry.');
-          }
-        }
+      if (isGoldGrade && currentIdentity) {
+        // [ARCHITECTURE FIX]: We ALREADY bound this session to the Seed Vault when "Start Session" was pressed.
+        // We do NOT want to interrupt the user with an active MWA popup for every single photo.
+        // The individual capture transactions will be compiled and signed in the background/batch at the end of the session.
+        teepinSignature = currentIdentity.sessionBindSignature || 'pending_batch_signature';
+        teepinPublicKey = currentIdentity.solanaAddress || '';
+        blobLog.info('ℹ️ Attaching bound session identity to capture (No active MWA popup required)');
       } else {
         blobLog.info('ℹ️ Skipping TEEPIN attestation (not GOLD grade)');
       }
@@ -226,18 +227,116 @@ export function useCapture() {
       onStatusChange?.('verifying', captureWithWalrus);
 
       const identityUser = IdentityService.getCurrentUser();
-      const creatorAddress = identityUser?.suiAddress || identityUser?.solanaAddress || 'anonymous-seeker';
-      const keypair = IdentityService.getSuiKeypair();
+
+      // CRITICAL FIX: Ensure addresses are strings, not React events
+      const suiAddr = typeof identityUser?.suiAddress === 'string' ? identityUser.suiAddress : null;
+      const solAddr = typeof identityUser?.solanaAddress === 'string' ? identityUser.solanaAddress : null;
+      const creatorAddress = suiAddr || '0x0000000000000000000000000000000000000000000000000000000000000000';
+
+      const keypair = undefined; // Legacy local keypair removed
 
       console.log('   👤 Identity Context:', {
         user: identityUser,
         creator: creatorAddress,
-        hasKeypair: !!keypair,
-        keypairAddress: keypair?.toSuiAddress()
+        suiAddressValid: typeof suiAddr === 'string',
+        solanaAddressValid: typeof solAddr === 'string',
+        hasKeypair: false,
+        keypairAddress: undefined
       });
 
+      // Use Ephemeral Session Key if available
+      const ephemeralSender = identityUser?.ephemeralKeypair?.getPublicKey().toSuiAddress();
+
       // Record captures metadata including TEEPIN signature
-      const suiData = await SuiService.recordCapture(captureWithWalrus, walrusData, creatorAddress, keypair);
+      const suiData = await SuiService.recordCapture(
+        captureWithWalrus,
+        walrusData,
+        creatorAddress,
+        async (txArgs) => {
+          // ====================================================================
+          // ZKLOGIN: Silently sign & execute using Ephemeral Key + ZK Proof
+          // ====================================================================
+
+          // HACK/NOTE: The `IdentityService` currently doesn't store the `ephemeralKeypair` 
+          // in memory after the Slush pivot. We MUST look for the ZK proof in SecureStorage
+          // to determine if we are in a zkLogin session.
+          const zkProofStr = await SecureStorage.getSecureItem('zklogin_proof');
+
+          if (zkProofStr) {
+            console.log('📦 Delegating signature to Background Ephemeral Key & ZK Proof...');
+
+            // The sender is the zkLogin-derived address
+            txArgs.transaction.setSender(creatorAddress);
+            const rawTxBytes = await txArgs.transaction.build({ client });
+
+            // Rehydrate the ephemeral keypair and session data
+            const ephemeralKeySecret = await SecureStorage.getSecureItem(SECURE_STORAGE_KEYS.ZKLOGIN_EPHEMERAL);
+            const maxEpochStr = await SecureStorage.getSecureItem(SECURE_STORAGE_KEYS.ZKLOGIN_MAX_EPOCH);
+            const randomnessStr = await SecureStorage.getSecureItem(SECURE_STORAGE_KEYS.ZKLOGIN_RANDOMNESS);
+
+            if (!ephemeralKeySecret || !maxEpochStr || !randomnessStr) {
+              throw new Error('Capture failed: Missing ephemeral key data for ZK Execution');
+            }
+
+            // getSecretKey() returns bech32 (suiprivkey1q...), not raw bytes
+            const { secretKey } = decodeSuiPrivateKey(ephemeralKeySecret);
+            const ephemeralKeyPair = Ed25519Keypair.fromSecretKey(secretKey);
+
+            const zkProofRaw = JSON.parse(zkProofStr);
+
+            // Enoki wraps proof in { data: { ... } }, public prover does not
+            const zkProof = zkProofRaw.data || zkProofRaw;
+
+            console.log('🔑 ZK Proof keys:', Object.keys(zkProof));
+            console.log('🔑 Has proofPoints:', !!zkProof.proofPoints);
+            console.log('🔑 Has addressSeed:', !!zkProof.addressSeed);
+
+            // Sign the transaction bytes with the local ephemeral key
+            const { signature: ephemeralSig } = await ephemeralKeyPair.signTransaction(rawTxBytes);
+
+            // Assemble the mathematical proof that the ephemeral key is authorized
+            const zkLoginSig = getZkLoginSignature({
+              inputs: {
+                proofPoints: zkProof.proofPoints,
+                issBase64Details: zkProof.issBase64Details,
+                headerBase64: zkProof.headerBase64,
+                addressSeed: zkProof.addressSeed,
+              },
+              maxEpoch: Number(maxEpochStr),
+              userSignature: ephemeralSig,
+            });
+
+            // Execute it directly without prompting the user!
+            return await client.executeTransactionBlock({
+              transactionBlock: rawTxBytes,
+              signature: zkLoginSig,
+              options: { showEffects: true, showObjectChanges: true }
+            });
+
+          } else {
+            // ====================================================================
+            // FALLBACK: WalletConnect native app popup
+            // ====================================================================
+            console.log('📲 Prompting user to sign via WalletConnect...');
+            if (!provider) {
+              throw new Error('WalletConnect provider not initialized. Cannot sign transaction.');
+            }
+
+            const rawTxBytes = await txArgs.transaction.build({ client });
+            const txB64 = Buffer.from(rawTxBytes).toString('base64');
+
+            return await provider.request({
+              method: 'sui_signAndExecuteTransaction',
+              params: {
+                transaction: txB64,
+                address: creatorAddress,
+                options: { showEffects: true, showObjectChanges: true }
+              }
+            }, 'sui:testnet');
+          }
+        },
+        undefined // We don't send the ephemeralSender here, we let the smart contract rely on the true zkLogin derived address
+      );
 
       if (!suiData) {
         throw new Error('Sui recording failed');
@@ -264,7 +363,9 @@ export function useCapture() {
 
       console.log('🎉 Capture processing complete!');
       console.log('  - Walrus Blob ID:', walrusData.blobId);
+      console.log('  - Walrus URL:', `${CAPTURE_CONFIG.WALRUS_AGGREGATOR_URL}/v1/blobs/${walrusData.blobId}`);
       console.log('  - Sui Transaction:', suiData.digest);
+      console.log('  - Sui Explorer:', `https://suiscan.xyz/testnet/tx/${suiData.digest}`);
       console.log('  - Content Hash:', contentHash);
 
       // Remove from processing queue

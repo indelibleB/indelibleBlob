@@ -16,10 +16,13 @@ module indelible_blob::capture {
         content_hash: String,      // SHA-256 Hash of content
         timestamp: u64,
         
-        // GPS Data
+        // GPS Data (absolute values + sign booleans for lossless signed storage)
         gps_latitude: u64,
+        gps_latitude_negative: bool,
         gps_longitude: u64,
+        gps_longitude_negative: bool,
         gps_altitude: u64,
+        gps_altitude_negative: bool,
         gps_accuracy: u64,
         is_rtk: bool,
 
@@ -33,10 +36,13 @@ module indelible_blob::capture {
         provenance_grade: String,
         forensic_score: u64,
 
-        // Sensor Data
+        // Sensor Data (absolute values + sign booleans)
         accel_x: u64,
+        accel_x_negative: bool,
         accel_y: u64,
+        accel_y_negative: bool,
         accel_z: u64,
+        accel_z_negative: bool,
         compass_heading: u64,
         
         creator: address,
@@ -65,8 +71,11 @@ module indelible_blob::capture {
         content_hash: vector<u8>,
         timestamp: u64,
         gps_latitude: u64,
+        gps_latitude_negative: bool,
         gps_longitude: u64,
+        gps_longitude_negative: bool,
         gps_altitude: u64,
+        gps_altitude_negative: bool,
         gps_accuracy: u64,
         is_rtk: bool,
         session_id: vector<u8>,
@@ -77,8 +86,11 @@ module indelible_blob::capture {
         provenance_grade: vector<u8>,
         forensic_score: u64,
         accel_x: u64,
+        accel_x_negative: bool,
         accel_y: u64,
+        accel_y_negative: bool,
         accel_z: u64,
+        accel_z_negative: bool,
         compass_heading: u64,
         ctx: &mut TxContext
     ) {
@@ -90,8 +102,11 @@ module indelible_blob::capture {
             content_hash: string::utf8(content_hash),
             timestamp,
             gps_latitude,
+            gps_latitude_negative,
             gps_longitude,
+            gps_longitude_negative,
             gps_altitude,
+            gps_altitude_negative,
             gps_accuracy,
             is_rtk,
             session_id: string::utf8(session_id),
@@ -102,8 +117,11 @@ module indelible_blob::capture {
             provenance_grade: string::utf8(provenance_grade),
             forensic_score,
             accel_x,
+            accel_x_negative,
             accel_y,
+            accel_y_negative,
             accel_z,
+            accel_z_negative,
             compass_heading,
             creator: sender,
         };
@@ -122,3 +140,4 @@ module indelible_blob::capture {
         transfer::transfer(capture, sender);
     }
 }
+

@@ -137,9 +137,13 @@ export class SolanaService {
      */
     static async checkHealth(): Promise<boolean> {
         try {
-            await this.connection.getSlot();
+            const result = await Promise.race([
+                this.connection.getSlot(),
+                new Promise((_, reject) => setTimeout(() => reject(new Error('Solana RPC timeout')), 5000)),
+            ]);
             return true;
-        } catch {
+        } catch (e) {
+            console.warn('Solana health check failed:', e);
             return false;
         }
     }

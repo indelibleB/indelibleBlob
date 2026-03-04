@@ -70,12 +70,9 @@ export async function applyWatermark(uri: string): Promise<string> {
                 /* GLASSMORPHIC OVERLAY (MVP) */
                 // Since we can't easily extend canvas in pure JS/Expo-Image-Manipulator without complex base64 merging,
                 // We will create the "Look" of a passport by reserving the bottom 8% of the screen.
-                {
-                    overlay: {
-                        uri: logoAsset.localUri,
-                        position: { x: TARGET_WIDTH - 150, y: TARGET_HEIGHT - 100 }, // Bottom Right
-                    }
-                }
+                // NOTE: 'overlay' is not a supported primitive in expo-image-manipulator.
+                // It crashes with [TypeError: Unsupported action type: overlay].
+                // For MVP, we will just resize. Watermarking needs a specialized native module.
             ],
             { compress: 0.9, format: SaveFormat.JPEG }
         );

@@ -6,19 +6,12 @@
  * Manages user identity across Sui (zkLogin) and Solana (MWA).
  */
 
-import { SuiClient } from '@mysten/sui/client';
-import { Transaction } from '@mysten/sui/transactions';
-import { Connection, PublicKey } from '@solana/web3.js';
 import { transact } from '@solana-mobile/mobile-wallet-adapter-protocol-web3js';
 import { CAPTURE_CONFIG } from '../constants/config';
 import { blobLog } from '../utils/logger';
-import { activeGasManager } from './gas';
 
 import { TrustManager } from './trust';
 import { ProvenanceGrade } from '@shared/types';
-import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { fromB64 } from '@mysten/sui/utils';
 
 // [UPDATED] Interface to include Binding Signature
 export interface UserIdentity {
@@ -29,18 +22,8 @@ export interface UserIdentity {
     provenanceGrade: ProvenanceGrade;
 }
 
-const STORAGE_KEY_SOLANA_ADDR = 'indelible_solana_addr';
-
 class IdentityServiceClass {
-    // REMOVED: private keypair: Ed25519Keypair | null = null;
     private currentUser: UserIdentity | null = null;
-    private client: SuiClient;
-
-    constructor() {
-        this.client = new SuiClient({ url: CAPTURE_CONFIG.SUI_RPC_URL || 'https://fullnode.testnet.sui.io:443' });
-    }
-
-    // REMOVED: loginSui() - We now use Wallet Standard via App.tsx
 
     /**
      * Clear all identity state (Logout)
@@ -81,25 +64,35 @@ class IdentityServiceClass {
         // Step 3: Seeker Handshake (Layer B)
         if (profile.hasMWA) {
             blobLog.info('   🛡️ Seeker Detected — Initiating Session Bind...');
-            try {
-                // MWA "Session Bind" Handshake
-                const bindResult = await this.performSessionBind(suiAddress);
 
-                solanaAddress = bindResult.solanaAddress;
-                sessionBindSignature = bindResult.signature;
+            // [ARCHITECTURE FIX]: Do not pop up Seed Vault again if we already bound the session
+            // during the initial click before zkLogin was triggered.
+            if (this.currentUser?.sessionBindSignature && this.currentUser?.solanaAddress) {
+                blobLog.info('   ♻️ Re-using existing Session Bind (No MWA popup needed)');
+                solanaAddress = this.currentUser.solanaAddress;
+                sessionBindSignature = this.currentUser.sessionBindSignature;
                 grade = 'GOLD';
+            } else {
+                try {
+                    // MWA "Session Bind" Handshake
+                    const bindResult = await this.performSessionBind(suiAddress);
 
-                blobLog.success('   ✅ Session Bound to Seeker!');
-                blobLog.info('      Sig:', sessionBindSignature.substring(0, 16) + '...');
+                    solanaAddress = bindResult.solanaAddress;
+                    sessionBindSignature = bindResult.signature;
+                    grade = 'GOLD';
 
-            } catch (e) {
-                blobLog.error('   ❌ MWA Bind Failed:', e);
-                // Strict Gate: If it looks like a Seeker but refuses to sign, we downgrade or block.
-                // For v3 Plan, we block if it's supposed to be verified.
-                if (CAPTURE_CONFIG.STRICT_PROVENANCE) {
-                    throw new Error('Hardware Binding Failed: Seeker refused session signature.');
+                    blobLog.success('   ✅ Session Bound to Seeker!');
+                    blobLog.info('      Sig:', sessionBindSignature.substring(0, 16) + '...');
+
+                } catch (e) {
+                    blobLog.error('   ❌ MWA Bind Failed:', e);
+                    // Strict Gate: If it looks like a Seeker but refuses to sign, we downgrade or block.
+                    // For v3 Plan, we block if it's supposed to be verified.
+                    if (CAPTURE_CONFIG.STRICT_PROVENANCE) {
+                        throw new Error('Hardware Binding Failed: Seeker refused session signature.');
+                    }
+                    blobLog.warn('   ⚠️ Downgraded to SILVER (Bind failed)');
                 }
-                blobLog.warn('   ⚠️ Downgraded to SILVER (Bind failed)');
             }
         }
 

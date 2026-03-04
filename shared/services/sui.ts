@@ -129,59 +129,57 @@ export class SuiService {
       // LIVE CHAIN IMPLEMENTATION (PROD-READY)
       // ========================================================================
 
-      // DIAGNOSTICS: Log why we might skip live mode
-      if (!CAPTURE_CONFIG.ENABLE_SIMULATION) {
-        if (!signTransaction) console.warn('⚠️ SuiService: Missing signTransaction callback');
-        if (!CAPTURE_CONFIG.INDELIBLE_BLOB_PACKAGE_ID) console.warn('⚠️ SuiService: Missing Package ID');
-      }
-
-      if (CAPTURE_CONFIG.INDELIBLE_BLOB_PACKAGE_ID &&
-        CAPTURE_CONFIG.INDELIBLE_BLOB_PACKAGE_ID !== '0x0000000000000000000000000000000000000000000000000000000000000000' &&
-        signTransaction) {
+      if (process.env.NODE_ENV === 'production' || !CAPTURE_CONFIG.ENABLE_SIMULATION) {
+        if (!signTransaction) {
+          throw new Error('SuiService: Missing signTransaction callback in strict mode');
+        }
+        if (!CAPTURE_CONFIG.INDELIBLE_BLOB_PACKAGE_ID || CAPTURE_CONFIG.INDELIBLE_BLOB_PACKAGE_ID === '0x0000000000000000000000000000000000000000000000000000000000000000') {
+          throw new Error('SuiService: Missing valid Sui Package ID in strict mode');
+        }
 
         try {
           // Build Transaction (No Client needed to just build)
           const tx = new Transaction();
 
+
+
+          // Helper function to safely encode JS string to Move vector<u8>
+          // The newer SDK requires explicit BCS type annotations  
+          const encoder = new TextEncoder();
+          const toVecU8 = (str: string) => tx.pure.vector('u8', Array.from(encoder.encode(str)));
+
           tx.moveCall({
             target: `${CAPTURE_CONFIG.INDELIBLE_BLOB_PACKAGE_ID}::capture::record_capture`,
             arguments: [
-              tx.pure.string(walrusData.blobId),
-              tx.pure.string(capture.contentHash || ''),
+              toVecU8(walrusData.blobId),
+              toVecU8(capture.contentHash || ''),
               tx.pure.u64(capture.timestamp),
-              tx.pure.u64(metadata.gps_latitude),
-              tx.pure.u64(metadata.gps_longitude),
-              tx.pure.u64(metadata.gps_altitude),
-              tx.pure.u64(metadata.gps_accuracy),
+              // GPS — lossless signed storage: absolute value + sign boolean
+              tx.pure.u64(Math.abs(Math.round(metadata.gps_latitude))),
+              tx.pure.bool(metadata.gps_latitude < 0),
+              tx.pure.u64(Math.abs(Math.round(metadata.gps_longitude))),
+              tx.pure.bool(metadata.gps_longitude < 0),
+              tx.pure.u64(Math.abs(Math.round(metadata.gps_altitude))),
+              tx.pure.bool(metadata.gps_altitude < 0),
+              tx.pure.u64(Math.round(metadata.gps_accuracy)),
               tx.pure.bool(metadata.is_rtk),
-              tx.pure.string(metadata.session_id),
-              tx.pure.string(metadata.capture_type),
+              toVecU8(metadata.session_id),
+              toVecU8(metadata.capture_type),
               tx.pure.bool(metadata.is_sovereign),
-              tx.pure.string(metadata.teepin_signature),
-              tx.pure.string(metadata.teepin_public_key),
-              tx.pure.string(metadata.provenance_grade),
+              toVecU8(metadata.teepin_signature),
+              toVecU8(metadata.teepin_public_key),
+              toVecU8(metadata.provenance_grade),
               tx.pure.u64(metadata.forensic_score),
-              // Forensic sensors (scaled integers)
-              tx.pure.u64(Math.round(metadata.accel_x * 1000)),
-              tx.pure.u64(Math.round(metadata.accel_y * 1000)),
-              tx.pure.u64(Math.round(metadata.accel_z * 1000)),
-              tx.pure.u64(Math.round(metadata.compass_heading * 100)),
-              // [Future] Bind Signature separate field or part of metadata JSON? 
-              // For now assuming the contract has space or we pack it.
-              // If contract doesn't have the field yet, this line might fail if I add it to args.
-              // CHECK: Does Move contract have `session_bind_signature`?
-              // The Typescript comment above says:
-              // public struct CaptureRecord { ... teepin_signature ... }
-              // It does NOT list session_bind_signature.
-              // I will append it to 'teepin_signature' if needed or just log it for now.
-              // For v3 Plan, we want it ON CHAIN. 
-              // Assumption: We might need to update Move contract.
-              // For now, I will NOT pass it to Move to avoid transaction failure, 
-              // BUT I will ensure it is in the `metadata` object if we were uploading JSON.
+              // Accelerometer — lossless signed storage: absolute value + sign boolean
+              tx.pure.u64(Math.abs(Math.round(metadata.accel_x * 1000))),
+              tx.pure.bool(metadata.accel_x < 0),
+              tx.pure.u64(Math.abs(Math.round(metadata.accel_y * 1000))),
+              tx.pure.bool(metadata.accel_y < 0),
+              tx.pure.u64(Math.abs(Math.round(metadata.accel_z * 1000))),
+              tx.pure.bool(metadata.accel_z < 0),
+              tx.pure.u64(Math.round(Math.abs(metadata.compass_heading * 100))),
             ],
           });
-
-          console.log('📦 Delegating signature to Wallet...');
 
           const result = await signTransaction({
             transaction: tx,
@@ -208,37 +206,33 @@ export class SuiService {
           }
 
         } catch (netError: any) {
-          console.warn('⚠️ Sui Transaction failed:', netError.message);
+          console.error('⚠️ [FATAL] Sui Transaction build/sign failed:', netError);
+          console.error('   Error Stack:', netError.stack);
           // If in strict mode or production, rethrow
           if (process.env.NODE_ENV === 'production' || !CAPTURE_CONFIG.ENABLE_SIMULATION) {
             throw netError;
           }
+
+          // Should never hit this based on the above throw, but satisfies TypeScript Promise return
+          return { digest: '', objectId: '', recordedAt: Date.now() };
         }
+      } else {
+        // ========================================================================
+        // SIMULATED TRANSACTION (DEV & TEST LOGIC)
+        // ========================================================================
+        await this.simulateNetworkDelay();
+
+        const suiData: SuiData = {
+          digest: `sui_tx_${Date.now()}_${this.generateRandomId()}`,
+          objectId: `0x${this.generateRandomHex(40)}`,
+          recordedAt: Date.now(),
+        };
+
+        console.log('✅ Sui transaction completed (SIMULATED)');
+        console.log('   Digest:', suiData.digest);
+
+        return suiData;
       }
-
-      // ========================================================================
-      // SIMULATED TRANSACTION (FALLBACK)
-      // ========================================================================
-      // FAIL-SAFE: Check why we are here
-      if (process.env.NODE_ENV === 'production' || !CAPTURE_CONFIG.ENABLE_SIMULATION) {
-        if (!signTransaction) throw new SuiTransactionError('Missing Wallet Signer Callback');
-        if (!CAPTURE_CONFIG.INDELIBLE_BLOB_PACKAGE_ID) throw new SuiTransactionError('Missing Sui Package ID');
-
-        throw new SuiTransactionError('Sui Transaction Aborted (Reason Unknown)');
-      }
-
-      await this.simulateNetworkDelay();
-
-      const suiData: SuiData = {
-        digest: `sui_tx_${Date.now()}_${this.generateRandomId()}`,
-        objectId: `0x${this.generateRandomHex(40)}`,
-        recordedAt: Date.now(),
-      };
-
-      console.log('✅ Sui transaction completed (SIMULATED)');
-      console.log('   Digest:', suiData.digest);
-
-      return suiData;
     } catch (error: any) {
       console.error('❌ Sui transaction failed:', error);
       throw new SuiTransactionError(

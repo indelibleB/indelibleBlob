@@ -48,6 +48,7 @@ interface VisionCameraViewProps {
     onNavigate: (view: string) => void;
     onStartSession: () => void;
     onEndSession: () => void;
+    isActive?: boolean; // Controls whether camera native surface is active (yield during modals)
 }
 
 export function VisionCameraView({
@@ -60,6 +61,7 @@ export function VisionCameraView({
     onNavigate,
     onStartSession,
     onEndSession,
+    isActive = true, // Default to active, App.tsx sets false during auth modals
 }: VisionCameraViewProps) {
 
     // ========================================================================
@@ -160,7 +162,19 @@ export function VisionCameraView({
             if (isRecording) {
                 await stopRecording();
             } else {
-                await startRecording();
+                await startRecording((video) => {
+                    if (!currentLocation || !activeSession) return;
+                    const capturedVideo: CapturedVideo = {
+                        uri: `file://${video.path}`,
+                        timestamp: Date.now(),
+                        gpsData: currentLocation,
+                        sessionId: activeSession.id,
+                        index: activeSession.totalAssets || 0,
+                        duration: video.duration,
+                        uploadStatus: 'local',
+                    };
+                    onCapture(capturedVideo, isSovereign);
+                });
             }
         }
     };
@@ -213,7 +227,7 @@ export function VisionCameraView({
                 ref={camera}
                 style={StyleSheet.absoluteFill}
                 device={device}
-                isActive={true}
+                isActive={isActive}
                 photo={true}
                 video={true}
                 audio={true}

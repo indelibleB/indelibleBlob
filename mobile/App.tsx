@@ -6,7 +6,8 @@
  * Decentralized photo/video verification platform using Walrus and Sui.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import 'react-native-get-random-values'; // Required crypto polyfill for WalletConnect v2
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Alert, ToastAndroid, Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -20,10 +21,9 @@ import {
   Inter_700Bold,
 } from '@expo-google-fonts/inter';
 
-// [NEW] DApp Kit & Query Imports
-import { createNetworkConfig, SuiClientProvider, WalletProvider, useCurrentAccount } from '@mysten/dapp-kit';
-import { getFullnodeUrl } from '@mysten/sui/client';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+// Sui Wallet Context (replaces @mysten/dapp-kit)
+import { SuiWalletProvider, useSuiWallet } from './src/contexts/SuiWalletContext';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 // Hooks
 import { useSessions } from './src/hooks/useSessions';
@@ -47,27 +47,18 @@ import { blobLog } from './src/utils/logger';
 import { COLORS, FONTS } from './src/constants/config';
 import type { CapturedPhoto, CapturedVideo, GPSData, CaptureSessionData } from '@shared/types';
 
-// =========================================================================
-// SUI CONFIGURATION
-// =========================================================================
-const { networkConfig } = createNetworkConfig({
-  testnet: { url: getFullnodeUrl('testnet') },
-  mainnet: { url: getFullnodeUrl('mainnet') },
-});
-const queryClient = new QueryClient();
+
 
 // =========================================================================
 // ROOT APP COMPONENT (PROVIDERS)
 // =========================================================================
 export default function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <SuiClientProvider networks={networkConfig} defaultNetwork="testnet">
-        <WalletProvider>
-          <IndelibleBlobApp />
-        </WalletProvider>
-      </SuiClientProvider>
-    </QueryClientProvider>
+    <SafeAreaProvider>
+      <SuiWalletProvider network="testnet">
+        <IndelibleBlobApp />
+      </SuiWalletProvider>
+    </SafeAreaProvider>
   );
 }
 
@@ -75,7 +66,6 @@ export default function App() {
 // MAIN LOGIC COMPONENT
 // =========================================================================
 function IndelibleBlobApp() {
-  console.log('TRACE: [App.tsx] App rendering...');
 
   // Load Inter fonts
   const [fontsLoaded] = useFonts({
@@ -94,9 +84,10 @@ function IndelibleBlobApp() {
 
   // Location
   const [currentLocation, setCurrentLocation] = useState<GPSData | null>(null);
+  const currentLocationRef = useRef<GPSData | null>(null);
 
   // Identity State
-  const currentAccount = useCurrentAccount(); // [NEW] Real Wallet Account
+  const { address: currentAddress } = useSuiWallet();
   const [loginModalVisible, setLoginModalVisible] = useState(false);
   const [identityLoading, setIdentityLoading] = useState(false);
 
@@ -128,7 +119,10 @@ function IndelibleBlobApp() {
     const initializeServices = async () => {
       if (!permissions.loading) {
         if (permissions.location) {
-          LocationService.startTracking(setCurrentLocation).catch(e => console.error('LocTrack error', e));
+          LocationService.startTracking((loc) => {
+            currentLocationRef.current = loc;
+            setCurrentLocation(loc); // [FIX] Trigger re-render
+          }).catch(e => console.error('LocTrack error', e));
         }
         try {
           await SensorService.startTracking();
@@ -150,24 +144,29 @@ function IndelibleBlobApp() {
   // HANDLE START SESSION (REAL IDENTITY FLOW)
   // ==========================================================================
 
-  const handleStartSession = useCallback(async () => {
+  const handleStartSession = useCallback(async (overrideAddress?: string) => {
+    const currentLocation = currentLocationRef.current;
     blobLog.info('🎬 Start Session button pressed');
 
-    // Step 1: Layer A - Sui Authentication
-    // Check if real wallet is connected via DApp Kit
-    if (!currentAccount) {
-      blobLog.info('   👤 Layer A: No Wallet Connected. Prompting login...');
+    // Validate overrideAddress is actually a string (button onPress passes touch event as first arg)
+    const validOverride = typeof overrideAddress === 'string' ? overrideAddress : undefined;
+    const addrToUse = validOverride || currentAddress;
+
+    // Step 1: Layer A - Sui Wallet Binding (Metadata Identity)
+    // First bind the person's Sui identity for on-chain provenance recording
+    if (!addrToUse) {
+      blobLog.info('   👤 Layer A: Hardware binding queued — Now connecting Sui wallet for metadata layer...');
       setLoginModalVisible(true);
       return;
     }
 
-    // Step 2: Layer B - Hardware Binding (Cross-Chain)
-    // Synchronize the DApp Kit account with our IdentityService and enforce Hardware Check
+    // Step 2: Layer B - Hardware Binding (Device Attestation)
+    // Prove the device via MWA Seed Vault / TEEPIN signature now that we have the Sui address
     try {
       setIdentityLoading(true);
+      blobLog.info('   🔐 Layer B: Initiating Hardware Bind (Seed Vault)...');
 
-      // ORCHESTRATION: This throws if "Session Bind" or "Hardware Check" fails.
-      await IdentityService.initializeIdentity(currentAccount);
+      await IdentityService.initializeIdentity({ address: addrToUse });
 
       const currentUser = IdentityService.getCurrentUser();
       const gradeMsg = currentUser?.provenanceGrade === 'GOLD'
@@ -179,7 +178,7 @@ function IndelibleBlobApp() {
 
     } catch (e: any) {
       setIdentityLoading(false);
-      Alert.alert('Identity Verification Failed', e.message);
+      Alert.alert('Hardware Verification Failed', e.message);
       return;
     } finally {
       setIdentityLoading(false);
@@ -202,7 +201,7 @@ function IndelibleBlobApp() {
     blobLog.info(`   Creating session: ${sessionName}`);
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
     await startSession(currentLocation, sessionName);
-  }, [currentLocation, activeSession, sessions.length, startSession, currentAccount]);
+  }, [activeSession, sessions.length, startSession, currentAddress]);
 
   // ==========================================================================
   // HANDLE END SESSION
@@ -290,6 +289,7 @@ function IndelibleBlobApp() {
               onNavigate={(view: any) => setCurrentView(view)}
               onStartSession={handleStartSession}
               onEndSession={handleEndSession}
+              isActive={!loginModalVisible && !identityLoading} // [NEW] Pause camera during auth
             />
           </View>
         )}
@@ -307,14 +307,14 @@ function IndelibleBlobApp() {
               <Text style={styles.libraryTitle}>Library</Text>
               <View style={styles.placeholder} />
             </View>
-            <SessionList sessions={sessions} onSelectSession={setSelectedSession} onDeleteSession={deleteSession} />
+            <SessionList sessions={sessions} onSelectSession={(session) => { setSelectedSession(session); setCurrentView('session-detail'); }} onDeleteSession={deleteSession} />
           </LinearGradient>
         )}
 
         {currentView === 'session-detail' && selectedSession && (
           <SessionDetail
             session={selectedSession}
-            onSelectCapture={setSelectedCapture}
+            onSelectCapture={(capture) => { setSelectedCapture(capture); setCurrentView('capture-detail'); }}
             onBack={() => setCurrentView('library')}
             onDeleteSession={deleteSession}
           />
@@ -345,9 +345,9 @@ function IndelibleBlobApp() {
       <LoginModal
         visible={loginModalVisible}
         onClose={() => setLoginModalVisible(false)}
-        onLoginSuccess={() => {
+        onLoginSuccess={(newAddress) => {
           setLoginModalVisible(false);
-          handleStartSession(); // Retry start session after login
+          handleStartSession(newAddress); // Use explicit arg to prevent closure bugs
         }}
       />
     </View>

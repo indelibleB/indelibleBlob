@@ -88,13 +88,20 @@ export function DiagnosticsHub({ onBack }: { onBack: () => void }) {
             }
         }));
 
-        // 4. TEEPIN Readiness
+        // 4. TEEPIN / Identity Readiness
         const user = IdentityService.getCurrentUser();
-        const isSeeker = user?.method === 'mwa';
+        const isGold = user?.provenanceGrade === 'GOLD';
+        const isSilver = user?.provenanceGrade === 'SILVER';
         setResults(prev => ({
             ...prev, teepin: {
-                status: isSeeker ? 'success' : 'pending',
-                message: isSeeker ? 'Hardware-Bound Identity Active' : 'TEEPIN requires Solana Identity'
+                status: isGold ? 'success' : isSilver ? 'success' : user ? 'pending' : 'pending',
+                message: isGold
+                    ? `GOLD — Hardware Enclave Active (${user?.solanaAddress ? 'Seeker Bound' : 'Device Attested'})`
+                    : isSilver
+                        ? 'SILVER — Device Attested (Secure Enclave)'
+                        : user
+                            ? `Identity loaded but provenance: ${user.provenanceGrade || 'unknown'}`
+                            : 'Start a session to bind identity'
             }
         }));
 

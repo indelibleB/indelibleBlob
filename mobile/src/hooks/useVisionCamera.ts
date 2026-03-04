@@ -67,8 +67,9 @@ export function useVisionCamera() {
 
     /**
      * Start Recording
+     * @param onFinished — callback invoked with the VideoFile when recording completes
      */
-    const startRecording = useCallback(async () => {
+    const startRecording = useCallback(async (onFinished?: (video: VideoFile) => void) => {
         if (!camera.current) return;
 
         try {
@@ -78,7 +79,7 @@ export function useVisionCamera() {
                 onRecordingFinished: (video) => {
                     console.log('VisionCamera Recording Finished:', video);
                     setIsRecording(false);
-                    // Verify video content here if needed?
+                    onFinished?.(video);
                 },
                 onRecordingError: (error) => {
                     console.error('Recording Error:', error);

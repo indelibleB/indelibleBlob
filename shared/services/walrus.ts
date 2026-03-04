@@ -151,7 +151,7 @@ class WalrusServiceClass {
    */
   getBlobUrl(blobId: string): string {
     const aggregatorUrl = CAPTURE_CONFIG.WALRUS_AGGREGATOR_URL;
-    return `${aggregatorUrl}/v1/${blobId}`;
+    return `${aggregatorUrl}/v1/blobs/${blobId}`;
   }
 
   /**
@@ -185,19 +185,30 @@ class WalrusServiceClass {
   }
 
   /**
-   * Check health of Walrus connection
-   */
+ * Check health of Walrus connection
+ * Note: Walrus has no dedicated /status endpoint. We test reachability
+ * by fetching the root URL — any HTTP response (even 4xx) means the
+ * server is up. Only network errors (timeouts, DNS) mean it's down.
+ */
   static async checkHealth(): Promise<{ publisher: boolean; aggregator: boolean }> {
+    const testReachable = async (url: string): Promise<boolean> => {
+      try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 5000);
+        await fetch(url, { method: 'GET', signal: controller.signal });
+        clearTimeout(timeout);
+        return true; // Any HTTP response = server is reachable
+      } catch {
+        return false; // Network error or timeout = unreachable
+      }
+    };
+
     try {
-      const results = await Promise.all([
-        fetch(`${CAPTURE_CONFIG.WALRUS_PUBLISHER_URL}/v1/blobs/status`, { method: 'GET' })
-          .then(r => r.ok)
-          .catch(() => false),
-        fetch(`${CAPTURE_CONFIG.WALRUS_AGGREGATOR_URL}/v1/blobs/status`, { method: 'GET' })
-          .then(r => r.ok)
-          .catch(() => false)
+      const [publisher, aggregator] = await Promise.all([
+        testReachable(CAPTURE_CONFIG.WALRUS_PUBLISHER_URL),
+        testReachable(CAPTURE_CONFIG.WALRUS_AGGREGATOR_URL),
       ]);
-      return { publisher: results[0], aggregator: results[1] };
+      return { publisher, aggregator };
     } catch {
       return { publisher: false, aggregator: false };
     }
