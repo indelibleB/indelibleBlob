@@ -210,6 +210,15 @@ function IndelibleBlobApp() {
   const handleEndSession = useCallback(async () => {
     if (!activeSession) return;
 
+    // Block ending session while captures are still processing
+    if (processingQueue.length > 0) {
+      Alert.alert(
+        'Processing In Progress',
+        `${processingQueue.length} capture(s) still processing. Please wait for them to finish before ending the session.`
+      );
+      return;
+    }
+
     Alert.alert(
       'End Session',
       `End "${activeSession.name}" with ${activeSession.totalAssets} captures?`,
@@ -221,13 +230,13 @@ function IndelibleBlobApp() {
           onPress: async () => {
             blobLog.info('⏹️ Ending Session...');
             await endSession();
-            await IdentityService.logout(); // Clear session binding
+            await IdentityService.logout();
             blobLog.success('   ✅ Session Unbound.');
           },
         },
       ]
     );
-  }, [activeSession, endSession]);
+  }, [activeSession, endSession, processingQueue.length]);
 
   // ==========================================================================
   // HANDLE CAPTURE
@@ -285,6 +294,7 @@ function IndelibleBlobApp() {
               locationPermission={permissions.location}
               hasCameraPermission={permissions.camera}
               sessionCount={sessions.length}
+              processingCount={processingQueue.length}
               onCapture={handleCapture}
               onNavigate={(view: any) => setCurrentView(view)}
               onStartSession={handleStartSession}
@@ -325,14 +335,6 @@ function IndelibleBlobApp() {
         )}
       </MotiView>
 
-      {/* Processing Indicator */}
-      {processingQueue.length > 0 && (
-        <View style={styles.processingIndicator}>
-          <Text style={styles.processingText}>
-            ⚙️ Processing {processingQueue.length} capture{processingQueue.length > 1 ? 's' : ''}...
-          </Text>
-        </View>
-      )}
 
       {/* Identity Loading Overlay */}
       {identityLoading && (
@@ -392,22 +394,6 @@ const styles = StyleSheet.create({
   },
   placeholder: {
     width: 60,
-  },
-  processingIndicator: {
-    position: 'absolute',
-    top: 100,
-    left: 20,
-    right: 20,
-    backgroundColor: COLORS.info,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  processingText: {
-    color: COLORS.text,
-    fontSize: 14,
-    fontWeight: '600',
   },
   identityOverlay: {
     ...StyleSheet.absoluteFillObject,

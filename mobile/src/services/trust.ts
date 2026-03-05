@@ -46,7 +46,6 @@ class TrustManagerClass {
       reason = 'Solana Seeker Hardware Enclave (TEEPIN) Active';
     }
     // 2. Detect iOS/Android Enclave (SILVER)
-    // 2. Detect iOS/Android Enclave (SILVER)
     else if (Platform.OS === 'ios' || (Platform.OS === 'android' && await this.checkAndroidStrongBox())) {
       grade = 'SILVER';
       hasHardwareEnclave = true;

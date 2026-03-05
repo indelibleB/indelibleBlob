@@ -44,6 +44,7 @@ interface VisionCameraViewProps {
     locationPermission: boolean;
     hasCameraPermission: boolean; // [NEW] Prop driven by App.tsx
     sessionCount: number;
+    processingCount: number; // Number of captures currently processing
     onCapture: (capture: CapturedPhoto | CapturedVideo, isSovereign: boolean) => void;
     onNavigate: (view: string) => void;
     onStartSession: () => void;
@@ -57,6 +58,7 @@ export function VisionCameraView({
     locationPermission,
     hasCameraPermission, // [NEW]
     sessionCount,
+    processingCount,
     onCapture,
     onNavigate,
     onStartSession,
@@ -354,19 +356,43 @@ export function VisionCameraView({
                     <View style={styles.divider} />
 
                     {/* Identity Status */}
-                    <Text style={styles.sectionLabel}>IDENTITY</Text>
+                    <Text style={styles.sectionLabel}>SESSION BIND</Text>
 
                     {currentUser ? (
                         <View style={styles.identityCard}>
                             <View style={styles.identityHeader}>
-                                <Text style={styles.identityMethod}>
-                                    {currentUser.method === 'mwa' ? '🟢 Solana' : '🔵 Sui zkLogin'}
-                                </Text>
-                                <Text style={styles.identityStatus}>CONNECTED</Text>
+                                <Text style={styles.identityMethod}>🔗 Cross-Chain Bind</Text>
+                                <Text style={styles.identityStatus}>ACTIVE</Text>
                             </View>
-                            <Text style={styles.identityAddress} numberOfLines={1} ellipsizeMode="middle">
-                                {currentUser.solanaAddress || currentUser.suiAddress || 'Unknown'}
-                            </Text>
+
+                            {/* Sui zkLogin Address */}
+                            {currentUser.suiAddress && (
+                                <View style={styles.bindRow}>
+                                    <Text style={styles.bindRoleLabel}>🔵 Sui Metadata</Text>
+                                    <Text style={styles.identityAddress} numberOfLines={1} ellipsizeMode="middle">
+                                        {currentUser.suiAddress}
+                                    </Text>
+                                </View>
+                            )}
+
+                            {/* Solana Seed Vault Address */}
+                            {currentUser.solanaAddress && (
+                                <View style={styles.bindRow}>
+                                    <Text style={styles.bindRoleLabel}>🟢 Solana Commerce</Text>
+                                    <Text style={styles.identityAddress} numberOfLines={1} ellipsizeMode="middle">
+                                        {currentUser.solanaAddress}
+                                    </Text>
+                                </View>
+                            )}
+
+                            {currentUser.provenanceGrade && (
+                                <View style={[styles.bindRow, { borderBottomWidth: 0, paddingBottom: 0 }]}>
+                                    <Text style={styles.bindRoleLabel}>
+                                        {currentUser.provenanceGrade === 'GOLD' ? '🛡️ Seeker Seed Vault' : '🥈 OS Hardware Secured'}
+                                    </Text>
+                                </View>
+                            )}
+
                             <TouchableOpacity
                                 style={styles.disconnectButton}
                                 onPress={() => {
@@ -385,6 +411,29 @@ export function VisionCameraView({
                             <Text style={styles.guestText}>Guest Mode</Text>
                         </View>
                     )}
+
+                    {/* Session Bind Info */}
+                    <TouchableOpacity
+                        style={styles.infoButton}
+                        onPress={() => {
+                            Alert.alert(
+                                'Session Bind',
+                                'Your session is bound to both chains:\n\n🟢 Solana (Seed Vault) — Hardware-secured attestation proving your media captures are authentic. Also handles SKR token payments.\n\n🔵 Sui (zkLogin) — Stores this verified metadata on-chain. Search your address on SuiScan to view your captures.',
+                                [
+                                    { text: 'Got it', style: 'cancel' },
+                                    {
+                                        text: 'Learn More',
+                                        onPress: () => Linking.openURL('https://indelible-blob.com/session-bind-guide'),
+                                    },
+                                ]
+                            );
+                        }}
+                    >
+                        <Info color={COLORS.textSecondary} size={14} />
+                        <Text style={styles.infoText}>What is Session Bind?</Text>
+                    </TouchableOpacity>
+
+                    <View style={styles.divider} />
 
                     {/* Sovereign Info */}
                     <TouchableOpacity
@@ -446,15 +495,22 @@ export function VisionCameraView({
                         onPress={handleCapture}
                     />
 
-                    {/* Right: Start/End Session */}
+                    {/* Right: Start/End Session + Processing Pill */}
                     {activeSession ? (
-                        <TouchableOpacity
-                            style={[styles.navPill, styles.navPillDanger]}
-                            onPress={onEndSession}
-                        >
-                            <Square color={COLORS.text} size={14} />
-                            <Text style={styles.navPillText}>End</Text>
-                        </TouchableOpacity>
+                        <View style={{ alignItems: 'flex-end', gap: 6 }}>
+                            {processingCount > 0 && (
+                                <View style={styles.processingPill}>
+                                    <Text style={styles.processingPillText}>⚙️ {processingCount}</Text>
+                                </View>
+                            )}
+                            <TouchableOpacity
+                                style={[styles.navPill, styles.navPillDanger]}
+                                onPress={onEndSession}
+                            >
+                                <Square color={COLORS.text} size={14} />
+                                <Text style={styles.navPillText}>End</Text>
+                            </TouchableOpacity>
+                        </View>
                     ) : (
                         <TouchableOpacity
                             style={[styles.navPill, styles.navPillPrimary]}
@@ -618,7 +674,31 @@ const styles = StyleSheet.create({
         padding: 12,
         borderWidth: 1,
         borderColor: COLORS.glassBorder,
-        gap: 6,
+        gap: 4,
+    },
+    bindRow: {
+        borderBottomWidth: 1,
+        borderBottomColor: 'rgba(255,255,255,0.06)',
+        paddingBottom: 4,
+        marginBottom: 2,
+    },
+    bindRoleLabel: {
+        color: COLORS.text,
+        fontSize: 10,
+        fontFamily: FONTS.semiBold,
+        marginBottom: 1,
+    },
+    processingPill: {
+        backgroundColor: 'rgba(0,0,0,0.55)',
+        paddingVertical: 4,
+        paddingHorizontal: 10,
+        borderRadius: 14,
+        alignItems: 'center',
+    },
+    processingPillText: {
+        color: '#FFFFFF',
+        fontSize: 11,
+        fontFamily: FONTS.semiBold,
     },
     identityHeader: {
         flexDirection: 'row',
