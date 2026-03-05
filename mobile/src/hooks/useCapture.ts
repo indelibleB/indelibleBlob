@@ -170,29 +170,43 @@ export function useCapture() {
       };
 
       // ========================================================================
+      // IDENTITY (needed for both Seal encryption and Sui recording)
+      // ========================================================================
+
+      const identityUser = IdentityService.getCurrentUser();
+      const suiAddr = typeof identityUser?.suiAddress === 'string' ? identityUser.suiAddress : null;
+      const solAddr = typeof identityUser?.solanaAddress === 'string' ? identityUser.solanaAddress : null;
+      const creatorAddress = suiAddr || '0x0000000000000000000000000000000000000000000000000000000000000000';
+
+      // ========================================================================
       // STEP 2: PRIVACY LAYER (SEAL ENCRYPTION)
       // ========================================================================
 
       let walrusData;
+      let sealNonce: Uint8Array | undefined;
 
       if (isSovereign) {
-        blobLog.info('🔒 Step 2/4: Encrypting capture via Seal...');
+        blobLog.info('🔒 Step 2/4: Encrypting capture via Seal (Sovereign Mode)...');
         updateStatus(captureId, 'uploading');
+
+        // Generate unique nonce for this capture (CSPRNG, 32 bytes)
+        sealNonce = SealService.generateNonce();
+        blobLog.info(`    Generated Seal nonce: ${Array.from(sealNonce.slice(0, 4)).map(b => b.toString(16).padStart(2, '0')).join('')}...`);
 
         // Read file as base64 and convert to bytes
         blobLog.info('    Reading file for encryption...');
         const base64 = await readAsStringAsync(capture.uri, { encoding: 'base64' });
         const bytes = new Uint8Array(Buffer.from(base64, 'base64'));
 
-        // Encrypt via Seal using user email/identity
-        const user = IdentityService.getCurrentUser();
-        const identity = user?.solanaAddress || 'anonymous-seeker';
+        const { encryptedObject } = await SealService.getInstance().encrypt(
+          bytes,
+          creatorAddress,
+          sealNonce
+        );
+        console.log('✅ Capture encrypted client-side via Seal IBE');
 
-        const encryptedBytes = await SealService.getInstance().encrypt(bytes, identity);
-        console.log('✅ Capture encrypted client-side');
-
-        // Upload encrypted data
-        walrusData = await WalrusService.uploadData(encryptedBytes);
+        // Upload encrypted data to Walrus
+        walrusData = await WalrusService.uploadData(encryptedObject);
       } else {
         console.log('📤 Step 2/4: Uploading public capture to Walrus...');
         updateStatus(captureId, 'uploading');
@@ -208,6 +222,7 @@ export function useCapture() {
       const captureWithWalrus = {
         ...captureWithAttestation,
         walrusData,
+        sealNonce: sealNonce ? Array.from(sealNonce) : undefined,
         uploadStatus: 'stored' as UploadStatus,
         recordedAt: Date.now(),
       };
@@ -225,13 +240,6 @@ export function useCapture() {
       console.log('⛓️  Step 3/4: Recording metadata on Sui blockchain...');
       updateStatus(captureId, 'verifying');
       onStatusChange?.('verifying', captureWithWalrus);
-
-      const identityUser = IdentityService.getCurrentUser();
-
-      // CRITICAL FIX: Ensure addresses are strings, not React events
-      const suiAddr = typeof identityUser?.suiAddress === 'string' ? identityUser.suiAddress : null;
-      const solAddr = typeof identityUser?.solanaAddress === 'string' ? identityUser.solanaAddress : null;
-      const creatorAddress = suiAddr || '0x0000000000000000000000000000000000000000000000000000000000000000';
 
       const keypair = undefined; // Legacy local keypair removed
 
@@ -260,7 +268,7 @@ export function useCapture() {
           // HACK/NOTE: The `IdentityService` currently doesn't store the `ephemeralKeypair` 
           // in memory after the Slush pivot. We MUST look for the ZK proof in SecureStorage
           // to determine if we are in a zkLogin session.
-          const zkProofStr = await SecureStorage.getSecureItem('zklogin_proof');
+          const zkProofStr = await SecureStorage.getSecureItem(SECURE_STORAGE_KEYS.ZKLOGIN_PROOF);
 
           if (zkProofStr) {
             console.log('📦 Delegating signature to Background Ephemeral Key & ZK Proof...');

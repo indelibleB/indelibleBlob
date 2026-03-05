@@ -18,6 +18,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Alert } from 'react-native';
 import { StorageService } from '../services/storage';
+import { TrustManager } from '../services/trust';
+import { IdentityService } from '../services/identity';
+import { SkrService } from '../services/skr';
 import type { CaptureSessionData, CapturedPhoto, CapturedVideo, GPSData } from '@shared/types';
 
 export function useSessions() {
@@ -60,30 +63,62 @@ export function useSessions() {
   // START NEW SESSION
   // ============================================================================
 
+  // ============================================================================
+  // START NEW SESSION
+  // ============================================================================
+
   const startSession = useCallback(async (location: GPSData, sessionName?: string) => {
     console.log('🎬 Starting new capture session...');
+
+    // 1. TEEPIN / SKR Commerce Gating
+    const profile = await TrustManager.getDeviceProfile();
+    const currentUser = IdentityService.getCurrentUser();
+
+    let availableCaptures: number | 'Infinity' = 0;
+
+    if (profile.grade === 'GOLD') {
+      // Seeker Device = Unlimited Free Captures
+      console.log('🛡️  GOLD Grade Detected: Unlimited free captures granted.');
+      availableCaptures = 'Infinity';
+    } else {
+      // Non-Seeker = Requires SKR Balance
+      if (!currentUser?.solanaAddress) {
+        Alert.alert('Wallet Required', 'Please connect a Solana wallet to pay for captures.');
+        return null;
+      }
+
+      console.log('🪙 Reading SKR balance for Non-Seeker device...');
+      const skrAfforded = await SkrService.getAvailableCaptures(currentUser.solanaAddress);
+
+      if (skrAfforded <= 0) {
+        Alert.alert('Insufficient SKR', 'You need SKR tokens to capture on a non-Seeker device. Please top up your wallet.');
+        return null;
+      }
+
+      availableCaptures = skrAfforded;
+      console.log(`🪙 Authorized for ${availableCaptures} paid captures.`);
+    }
 
     const newSession: CaptureSessionData = {
       id: `session_${Date.now()}`,
       name: sessionName || `Session ${sessions.length + 1}`,
       startTime: Date.now(),
       endTime: null,
-      location: {
-        latitude: location.latitude,
-        longitude: location.longitude,
-        altitude: location.altitude,
-      },
+      location,
       photos: [],
       videos: [],
       totalAssets: 0,
       status: 'active',
+      availableCaptures,
+      capturesConsumed: 0,
+      paymentPending: false,
     };
 
     setActiveSession(newSession);
     setSessions(prev => [newSession, ...prev]);
 
     console.log(`✅ Session started: ${newSession.name}`);
-    Alert.alert('Session Started', `${newSession.name} is now active`);
+    Alert.alert('Session Started', `${newSession.name} is now active.`);
 
     return newSession;
   }, [sessions.length]);
@@ -92,17 +127,15 @@ export function useSessions() {
   // END ACTIVE SESSION
   // ============================================================================
 
-  const endSession = useCallback(() => {
+  const endSession = useCallback(async () => {
     if (!activeSession) {
       Alert.alert('No Active Session', 'There is no active session to end');
       return;
     }
 
     console.log(`🏁 Ending session: ${activeSession.name}`);
-    console.log(`🔍 DEBUG: activeSession has ${activeSession.photos.length} photos, ${activeSession.videos.length} videos`);
-    console.log(`🔍 DEBUG: sessions array length: ${sessions.length}`);
 
-    // Get the latest session data from sessions array (it has the most recent captures)
+    // Get the latest session data from sessions array
     const currentSession = sessions.find(s => s.id === activeSession.id);
     if (!currentSession) {
       console.error('❌ Active session not found in sessions array');
@@ -110,14 +143,34 @@ export function useSessions() {
     }
 
     const totalCaptures = currentSession.photos.length + currentSession.videos.length;
-    console.log(`🔍 DEBUG: currentSession from array has ${currentSession.photos.length} photos, ${currentSession.videos.length} videos`);
-    console.log(`🔍 DEBUG: totalCaptures = ${totalCaptures}`);
+    const capturesConsumed = currentSession.capturesConsumed || 0;
+    let paymentPending = false;
+
+    // 2. SKR Post-Settlement
+    if (currentSession.availableCaptures !== 'Infinity' && capturesConsumed > 0) {
+      console.log(`💸 Processing post-session SKR payment for ${capturesConsumed} captures...`);
+      const success = await SkrService.settleSessionCaptures(capturesConsumed);
+
+      if (!success) {
+        paymentPending = true;
+        Alert.alert(
+          'Payment Failed',
+          'The SKR payment transaction failed or was rejected. The session will be marked as Payment Pending, but your captures are safe.'
+        );
+      } else {
+        Alert.alert(
+          'Payment Successful',
+          `Successfully paid for ${capturesConsumed} captures.`
+        );
+      }
+    }
 
     const updatedSession: CaptureSessionData = {
       ...currentSession,
       endTime: Date.now(),
       status: 'completed',
       totalAssets: totalCaptures,
+      paymentPending,
     };
 
     setSessions(prev =>
@@ -127,10 +180,9 @@ export function useSessions() {
     setActiveSession(null);
 
     console.log(`✅ Session ended: ${updatedSession.name}`);
-    Alert.alert(
-      'Session Ended',
-      `${updatedSession.name} completed with ${totalCaptures} captures`
-    );
+    if (!paymentPending && currentSession.availableCaptures === 'Infinity') {
+      Alert.alert('Session Ended', `${updatedSession.name} completed with ${totalCaptures} captures`);
+    }
   }, [activeSession, sessions]);
 
   // ============================================================================
@@ -151,11 +203,29 @@ export function useSessions() {
       const currentSession = prev.find(s => s.id === activeSession.id);
       if (!currentSession) return prev;
 
+      // Check if we have capacity left
+      let newAvailable = currentSession.availableCaptures;
+      let newConsumed = currentSession.capturesConsumed || 0;
+
+      if (newAvailable !== 'Infinity') {
+        const remaining = (newAvailable || 0) - 1;
+        newAvailable = remaining;
+        newConsumed += 1;
+
+        if (remaining <= 0) {
+          console.log('⚠️ SKR capacity reached. Enforcing graceful session end soon.');
+          // NOTE: Cannot auto-end safely within a setState callback because endSession relies on state.
+          // A separate effect or component-level check should trigger endSession when availableCaptures === 0.
+        }
+      }
+
       const updatedSession: CaptureSessionData = {
         ...currentSession,
         photos: isVideo ? currentSession.photos : [...currentSession.photos, capture as CapturedPhoto],
         videos: isVideo ? [...currentSession.videos, capture as CapturedVideo] : currentSession.videos,
         totalAssets: currentSession.totalAssets + 1,
+        availableCaptures: newAvailable,
+        capturesConsumed: newConsumed,
       };
 
       console.log(`🔍 After adding: ${updatedSession.photos.length} photos, ${updatedSession.videos.length} videos`);

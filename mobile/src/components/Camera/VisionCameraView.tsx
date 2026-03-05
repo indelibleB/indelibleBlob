@@ -95,7 +95,7 @@ export function VisionCameraView({
     const [recordingDuration, setRecordingDuration] = useState(0);
 
     // ========================================================================
-    // RECORDING TIMER
+    // SKR / RECORDING TIMER / AUTO-END
     // ========================================================================
 
     useEffect(() => {
@@ -110,6 +110,17 @@ export function VisionCameraView({
         }
         return () => { if (timer) clearInterval(timer); };
     }, [isRecording]);
+
+    // [NEW] SKR Auto-End: Watch active session capacity
+    useEffect(() => {
+        if (activeSession && activeSession.availableCaptures !== 'Infinity') {
+            const available = activeSession.availableCaptures || 0;
+            if (available <= 0) {
+                blobLog.warn('⚠️ SKR capacity reached 0. Auto-ending session.');
+                onEndSession();
+            }
+        }
+    }, [activeSession, onEndSession]);
 
     // ========================================================================
     // SIDEBAR TOGGLE
@@ -247,6 +258,8 @@ export function VisionCameraView({
                         <View style={styles.sessionDot} />
                         <Text style={styles.sessionText}>
                             {activeSession.name} • {activeSession.totalAssets} captures
+                            {activeSession.availableCaptures !== 'Infinity' &&
+                                ` (${activeSession.availableCaptures} paid left)`}
                         </Text>
                     </View>
                 )}

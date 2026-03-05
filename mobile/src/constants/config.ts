@@ -80,8 +80,13 @@ export const CAPTURE_CONFIG: AppConfig = {
   INDELIBLE_BLOB_PACKAGE_ID: '0xde8e70a68f79698646dc56f7d99e80b4831422618354047deb1780837e51aae3',
 
   // Solana configuration
-  SOLANA_NETWORK: 'testnet',
+  SOLANA_NETWORK: 'testnet', // Using testnet for hackathon
   SOLANA_RPC_URL: 'https://api.testnet.solana.com',
+
+  // SKR Token Configuration
+  SKR_MINT_ADDRESS: 'SKRbvo6Gf7GondiT3BbTfuRDPqLWei4j2Qy2NPGZhW3', // Official SKR mint on mainnet/testnet
+  SKR_TREASURY_WALLET: '7sWgEqFvU8Z34tBw2oNf4A4NqCkqS1tL3X1K3kFwK2Jj', // Placeholder treasury wallet
+  SKR_CAPTURE_COST: 5, // 5 SKR per capture (configurable placeholder)
 
   // Security
   STRICT_PROVENANCE: true, // Only allow hardware-backed proofs (Gold/Silver)

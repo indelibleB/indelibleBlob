@@ -196,19 +196,20 @@ export type Capture = CapturedPhoto | CapturedVideo;
  * Each session represents a discrete capture event (e.g., "Building Survey 2024-01-15")
  */
 export interface CaptureSessionData {
-  id: string;                     // Unique session identifier
-  name: string;                   // User-editable session name
-  startTime: number;              // Session start (Unix milliseconds)
-  endTime: number | null;         // Session end (null if active)
-  location: {                     // Starting GPS location
-    latitude: number;
-    longitude: number;
-    altitude: number;
-  };
-  photos: CapturedPhoto[];        // All photos in this session
-  videos: CapturedVideo[];        // All videos in this session
-  totalAssets: number;            // Total number of photos and videos
-  status: 'active' | 'completed'; // Current status of the session
+  id: string;              // Unique session ID
+  name: string;            // User-assigned name
+  startTime: number;       // Unix timestamp
+  endTime: number | null;  // null if active
+  location: GPSData;       // Starting location
+  photos: CapturedPhoto[];
+  videos: CapturedVideo[];
+  totalAssets: number;
+  status: 'active' | 'completed' | 'uploaded';
+
+  // [NEW] SKR Commerce Layer Data
+  availableCaptures?: number | 'Infinity'; // Infinity for Seeker free-tier
+  capturesConsumed?: number;               // Running total of captures taken this session
+  paymentPending?: boolean;                // True if post-session SPL transfer failed
 }
 
 // ============================================================================
@@ -269,14 +270,20 @@ export interface AppConfig {
   SUI_NETWORK: 'testnet' | 'mainnet' | 'devnet';
   SUI_RPC_URL: string;
   INDELIBLE_BLOB_PACKAGE_ID: string;
+  SOVEREIGN_BLOB_PACKAGE_ID: string;
 
-  // Solana configuration
-  SOLANA_NETWORK: 'testnet' | 'mainnet' | 'devnet';
-  SOLANA_RPC_URL: string;
+  // Solana configuration (optional — not all builds need Solana)
+  SOLANA_NETWORK?: 'testnet' | 'mainnet' | 'devnet';
+  SOLANA_RPC_URL?: string;
 
-  // Security
-  STRICT_PROVENANCE: boolean;
-  ENABLE_SIMULATION: boolean;
+  // SKR Token Configuration (optional)
+  SKR_MINT_ADDRESS?: string;
+  SKR_TREASURY_WALLET?: string;
+  SKR_CAPTURE_COST?: number;
+
+  // Security (optional — defaults to false)
+  STRICT_PROVENANCE?: boolean;
+  ENABLE_SIMULATION?: boolean;
 }
 
 // ============================================================================

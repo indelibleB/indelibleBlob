@@ -149,9 +149,9 @@ export function useZkLogin() {
                     const zkProof = await proverRes.json();
 
                     // Store the proof and the salt so we can use them during capture signing
-                    await SecureStorage.setSecureItem('zklogin_proof', JSON.stringify(zkProof));
-                    await SecureStorage.setSecureItem('zklogin_salt', userSalt);
-                    await SecureStorage.setSecureItem('zklogin_jwt', id_token);
+                    await SecureStorage.setSecureItem(SECURE_STORAGE_KEYS.ZKLOGIN_PROOF, JSON.stringify(zkProof));
+                    await SecureStorage.setSecureItem(SECURE_STORAGE_KEYS.ZKLOGIN_SALT, userSalt);
+                    await SecureStorage.setSecureItem(SECURE_STORAGE_KEYS.ZKLOGIN_JWT, id_token);
 
                     blobLog.success('zkLogin: Successfully derived address & fetched proof:', address);
                     setDerivedAddress(address);

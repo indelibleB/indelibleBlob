@@ -101,12 +101,18 @@ export const SECURE_STORAGE_KEYS = {
   ZKLOGIN_EPHEMERAL: 'secure.zklogin.ephemeral',
   ZKLOGIN_RANDOMNESS: 'secure.zklogin.randomness',
   ZKLOGIN_MAX_EPOCH: 'secure.zklogin.max_epoch',
+  ZKLOGIN_PROOF: 'secure.zklogin.proof',
+  ZKLOGIN_SALT: 'secure.zklogin.salt',
+  ZKLOGIN_JWT: 'secure.zklogin.jwt',
 
   // Sui wallet identity
   SUI_WALLET_ADDRESS: 'secure.sui.address',
 
-  // Future: Solana session binding
+  // Solana session binding
   SOLANA_SESSION_TOKEN: 'secure.solana.session_token',
+
+  // Seal encryption nonces (per-capture, stored in capture metadata)
+  SEAL_LAST_NONCE: 'secure.seal.last_nonce',
 } as const;
 
 /**
