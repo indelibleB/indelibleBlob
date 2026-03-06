@@ -397,6 +397,10 @@ export function VisionCameraView({
                             <TouchableOpacity
                                 style={styles.disconnectButton}
                                 onPress={() => {
+                                    if (activeSession) {
+                                        Alert.alert('Action Blocked', 'Cannot disconnect while a capture session is active. Please end the session first.');
+                                        return;
+                                    }
                                     IdentityService.logout();
                                     toggleSidebar();
                                     Alert.alert('Disconnected', 'Identity session ended.');

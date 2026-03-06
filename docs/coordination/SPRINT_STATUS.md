@@ -94,10 +94,10 @@
 Full audit report: `docs/security/SECURITY_AUDIT_LOG.md`
 
 **Fix before APK build (March 6):**
-- [ ] **H-2**: Delete JWT from SecureStorage after ZK proof is stored (`useZkLogin.ts:154`) — 1A
-- [ ] **H-3**: Sidebar Disconnect button must block when session is active (`VisionCameraView.tsx:399`) — 1A
-- [ ] **L-3**: Gate sensitive console.log behind DEBUG flag (multiple files) — 1A
-- [ ] **M-1**: Remove dummy fallback for Google Client IDs (`useZkLogin.ts:14-15`) — 1A
+- [x] **H-2**: Delete JWT from SecureStorage after ZK proof is stored (`useZkLogin.ts:154`) — 1A
+- [x] **H-3**: Sidebar Disconnect button must block when session is active (`VisionCameraView.tsx:399`) — 1A
+- [x] **L-3**: Gate sensitive console.log behind DEBUG flag (multiple files) — 1A
+- [x] **M-1**: Remove dummy fallback for Google Client IDs (`useZkLogin.ts:14-15`) — 1A
 
 **Track for mainnet (post-hackathon):**
 - H-1: Replace fixed AES-GCM IV with per-encryption random IV (seal.ts)

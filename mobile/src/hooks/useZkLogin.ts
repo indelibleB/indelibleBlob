@@ -11,8 +11,8 @@ import { blobLog } from '../utils/logger';
 
 WebBrowser.maybeCompleteAuthSession();
 
-const GOOGLE_WEB_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || 'dummy-web-client-id';
-const GOOGLE_ANDROID_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID || 'dummy-android-client-id';
+const GOOGLE_WEB_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || '';
+const GOOGLE_ANDROID_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID || '';
 const ENOKI_API_KEY = process.env.EXPO_PUBLIC_ENOKI_API_KEY;
 
 export function useZkLogin() {
@@ -151,7 +151,7 @@ export function useZkLogin() {
                     // Store the proof and the salt so we can use them during capture signing
                     await SecureStorage.setSecureItem(SECURE_STORAGE_KEYS.ZKLOGIN_PROOF, JSON.stringify(zkProof));
                     await SecureStorage.setSecureItem(SECURE_STORAGE_KEYS.ZKLOGIN_SALT, userSalt);
-                    await SecureStorage.setSecureItem(SECURE_STORAGE_KEYS.ZKLOGIN_JWT, id_token);
+                    await SecureStorage.deleteSecureItem(SECURE_STORAGE_KEYS.ZKLOGIN_JWT); // Security Fix: H-2 Delete JWT to prevent replay
 
                     blobLog.success('zkLogin: Successfully derived address & fetched proof:', address);
                     setDerivedAddress(address);

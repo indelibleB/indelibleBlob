@@ -302,9 +302,10 @@ export function useCapture() {
             // Enoki wraps proof in { data: { ... } }, public prover does not
             const zkProof = zkProofRaw.data || zkProofRaw;
 
-            console.log('🔑 ZK Proof keys:', Object.keys(zkProof));
-            console.log('🔑 Has proofPoints:', !!zkProof.proofPoints);
-            console.log('🔑 Has addressSeed:', !!zkProof.addressSeed);
+            // [SECURITY FIX L-3] Sensitive object structures shouldn't be logged in prod
+            // console.log('🔑 ZK Proof keys:', Object.keys(zkProof));
+            // console.log('🔑 Has proofPoints:', !!zkProof.proofPoints);
+            // console.log('🔑 Has addressSeed:', !!zkProof.addressSeed);
 
             // Sign the transaction bytes with the local ephemeral key
             const { signature: ephemeralSig } = await ephemeralKeyPair.signTransaction(rawTxBytes);
