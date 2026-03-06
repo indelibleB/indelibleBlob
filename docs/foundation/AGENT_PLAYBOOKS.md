@@ -1,8 +1,84 @@
 # indelible.Blob Agent Playbooks
 
-## Role-Specific Guides for Each Agent
+**Version:** 1.1 | **Updated:** March 5, 2026 | **Purpose:** Operational entry point for any model assuming an agent role
 
-**Version:** 1.0**Adopted:** February 17, 2026**Purpose:** Provide clear, actionable guidance for each agent role
+---
+
+## SYNC PROTOCOL — READ THIS FIRST
+
+> **DO NOT read this entire document.** Follow the steps below in order. This is the mandatory boot sequence for assuming any agent or subagent role.
+
+### Step 1: Read Your Role Section (this file)
+
+Find your assigned role in the Table of Contents below. Read ONLY the General Shared Knowledge section and your specific role section. Skip all other roles.
+
+### Step 2: Read Sprint Status (the brief)
+
+Read `docs/coordination/SPRINT_STATUS.md` — this is the single source of truth for current sprint state. One read = full picture.
+
+### Step 3: Read the Active Week-Of Doc (detailed context)
+
+Read the most recent `docs/coordination/WEEK_OF_*.md` file for the active sprint period. Check which part (Part 1 or Part 2) is current. This provides the detailed, day-by-day operational context that SPRINT_STATUS.md summarizes.
+
+### Step 4: Read Your Personal Task Doc (intra-agent sync)
+
+Read your task file from `docs/agents/tasks/`. This is your private intersession memory — active tasks, planned tasks, and session-to-session context transfer. Update this file at the end of every session.
+
+| Role | Task File |
+|------|-----------|
+| 1A Mobile Lead | `docs/agents/tasks/1A_mobile_lead.md` |
+| 1B Backend/Blockchain Lead | `docs/agents/tasks/1B_backend_lead.md` |
+| 1C Storage/Infrastructure Lead | `docs/agents/tasks/1C_infra_lead.md` |
+| 1D Security/Quality Lead | `docs/agents/tasks/1D_security_lead.md` |
+| 1E Website Lead | `docs/agents/tasks/1E_web_lead.md` |
+| 1F Marketplace Lead | `docs/agents/tasks/1F_marketplace_lead.md` |
+| 1G Research & Dev Lead | `docs/agents/tasks/1G_research_dev_lead.md` |
+
+### Step 5: Propose — DO NOT begin code changes without C.I.C. approval
+
+> **MANDATORY.** After completing Steps 1-4, you are synced — but you are NOT authorized to edit code or files yet. You must:
+>
+> 1. Summarize your understanding of the current state (what's done, what's in progress, what's blocked)
+> 2. State your proposed priorities and planned actions for this session
+> 3. **Wait for explicit C.I.C. (Founder) approval** before writing or editing any code, config, or documentation
+>
+> The sync protocol exists to ensure you are doing the *right things*. Jumping into file edits after skimming a few lines defeats the purpose. Complete all reads. Propose. Get approval. Then execute.
+
+**After completing all 5 steps, you are synced and authorized.** Execute your approved plan.
+
+---
+
+## General Shared Knowledge
+
+**All agents share these principles and operational norms:**
+
+- **Single source of truth:** `docs/coordination/SPRINT_STATUS.md` — always check this before starting work
+- **Git workflow:** All development happens on `feature/sprint-final`. Merges to `master` only after security audit + testing. Git pushes sync GitHub for external team (Manus) visibility.
+- **Agent boundaries:** Your task file (`docs/agents/tasks/`) is your private intra-agent workspace. Do not read other agents' task files unless explicitly directed by the Founder/C.I.C. Coordination happens through SPRINT_STATUS.md and WEEK_OF docs.
+- **No unsanctioned edits:** Never begin editing code, config, or documentation without first proposing your plan to the C.I.C. and receiving explicit approval. Read everything. Propose. Get approval. Then execute.
+- **Escalation:** Critical blockers → Executive Engineer → Founder. Security vulnerabilities → 1D (Claude Code) immediately.
+- **Session handoff:** At end of every session, update your task file with: completed work, in-progress items, planned next steps, and any context the next session needs.
+- **Doc hierarchy:** Founding docs (`docs/foundation/`) define *what* and *why*. Coordination docs (`docs/coordination/`) define *when* and *status*. Task docs (`docs/agents/tasks/`) define *your work*.
+
+---
+
+## Table of Contents
+
+### Manus Agents (Strategic Layer)
+- [Agent 1: Product & Engineering Lead](#agent-1-product--engineering-lead)
+- [Agent 2: Customer Discovery & Validation Lead](#agent-2-customer-discovery--validation-lead)
+- [Agent 3: Business & Strategy Lead](#agent-3-business--strategy-lead)
+- [Agent 4: Content & Communications Lead](#agent-4-content--communications-lead)
+
+### Antigravity Sub-Agents (Engineering Layer)
+- [Sub-Agent 1A: Mobile Lead](#sub-agent-1a-mobile-lead-react-native--teepin)
+- [Sub-Agent 1B: Backend/Blockchain Lead](#sub-agent-1b-backendblockchain-lead-nodejs--suisolana)
+- [Sub-Agent 1C: Storage/Infrastructure Lead](#sub-agent-1c-storageinfrastructure-lead-walrus--deployment)
+- [Sub-Agent 1D: Security/Quality Lead](#sub-agent-1d-securityquality-lead-claude-code--auditing)
+- [Sub-Agent 1E: Website Lead](#sub-agent-1e-website-lead-reactnextjs)
+- [Sub-Agent 1F: Marketplace Lead](#sub-agent-1f-marketplace-lead-verification--longitudinal-tracking)
+- [Antigravity Executive Engineer](#antigravity-executive-engineer)
+- [Claude Code (Quality & Security Advisor)](#claude-code-quality--security-advisor)
 
 ---
 
@@ -486,6 +562,8 @@
 
 ### Sub-Agent 1A: Mobile Lead (React Native + TEEPIN)
 
+> **Task File:** `docs/agents/tasks/1A_mobile_lead.md` | **Branch:** `feature/sprint-final`
+
 **Your Role:** Build iOS/Android app with hardware attestation
 
 **Your Responsibilities:**
@@ -577,6 +655,8 @@ Insights:
 ---
 
 ### Sub-Agent 1B: Backend/Blockchain Lead (Node.js + Sui/Solana)
+
+> **Task File:** `docs/agents/tasks/1B_backend_lead.md` | **Branch:** `feature/sprint-final`
 
 **Your Role:** Build backend API and blockchain integration
 
@@ -670,6 +750,8 @@ Insights:
 
 ### Sub-Agent 1C: Storage/Infrastructure Lead (Walrus + Deployment)
 
+> **Task File:** `docs/agents/tasks/1C_infra_lead.md` | **Branch:** `feature/sprint-final`
+
 **Your Role:** Build storage and infrastructure
 
 **Your Responsibilities:**
@@ -761,6 +843,8 @@ Insights:
 ---
 
 ### Sub-Agent 1D: Security/Quality Lead (Claude Code + Auditing)
+
+> **Task File:** `docs/agents/tasks/1D_security_lead.md` | **Branch:** `feature/sprint-final`
 
 **Your Role:** Ensure security and code quality
 
@@ -854,6 +938,8 @@ Insights:
 
 ### Sub-Agent 1E: Website Lead (React/Next.js)
 
+> **Task File:** `docs/agents/tasks/1E_web_lead.md` | **Branch:** `feature/sprint-final`
+
 **Your Role:** Build marketing website
 
 **Your Responsibilities:**
@@ -945,6 +1031,8 @@ Insights:
 ---
 
 ### Sub-Agent 1F: Marketplace Lead (Verification + Longitudinal Tracking)
+
+> **Task File:** `docs/agents/tasks/1F_marketplace_lead.md` | **Branch:** `feature/sprint-final`
 
 **Your Role:** Build marketplace platform
 

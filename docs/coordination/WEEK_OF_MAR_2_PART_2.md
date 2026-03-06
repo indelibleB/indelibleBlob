@@ -48,3 +48,15 @@ The user interface must convey that **the Creator is in control**. The default s
 - **Slider 3**: Public Goods / Community Fund
 
 If the user attempts to reduce Treasury below 33.33%, the UI should snap it back and display a tooltip explaining the requirement for network sustainability.
+
+---
+
+## 4. Thursday Evening Close-out (March 5)
+
+**Completed by Agent 1A (Mobile Lead):**
+- **SKR Pipeline Stability:** The MWA (`@solana-mobile/mobile-wallet-adapter-protocol-web3js`) serialization and type-checking bugs (`transaction.serialize is not a function` & `Expected Uint8Array`) were completely circumvented. We now extract the generic signed bytes using `signTransactions`, wrap them in base64, and POST them directly to the RPC `sendTransaction` endpoint via a native JS `fetch()`. This prevents the `jayson` UUID crash and bypasses the web3.js wrapper issues on Android.
+- **Strict Forensic Gating:** 100% forensic verification is now strictly enforced in `useCapture.ts`. Any capture with a score <100% throws an error locally and halts the pipeline immediately, protecting the Seal, Walrus, and Sui layers from polluted data.
+- **Sovereign UI Overhaul:** Replaced the generic lock/blob indicators with a clean `🧿` (Nazar Amulet) icon to denote "Sovereign Protected" mode, moving it out of the tabs and into the top-level Capture Detail banner next to the device provenance grade.
+
+**Handoff for Friday Morning (March 6):**
+The primary focus must shift immediately to building the **Creator Allocation UI** (3 sliders, minimum 33.33% Treasury floor) and completing the 4 pending **Pre-APK Security Fixes** logged by 1D. Feature freeze is imminent; time to prepare the APK.
