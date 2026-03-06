@@ -21,3 +21,12 @@ tools/sui/sui-node
 tools/sui/sui
 tools/sui/move-analyzer
 
+# WSL/Windows NTFS metadata artifacts
+*Zone.Identifier
+*:Zone.Identifier
+
+# Crash logs
+crash_log*.txt
+
+# Python virtual environments
+mcp/venv/
