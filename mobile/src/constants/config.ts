@@ -84,8 +84,8 @@ export const CAPTURE_CONFIG: AppConfig = {
   SOLANA_RPC_URL: 'https://api.testnet.solana.com',
 
   // SKR Token Configuration
-  SKR_MINT_ADDRESS: 'SKRbvo6Gf7GondiT3BbTfuRDPqLWei4j2Qy2NPGZhW3', // Official SKR mint on mainnet/testnet
-  SKR_TREASURY_WALLET: '7sWgEqFvU8Z34tBw2oNf4A4NqCkqS1tL3X1K3kFwK2Jj', // Placeholder treasury wallet
+  SKR_MINT_ADDRESS: 'AZbqUSumvXPYGLmZdepbyZpAJSrUdvetCzDW2gLQgQbT', // Dummy SPL token on testnet (placeholder for official SKR)
+  SKR_TREASURY_WALLET: 'BgiixT9sVHkyAqc5jtzTqGgtXHX1rCpp5EocdBNDTWyh', // Testnet treasury wallet
   SKR_CAPTURE_COST: 5, // 5 SKR per capture (configurable placeholder)
 
   // Security

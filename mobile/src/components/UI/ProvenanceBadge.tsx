@@ -31,7 +31,7 @@ export const ProvenanceBadge: React.FC<ProvenanceBadgeProps> = ({ grade, score, 
             <View style={[styles.compactContainer, { backgroundColor: config.color + '33' }]}>
                 <Ionicons name={config.icon as any} size={14} color={config.color} />
                 {score !== undefined && (
-                    <Text style={[styles.compactScore, { color: config.color }]}>{score}%</Text>
+                    <Text style={[styles.compactScore, { color: config.color }]}>{score}% Forensic</Text>
                 )}
             </View>
         );
@@ -44,9 +44,6 @@ export const ProvenanceBadge: React.FC<ProvenanceBadgeProps> = ({ grade, score, 
             </View>
             <View style={styles.textContainer}>
                 <Text style={[styles.label, { color: config.color }]}>{config.label}</Text>
-                {score !== undefined && (
-                    <Text style={styles.score}>Forensic Confidence: {score}%</Text>
-                )}
             </View>
         </View>
     );

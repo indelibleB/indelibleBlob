@@ -260,8 +260,9 @@ export function VisionCameraView({
                         <View style={styles.sessionDot} />
                         <Text style={styles.sessionText}>
                             {activeSession.name} • {activeSession.totalAssets} captures
-                            {activeSession.availableCaptures !== 'Infinity' &&
-                                ` (${activeSession.availableCaptures} paid left)`}
+                            {activeSession.availableCaptures !== 'Infinity'
+                                ? ` (${activeSession.availableCaptures} paid left)`
+                                : ` (Free via Seeker)`}
                         </Text>
                     </View>
                 )}

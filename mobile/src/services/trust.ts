@@ -33,6 +33,20 @@ class TrustManagerClass {
     if (this.profile) return this.profile;
 
     const hasMWA = await SolanaService.isMWAAvailable();
+
+    // ⚠️ [TESTING MOCK] Force SILVER grade to test SKR payment pipeline.
+    // REVERT THIS before final commit — restore the real isSeeker detection line below.
+    // Real line: const isSeeker = hasMWA && (Device.modelName?.toLowerCase().includes('seeker') || Device.deviceName?.toLowerCase().includes('seeker'));
+    this.profile = {
+      grade: 'SILVER',
+      hasHardwareEnclave: true,
+      hasLidar: false,
+      hasMWA,
+      reason: '[TESTING] Forced Silver for SKR Payment Testing',
+    };
+    return this.profile;
+    // ⚠️ [END TESTING MOCK] — Delete everything above this line and uncomment the real detection below.
+
     const isSeeker = hasMWA && (Device.modelName?.toLowerCase().includes('seeker') || Device.deviceName?.toLowerCase().includes('seeker'));
 
     let grade: ProvenanceGrade = 'UNTRUSTED';

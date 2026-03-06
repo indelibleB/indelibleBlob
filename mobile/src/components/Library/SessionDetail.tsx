@@ -137,15 +137,12 @@ export function SessionDetail({ session, onSelectCapture, onBack, onDeleteSessio
                   </View>
                 )}
 
-                {/* Status Badge */}
-                <View style={styles.statusBadge}>
-                  <StatusTag status={capture.uploadStatus} size="small" />
-                  <ProvenanceBadge
-                    grade={capture.provenanceGrade || 'UNTRUSTED'}
-                    score={capture.forensicScore}
-                    compact
-                  />
-                </View>
+                {/* Sovereign Indicator */}
+                {capture.isSovereign && (
+                  <View style={styles.sovereignBadge}>
+                    <Text style={styles.sovereignIcon}>🧿</Text>
+                  </View>
+                )}
               </TouchableOpacity>
             ))
           )}
@@ -256,5 +253,21 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 16,
     color: COLORS.textSecondary,
+  },
+  sovereignBadge: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    borderRadius: 12,
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  sovereignIcon: {
+    fontSize: 12,
   },
 });

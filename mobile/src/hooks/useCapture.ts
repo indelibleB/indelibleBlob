@@ -139,6 +139,13 @@ export function useCapture() {
         anomalies = result.anomalies;
       }
 
+      // [SECURITY REQUIREMENT] Fail early if validation checks fail
+      if (forensicScore < 100) {
+        blobLog.error(`❌ Forensic validation failed (Score: ${forensicScore}%). Anomalies: ${anomalies.join(', ')}`);
+        throw new Error(`Strict Forensic Validation Failed: ${anomalies[0] || 'Unknown anomaly detected'}`);
+      }
+      blobLog.success(`✅ Forensic validation passed: ${forensicScore}%`);
+
       // [NEW] Generate Neural Fingerprint (pHash) for Video/Image
       const visualUri = capture.uri.endsWith('.mp4') ? visualStampedUri : visualStampedUri; // For video, we might want to hash a frame?
       // NOTE: For Video, we currently hash the *Video File* with SHA-256. 

@@ -25,6 +25,19 @@ const SKR_MULTIPLIER = Math.pow(10, SKR_DECIMALS);
 
 export class SkrService {
     /**
+     * Resolve a Solana address that may be base58 OR base64-encoded raw bytes.
+     * MWA Seed Vault returns raw bytes which identity.ts stores as base64.
+     */
+    private static resolvePublicKey(address: string): PublicKey {
+        // Base64 indicators: contains +, /, or ends with =
+        if (address.includes('/') || address.includes('+') || address.endsWith('=')) {
+            const bytes = Buffer.from(address, 'base64');
+            return new PublicKey(bytes);
+        }
+        return new PublicKey(address);
+    }
+
+    /**
      * Get the available captures based on the user's SKR balance.
      * @param solanaAddress The user's Solana public key connect via MWA
      * @returns The number of captures they can afford
@@ -36,40 +49,54 @@ export class SkrService {
         }
 
         try {
-            const connection = new Connection(CAPTURE_CONFIG.SOLANA_RPC_URL, 'confirmed');
-            const ownerKey = new PublicKey(solanaAddress);
-            const mintKey = new PublicKey(CAPTURE_CONFIG.SKR_MINT_ADDRESS);
+            // MWA stores the address as base64-encoded raw bytes.
+            const ownerKey = this.resolvePublicKey(solanaAddress);
 
-            blobLog.info('🪙 Checking SKR balance for:', solanaAddress);
+            blobLog.info('🪙 Checking SKR balance for:', ownerKey.toBase58());
 
-            // Get the Associated Token Account (ATA) for SKR
-            const ata = await getAssociatedTokenAddress(mintKey, ownerKey);
+            // Use raw fetch() to bypass jayson/uuid crash in React Native.
+            const response = await fetch(CAPTURE_CONFIG.SOLANA_RPC_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    jsonrpc: '2.0',
+                    id: 1,
+                    method: 'getTokenAccountsByOwner',
+                    params: [
+                        ownerKey.toBase58(),
+                        { mint: CAPTURE_CONFIG.SKR_MINT_ADDRESS },
+                        { encoding: 'jsonParsed' },
+                    ],
+                }),
+            });
 
-            try {
-                // Fetch the token account balance
-                const accountInfo = await getAccount(connection, ata);
-                const balanceTotal = Number(accountInfo.amount); // atomic units (multiplier applied)
+            const json = await response.json();
 
-                // Convert to whole SKR
-                const skrBalance = balanceTotal / SKR_MULTIPLIER;
-                blobLog.info(`🪙 SKR Balance: ${skrBalance} SKR`);
-
-                // Calculate affordable captures
-                const availableCaptures = Math.floor(skrBalance / CAPTURE_CONFIG.SKR_CAPTURE_COST);
-                return availableCaptures;
-            } catch (e: any) {
-                // Token account doesn't exist = 0 balance
-                if (e.name === 'TokenAccountNotFoundError') {
-                    blobLog.info('🪙 SKR Balance: 0 SKR (No ATA found)');
-                    return 0;
-                }
-                throw e;
+            if (json.error) {
+                blobLog.error('❌ RPC error reading SKR balance:', json.error.message);
+                return 0;
             }
+
+            const accounts = json.result?.value || [];
+            if (accounts.length === 0) {
+                blobLog.info('🪙 SKR Balance: 0 SKR (No token account found)');
+                return 0;
+            }
+
+            // Parse the token balance from the parsed account data
+            const tokenAmount = accounts[0]?.account?.data?.parsed?.info?.tokenAmount;
+            const balanceTotal = Number(tokenAmount?.amount || 0);
+
+            // Convert to whole SKR
+            const skrBalance = balanceTotal / SKR_MULTIPLIER;
+            blobLog.info(`🪙 SKR Balance: ${skrBalance} SKR`);
+
+            // Calculate affordable captures
+            const availableCaptures = Math.floor(skrBalance / CAPTURE_CONFIG.SKR_CAPTURE_COST);
+            return availableCaptures;
 
         } catch (error) {
             blobLog.error('❌ Failed to read SKR balance:', error);
-            // Fail open for hackathon or fail closed? The spec says to gate if insufficient.
-            // If the RPC is down, we return 0 to be safe.
             return 0;
         }
     }
@@ -93,7 +120,6 @@ export class SkrService {
         blobLog.info(`💸 Settling SKR: ${totalCostSkr} SKR for ${capturesConsumed} captures...`);
 
         try {
-            const connection = new Connection(CAPTURE_CONFIG.SOLANA_RPC_URL, 'confirmed');
             const mintKey = new PublicKey(CAPTURE_CONFIG.SKR_MINT_ADDRESS);
             const treasuryKey = new PublicKey(CAPTURE_CONFIG.SKR_TREASURY_WALLET);
 
@@ -108,13 +134,13 @@ export class SkrService {
                     },
                 });
 
-                const senderKey = new PublicKey(auth.accounts[0].address);
+                const senderKey = this.resolvePublicKey(auth.accounts[0].address);
 
                 // 2. Derive ATA addresses
-                const senderAta = await getAssociatedTokenAddress(mintKey, senderKey);
+                const senderAta = await getAssociatedTokenAddress(mintKey, senderKey, true);
                 // In a production environment with a unified treasury, you'd ensure the treasury ATA exists.
                 // For this transaction, we assume the treasury already has an ATA setup.
-                const recipientAta = await getAssociatedTokenAddress(mintKey, treasuryKey);
+                const recipientAta = await getAssociatedTokenAddress(mintKey, treasuryKey, true);
 
                 // 3. Build Transfer Instruction
                 const transferIx = createTransferInstruction(
@@ -125,26 +151,76 @@ export class SkrService {
                 );
 
                 // 4. Build and send transaction
-                // NOTE: Using legacy Transaction for MWA compatibility (simpler for basic SPL transfers)
-                const latestBlockhash = await connection.getLatestBlockhash();
-                const transaction = new Transaction().add(transferIx);
-                transaction.recentBlockhash = latestBlockhash.blockhash;
-                transaction.feePayer = senderKey;
+                // Use raw fetch() to get blockhash (bypass jayson/uuid crash)
+                const blockhashResponse = await fetch(CAPTURE_CONFIG.SOLANA_RPC_URL!, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        jsonrpc: '2.0',
+                        id: 1,
+                        method: 'getLatestBlockhash',
+                        params: [{ commitment: 'confirmed' }],
+                    }),
+                });
+                const blockhashJson = await blockhashResponse.json();
+                const recentBlockhash = blockhashJson.result?.value?.blockhash;
 
-                // 5. Sign and Send via MWA
-                // Convert legacy transaction to byte array for MWA
-                const txBytes = transaction.serialize({ requireAllSignatures: false, verifySignatures: false });
+                if (!recentBlockhash) {
+                    throw new Error('Failed to fetch recent blockhash from RPC');
+                }
 
-                blobLog.info('📲 Requesting SKR Payment Signature from Seed Vault...');
-                const [signatureBytes] = await wallet.signAndSendTransactions({
-                    transactions: [txBytes]
+                // Use VersionedTransaction since MWA web3js adapter internals expect it
+                const { TransactionMessage, VersionedTransaction } = require('@solana/web3.js');
+
+                const messageV0 = new TransactionMessage({
+                    payerKey: senderKey,
+                    recentBlockhash: recentBlockhash,
+                    instructions: [transferIx],
+                }).compileToV0Message();
+
+                const transaction = new VersionedTransaction(messageV0);
+
+                // 5. Sign the Transaction (Option A: Bypass MWA wrapper bug)
+                // We use signTransactions to get the signed bytes back, then submit to RPC ourselves.
+                // The wallet adapter for 'signTransactions' expects base64 encoded strings in the lowest level API, 
+                // but the web3.js wrapper still expects Transaction objects. We'll pass the transaction object.
+                blobLog.info('📲 Requesting SKR Signing from Seed Vault...');
+
+                const [signedTx] = await wallet.signTransactions({
+                    transactions: [transaction]
                 });
 
-                // Convert signature bytes to Base58 string for logging/explorer
-                const bs58 = require('bs58');
-                const signatureStr = bs58.encode(signatureBytes);
+                // 6. Submit to RPC directly
+                blobLog.info('📡 Submitting signed transaction to RPC...');
 
+                // MWA returns a fully signed VersionedTransaction. We serialize it to send to the RPC.
+                const rawTxBytes = signedTx.serialize();
+                const rawTxBase64 = Buffer.from(rawTxBytes).toString('base64');
+
+                const rpcResponse = await fetch(CAPTURE_CONFIG.SOLANA_RPC_URL!, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        jsonrpc: '2.0',
+                        id: 1,
+                        method: 'sendTransaction',
+                        params: [
+                            rawTxBase64,
+                            { encoding: 'base64', preflightCommitment: 'confirmed' }
+                        ]
+                    })
+                });
+
+                const rpcJson = await rpcResponse.json();
+
+                if (rpcJson.error) {
+                    blobLog.error('❌ RPC Submission Error:', rpcJson.error);
+                    throw new Error(rpcJson.error.message || 'RPC Error');
+                }
+
+                const signatureStr = rpcJson.result;
                 blobLog.success(`✅ SKR Payment Successful! Tx: ${signatureStr}`);
+
                 return true;
             });
 

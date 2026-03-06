@@ -155,6 +155,8 @@ export function CaptureDetail({ capture, onBack }: CaptureDetailProps) {
       case 'blockchain':
         return (
           <View>
+            {/* Sovereign state is now displayed in the top header banner and in Advanced tab */}
+
             {/* Consumer Proof Link */}
             {(capture.walrusData || capture.suiData) && (
               <MetadataRow
@@ -173,7 +175,7 @@ export function CaptureDetail({ capture, onBack }: CaptureDetailProps) {
                 <MetadataRow
                   label="Walrus Blob"
                   value={capture.walrusData.blobId}
-                  icon="🐋"
+                  icon="🦭"
                   copyable
                   onPressValue={() => Linking.openURL(capture.walrusData!.url)}
                 />
@@ -218,6 +220,13 @@ export function CaptureDetail({ capture, onBack }: CaptureDetailProps) {
               value={capture.provenanceGrade || 'UNTRUSTED'}
               icon="🛡️"
             />
+            {capture.isSovereign && (
+              <MetadataRow
+                label="Protection State"
+                value="Sovereign Mode Active"
+                icon="🧿"
+              />
+            )}
             <MetadataRow
               label="Forensic Score"
               value={`${capture.forensicScore || 100}%`}
@@ -296,12 +305,18 @@ export function CaptureDetail({ capture, onBack }: CaptureDetailProps) {
           </View>
         </View>
 
-        {/* Provenance Grade Placard */}
+        {/* Provenance Grade Placard & Sovereign State */}
         <View style={styles.truthGradeContainer}>
           <ProvenanceBadge
             grade={capture.provenanceGrade || 'UNTRUSTED'}
             score={capture.forensicScore}
           />
+          {capture.isSovereign && (
+            <View style={styles.sovereignHeaderBadge}>
+              <Text style={styles.sovereignHeaderIcon}>🧿</Text>
+              <Text style={styles.sovereignHeaderText}>Sovereign Protected</Text>
+            </View>
+          )}
           {capture.anomalies && capture.anomalies.length > 0 && (
             <View style={styles.anomalyList}>
               {capture.anomalies.map((anomaly, idx) => (
@@ -520,5 +535,25 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingVertical: 20,
     fontStyle: 'italic',
+  },
+  sovereignHeaderBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(59, 130, 246, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(59, 130, 246, 0.4)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+    marginLeft: 'auto', // Pushes to the right edge
+  },
+  sovereignHeaderIcon: {
+    fontSize: 14,
+    marginRight: 6,
+  },
+  sovereignHeaderText: {
+    color: '#60a5fa',
+    fontSize: 12,
+    fontWeight: 'bold',
   },
 });
