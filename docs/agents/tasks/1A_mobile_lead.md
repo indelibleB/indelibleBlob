@@ -1,32 +1,45 @@
 # 1A Mobile Lead — Active Tasks
-**Date:** Thursday, March 5, 2026
+**Date:** Friday, March 6, 2026 — FEATURE FREEZE DAY
 
-## ✅ COMPLETED YESTERDAY (March 4)
-- **Seal Encryption Layer**: Implemented `HermesAesGcm256` and successfully mapped it to the `sovereign_blob` contract pattern for the Hackathon demo.
-- **SKR Token Integration (Commerce Layer)**: Wrote `SkrService` to perform testnet balance reads and MWA SPL token transfers.
-- **Capture Gating**: Updated `useSessions` to track consumed captures, auto-end the session recursively on 0 balance, and post-settle via MWA at session wrap.
-- **Hackathon Strategy**: Confirmed Testnet submission strategy mapped via `MAINNET_TRANSITION.md`.
+## ✅ COMPLETED (March 4-5)
+- Seal Encryption Layer (HermesAesGcm256 + sovereign_blob)
+- SKR Token Integration (SkrService, balance reads, MWA transfers)
+- Capture Gating (consumed captures tracking, auto-end, post-settle)
+- SKR Settlement Pipeline (raw fetch() JSON-RPC bypassing jayson UUID crash)
+- Sovereign UI Polish (Nazar Amulet 🧿, clean thumbnails)
+- Strict Forensic Validation (100% score enforcement in useCapture)
+- Pre-APK Security Fixes: H-2 (JWT delete), H-3 (disconnect block), L-3 (console.log gating), M-1 (dummy client ID removal)
+- Master + sprint-final validated on Seeker device
 
-## 🟡 TODAY'S FOCUS (March 5)
-1. **Creator Allocation UI**
-   - **Task:** Build the 3-slider UI in the Settings Screen.
-   - **Constraint:** Treasury slider must snap to a minimum of `33.33%`.
-   - **Purpose:** Provide the behavioral data tool for Agent 5's Research Protocol.
-2. **Verification Readiness**
-   - **Task:** Ensure the mobile app's payload matches whatever Agent 1B expects for the `/verify` endpoint.
-3. **Mock SKR Testnet Validation**
-   - **Task:** Verify the SKR MWA `transact()` sequence on testnet using a dummy token prior to Android APK build.
-   - **Status:** ✅ Complete. Test tokens successfully minted. Raw JS fetch() pipeline bypassing `jayson` UUID crash is fully stable.
+## 🔴 TODAY'S P0 TASKS (March 6 — Sequential, C.I.C. approval required per phase)
 
-*Note to self: The codebase is very close to freeze. Prioritize clean UI and avoid massive architectural rewrites today.*
+### Phase 1: Creator Allocation UI
+- **What:** New screen/section in Settings with 3 linked sliders
+  - Slider 1: Treasury (floor: 33.33%) — protocol operational fund, sustains the business/network
+  - Slider 2: Creator Rewards Fund — returns to the creator who captured the content
+  - Slider 3: Public Goods / Community Fund — ecosystem grants, community initiatives
+- **Behavior:** All 3 must sum to 100%. When Treasury is snapped to floor, redistribute remainder across other 2.
+- **Persist:** Save allocation to session metadata (AsyncStorage for MVP)
+- **Demo note:** "On-chain treasury distribution in mainnet."
+- **Files likely touched:** New component + Settings screen integration
+- **Approval gate:** C.I.C. reviews code diff BEFORE commit
 
-## 🌙 END OF DAY SUMMARY (March 5 Evening Sync)
-- **SKR Settlement Pipeline Fixed**: Successfully completely bypassed the `jayson` UUID crash in the MWA adapter by implementing a direct `fetch()` JSON-RPC submission of the byte-serialized `VersionedTransaction`.
-- **Sovereign UI Polished**: Cleaned up the Library thumbnails to remove redundant forensic badges. Replaced the confusing lock/blob icons with a culturally relevant Nazar Amulet (`🧿`) to signify "Protected/Sovereign" viewing mode, and updated the Walrus emoji.
-- **Strict Forensic Validation Enforced**: Updated the `useCapture` pipeline to instantly fail any capture that receives a forensic trust score below `100%`, preventing polluted data from reaching the Seal encryption or Sui recording phases.
-- **Git State**: All changes pushed successfully to `feature/sprint-final`.
+### Phase 2: Governance Voting UI
+- **What:** Simple proposals list + cast vote button
+  - Display 2-3 hardcoded sample proposals (MVP)
+  - User taps "Vote" → registers locally (AsyncStorage)
+  - Show vote count per proposal
+- **Demo note:** "On-chain tallying engine in development."
+- **Files likely touched:** New component + navigation integration
+- **Approval gate:** C.I.C. reviews code diff BEFORE commit
 
-## ⏭️ NEXT SESSION HANDOFF (March 6)
-1. Execute the 4 remaining **Pre-APK Security Fixes** (JWT cleanup, blocking disconnects during sessions, removing dummy client IDs).
-2. Build the **Creator Allocation UI** (3 sliders, minimum 33.33% Treasury floor).
-3. Build the **Android APK** for submission formatting.
+### Phase 3: Android APK Build
+- **What:** `eas build --platform android --profile preview` or equivalent
+- **Gate:** Phases 1 + 2 merged and tested on Seeker
+- **Approval gate:** C.I.C. triggers build
+
+## ⛔ RULES FOR THIS SESSION
+1. **NO autonomous commits.** Every code change must be proposed to C.I.C. first.
+2. **NO changes outside the Phase you are working on.** Do not refactor, rename, or "improve" existing code.
+3. **NO deleting files.** If you think a file should be deleted, ask C.I.C.
+4. **Work one Phase at a time.** Do not start Phase 2 until Phase 1 is approved and committed.
