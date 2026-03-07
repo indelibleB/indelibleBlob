@@ -105,6 +105,7 @@ export const STORAGE_KEYS = {
   ALLOCATION_PREFERENCES: '@indelible_blob_allocations',
   GOVERNANCE_VOTES: '@indelible_blob_gov_votes',
   LAST_SYNC: '@indelible_blob_last_sync',
+  ONBOARDING_COMPLETE: '@indelible_onboarding_complete',
 } as const;
 
 /**

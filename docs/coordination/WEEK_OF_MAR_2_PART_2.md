@@ -126,3 +126,55 @@ The primary focus must shift immediately to building the **Creator Allocation UI
 **For C.I.C. (March 7 AM):**
 - Demo video (2-3 min, Seeker device) capturing all P0 features
 - Pitch narrative (Align Nexus) — parallel with demo video
+
+---
+
+## 6. Friday EOD Close-out (March 6)
+
+### Session: 1D (Security Lead / Claude Code) + C.I.C.
+
+**Context:** With Phases 1+2 merged, the afternoon session focused on first-launch onboarding UX, brand polish, and APK build preparation.
+
+### What Was Done
+
+**Phase 2.5 — Onboarding Walkthrough (OnboardingOverlay.tsx — NEW file):**
+- 3-step user-driven guided experience, gated by AsyncStorage (`@indelible_onboarding_complete`)
+- **Step 1 (sidebar_invite):** Pulsing glow ring matched exactly to sidebar toggle shape (26w×50h, right-side-only border radius). 3 bounces with decreasing amplitude. `pointerEvents="none"` so glow doesn't block the real arrow — user discovers by tapping themselves. Tooltip with `icon.png` (42px) shows "indelible.Blob — Tap to explore controls."
+- **Step 2 (sidebar_explore):** Detects user opening sidebar via `sidebarVisible` prop. Dark overlay with centered card: 64px `icon.png`, "Your Command Center" headline, description of sidebar controls, "Got it →" button to advance.
+- **Step 3 (start_highlight):** Closes sidebar. Pulsing glow aligned to Start navPill (82×40, borderRadius 20, bottom:57, right:16). "Ready to Capture Truth" tooltip with 66px `icon.png`, copy: "When GPS locks, tap Start to begin your Session Bind sequence which secures your first capture session." "Let's go!" dismiss button with 30px inline `emoji_size_blob_icon.png`.
+- VisionCameraView.tsx refactored: `toggleSidebar` split into `openSidebar`/`closeSidebar`/`toggleSidebar` for onboarding control.
+
+**Brand Polish:**
+- **App icon:** Adaptive icon foreground changed from `icon.png` (blob in glass cube, tiny after masking) to `emoji_size_blob_icon.png` (blob fills frame). Background: `#100820`.
+- **Splash screen:** `expo-splash-screen` installed, `preventAutoHideAsync()` at module level in App.tsx, `hideAsync()` when `fontsLoaded && !sessionsLoading && !permissions.loading`. Returns `null` during load (native splash stays visible).
+- **Brand asset policy:** `icon.png` = high-grade displays (tooltip icons, cards). `emoji_size_blob_icon.png` = emoji replacement only ("Let's go!" inline blob).
+
+**APK Build Plan Review (Phase 3 preparation):**
+- Identified 4 gaps blocking APK build:
+  1. EAS CLI not installed globally
+  2. No `eas.json` exists (needs `eas build:configure` + `"buildType": "apk"` in preview profile)
+  3. `versionCode` missing from `app.json` android block
+  4. `expo-splash-screen` not registered in `app.json` plugins array
+- Recommended `--local` build flag to avoid Expo cloud queue on deadline day
+- Full execution plan documented and ready for March 7 AM
+
+**Multiple iteration rounds on glow positioning:**
+- Sidebar glow: matched toggle shape exactly (right-side-only border radius, 26×50)
+- Start glow: 5 rounds of refinement. Final: bottom:57, right:16, 82×40, borderRadius:20 — calculated from bottomBar paddingBottom(24) + BlobCaptureButton centering offset
+
+### Handoff for Saturday Morning (March 7 — Submission Day)
+
+**For 1D + C.I.C. — Sequential execution:**
+1. **Commit onboarding work** on `feature/sprint-final`, merge to master
+2. **app.json fixes:** Add `versionCode: 1`, add `"expo-splash-screen"` to plugins array
+3. **EAS setup:** `npm install -g eas-cli`, `eas login`, `eas build:configure`
+4. **Edit eas.json:** Set `"buildType": "apk"` in preview profile
+5. **Build APK:** `eas build --platform android --profile preview --local`
+6. **Sideload & validate:** Boot, onboarding flow, camera, GPS, Sui RPC connection
+7. **If build passes:** APK ready for submission
+
+**For C.I.C. — Parallel with build:**
+- Demo video (2-3 min, Seeker device)
+- Pitch narrative finalization (Align Nexus)
+
+**Deadline: March 7 @ 12:00 PM MST (Noon)**

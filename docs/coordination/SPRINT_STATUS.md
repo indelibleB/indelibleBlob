@@ -7,7 +7,35 @@
 ## Sprint: MONOLITH Hackathon Final Sprint
 **Submission Target:** March 7, 2026 @ 12:00 PM MST (Noon) | **Days Remaining:** 1
 **Hard Deadline:** March 9, 2026 @ 00:00 UTC
-**Last Updated:** March 6, 2026 — Midday Session (Friday — Feature Freeze Day)
+**Last Updated:** March 6, 2026 — EOD Session (Friday — Feature Freeze Day)
+
+---
+
+## Day 3 EOD Checkpoint (March 6, Friday)
+
+**Afternoon session (1D + C.I.C.) — Onboarding & Brand Polish COMPLETE:**
+- ✅ **3-step guided onboarding walkthrough** — user-driven, not autopilot. Step 1: sidebar glow + bounce (`pointerEvents="none"`, user taps real arrow). Step 2: "Your Command Center" explanation card (user taps "Got it"). Step 3: Start button highlight + "Ready to Capture Truth" tooltip + "Let's go!" dismiss. Gated by AsyncStorage — shows once per install.
+- ✅ **App icon sizing** — adaptive icon foreground swapped from `icon.png` to `emoji_size_blob_icon.png` (blob fills frame instead of tiny glass cube)
+- ✅ **Splash screen** — `expo-splash-screen` wired in App.tsx: `preventAutoHideAsync()` at module level, `hideAsync()` when fonts/sessions/permissions load. Native splash with `#100820` background.
+- ✅ **Brand polish** — `icon.png` for high-grade displays (tooltips, cards), `emoji_size_blob_icon.png` only replaces standard emoji instances (inline blob in "Let's go!" button)
+- ✅ **Multiple iteration rounds** — glow rings pixel-matched to sidebar toggle shape (right-side-only border radius) and Start navPill (82×40, borderRadius 20). Copy updated to reference "Session Bind sequence."
+- ⚠️ **Not yet committed** — changes local on `feature/sprint-final`. Master still at `6655e50`.
+
+**APK Build Plan reviewed — gaps identified for March 7 AM:**
+- 🔴 No `eas.json` exists — needs `eas build:configure` + `"buildType": "apk"` in preview profile
+- 🔴 EAS CLI not installed — needs `npm install -g eas-cli`
+- 🔴 Missing `versionCode` in `app.json` android block
+- 🔴 `expo-splash-screen` plugin not in `app.json` plugins array (package installed, JS wired, but plugin registration needed for native build)
+- ✅ Recommended `--local` build to avoid cloud queue on deadline day
+
+**Files modified this session:**
+- `mobile/src/components/Camera/OnboardingOverlay.tsx` — NEW file, 3-step onboarding
+- `mobile/src/components/Camera/VisionCameraView.tsx` — sidebar refactor (open/close/toggle), OnboardingOverlay integration
+- `mobile/src/constants/config.ts` — `ONBOARDING_COMPLETE` storage key added
+- `mobile/App.tsx` — expo-splash-screen lifecycle integration
+- `mobile/app.json` — adaptive icon foreground swap
+
+**Git state:** `feature/sprint-final` has uncommitted onboarding work. Master at `6655e50`.
 
 ---
 
@@ -27,7 +55,8 @@
 
 | # | Task | Owner | Target | Status |
 |---|------|-------|--------|--------|
-| P0-6 | **Android APK build** — final build, tested on Seeker | 1A + C.I.C. | March 6 EOD | 🔴 Gate cleared (Phases 1+2 merged at `6655e50`) |
+| P0-5.5 | **Onboarding walkthrough + brand polish** — 3-step guided flow, icon/splash fixes | 1D + C.I.C. | March 6 EOD | ✅ Complete (uncommitted on sprint-final) |
+| P0-6 | **Android APK build** — commit onboarding, EAS config, build APK, test on Seeker | 1A + C.I.C. | March 7 AM | 🔴 Gate cleared (Phases 1+2+onboarding done, EAS setup needed) |
 | P0-7 | **Website polish** — final copy, verification portal, SKR section, Sovereign Mode explainer, mobile download CTA | 1E | March 6 EOD | 🔴 Independent track |
 | P0-8 | **Walrus Sites deployment** — website published to Walrus mainnet, becomes submission URL | 1E + 1C | March 6 EOD | 🔴 Depends on P0-7 |
 | P0-9 | **Demo video** (2-3 min, capture → attestation → Walrus → Sui → verify on Seeker) | C.I.C. + all agents | March 7 AM | 🔴 Not started |

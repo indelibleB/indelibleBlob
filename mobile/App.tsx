@@ -13,6 +13,7 @@ import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MotiView } from 'moti';
 import * as Haptics from 'expo-haptics';
+import * as SplashScreen from 'expo-splash-screen';
 import {
   useFonts,
   Inter_400Regular,
@@ -51,6 +52,9 @@ import { COLORS, FONTS } from './src/constants/config';
 import type { CapturedPhoto, CapturedVideo, GPSData, CaptureSessionData } from '@shared/types';
 
 
+
+// Keep native splash screen visible while JS bundle & assets load
+SplashScreen.preventAutoHideAsync();
 
 // =========================================================================
 // ROOT APP COMPONENT (PROVIDERS)
@@ -265,17 +269,24 @@ function IndelibleBlobApp() {
   }, [addCapture, processCapture, updateCapture]);
 
   // ==========================================================================
+  // SPLASH SCREEN — Hide when all assets are ready
+  // ==========================================================================
+
+  const appReady = fontsLoaded && !sessionsLoading && !permissions.loading;
+
+  useEffect(() => {
+    if (appReady) {
+      SplashScreen.hideAsync();
+    }
+  }, [appReady]);
+
+  // ==========================================================================
   // RENDERING
   // ==========================================================================
 
-  if (sessionsLoading || !fontsLoaded || permissions.loading) {
-    return (
-      <View style={styles.container}>
-        <LinearGradient colors={[COLORS.backgroundDark, COLORS.background]} style={styles.gradient}>
-          <LoadingSpinner size="large" message="Initializing..." />
-        </LinearGradient>
-      </View>
-    );
+  if (!appReady) {
+    // Native splash screen is still visible — render nothing behind it
+    return null;
   }
 
   return (

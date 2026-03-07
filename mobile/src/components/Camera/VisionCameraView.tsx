@@ -37,6 +37,7 @@ import type {
 } from '@shared/types';
 
 import { BookOpen, Play, Square } from 'lucide-react-native';
+import { OnboardingOverlay } from './OnboardingOverlay';
 
 interface VisionCameraViewProps {
     activeSession: CaptureSessionData | null;
@@ -128,15 +129,21 @@ export function VisionCameraView({
     // SIDEBAR TOGGLE
     // ========================================================================
 
+    const openSidebar = () => {
+        if (sidebarVisible) return;
+        Animated.spring(sidebarAnim, { toValue: 0, useNativeDriver: true, tension: 50, friction: 8 }).start();
+        setSidebarVisible(true);
+    };
+
+    const closeSidebar = () => {
+        if (!sidebarVisible) return;
+        Animated.spring(sidebarAnim, { toValue: -220, useNativeDriver: true, tension: 50, friction: 8 }).start();
+        setSidebarVisible(false);
+    };
+
     const toggleSidebar = () => {
-        const toValue = sidebarVisible ? -220 : 0;
-        Animated.spring(sidebarAnim, {
-            toValue,
-            useNativeDriver: true,
-            tension: 50,
-            friction: 8,
-        }).start();
-        setSidebarVisible(!sidebarVisible);
+        if (sidebarVisible) closeSidebar();
+        else openSidebar();
     };
 
     // ========================================================================
@@ -578,6 +585,13 @@ export function VisionCameraView({
                     )}
                 </View>
             </LinearGradient>
+
+            {/* First-launch onboarding overlay */}
+            <OnboardingOverlay
+                onCloseSidebar={closeSidebar}
+                sidebarVisible={sidebarVisible}
+                hasActiveSession={!!activeSession}
+            />
         </View>
     );
 }

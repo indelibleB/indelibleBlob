@@ -20,6 +20,10 @@
     "android": {
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/emoji_size_blob_icon.png",
+        "backgroundColor": "#100820"
+      },
       "package": "com.indelible.blob",
       "permissions": [
         "android.permission.CAMERA",

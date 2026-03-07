@@ -26,10 +26,21 @@
 - [x] Master tested on Seeker device — confirmed working
 - [x] SPRINT_STATUS.md updated with midday checkpoint
 
-## Remaining Today (March 6)
-1. **Pre-APK final audit** — one last pass before 1A triggers build
-2. **Support 1A + C.I.C. on APK build** if issues arise
-3. **Update coordination docs** as work completes
+## Completed (March 6 Afternoon — with C.I.C.)
+- [x] **Onboarding walkthrough** — NEW `OnboardingOverlay.tsx`: 3-step user-driven flow (sidebar invite → sidebar explore → start highlight). Glow rings pixel-matched to actual button shapes. `pointerEvents="none"` for user-driven discovery. Gated by AsyncStorage.
+- [x] **VisionCameraView refactor** — Split `toggleSidebar` into `openSidebar`/`closeSidebar`/`toggleSidebar` for onboarding control
+- [x] **App icon fix** — Adaptive icon foreground swapped to `emoji_size_blob_icon.png` (fills frame vs tiny glass cube)
+- [x] **Splash screen** — `expo-splash-screen` installed, `preventAutoHideAsync()`/`hideAsync()` lifecycle wired in App.tsx
+- [x] **Brand asset policy** — `icon.png` for high-grade displays, `emoji_size_blob_icon.png` for emoji replacement only
+- [x] **Multiple iteration rounds** — 5 rounds of glow positioning refinement, copy updates ("Session Bind sequence")
+- [x] **APK Build Plan review** — identified 4 gaps (EAS CLI, eas.json, versionCode, splash plugin registration)
+- [x] **Coordination docs updated** — SPRINT_STATUS.md, WEEK_OF_MAR_2_PART_2.md, this file
+
+## Remaining (March 7 — Submission Day)
+1. **Commit onboarding work** — stage, commit, merge to master
+2. **app.json fixes** — add `versionCode: 1`, add `expo-splash-screen` to plugins
+3. **Support APK build** — EAS config, troubleshoot native compilation issues
+4. **Final pre-submission audit** — one last pass on APK before submission
 
 ## Blockers
 - Gemini (1A) requires step-by-step C.I.C. approval for all code changes (no autonomous commits)
