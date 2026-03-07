@@ -11,31 +11,43 @@
 - Pre-APK Security Fixes: H-2 (JWT delete), H-3 (disconnect block), L-3 (console.log gating), M-1 (dummy client ID removal)
 - Master + sprint-final validated on Seeker device
 
-## 🔴 TODAY'S P0 TASKS (March 6 — Sequential, C.I.C. approval required per phase)
+## ✅ COMPLETED (March 6 Morning — by 1D + C.I.C.)
 
-### Phase 1: Creator Allocation UI
-- **What:** New screen/section in Settings with 3 linked sliders
-  - Slider 1: Treasury (floor: 33.33%) — protocol operational fund, sustains the business/network
-  - Slider 2: Creator Rewards Fund — returns to the creator who captured the content
-  - Slider 3: Public Goods / Community Fund — ecosystem grants, community initiatives
-- **Behavior:** All 3 must sum to 100%. When Treasury is snapped to floor, redistribute remainder across other 2.
-- **Persist:** Save allocation to session metadata (AsyncStorage for MVP)
-- **Demo note:** "On-chain treasury distribution in mainnet."
-- **Files likely touched:** New component + Settings screen integration
-- **Approval gate:** C.I.C. reviews code diff BEFORE commit
+### Phase 1: Creator Allocation UI ✅
+- 3 linked sliders in SettingsScreen.tsx (Treasury 33.33% floor, Creator, Community)
+- Snap-to-100 on finger release (adjusts last-moved slider if within 5% of 100)
+- Save/load via AsyncStorage (`STORAGE_KEYS.ALLOCATION_PREFERENCES`)
+- Unsaved-changes guard on back button (`handleBack` with Alert confirmation)
+- Research consent toggle with Agent 5 approved copy and external link
+- Headline: "Help us Build a Longevity-Minded, Creative Economy Tethered to Reality"
+- **Scrubber extracted as top-level React.memo** — critical fix for PanResponder survival across re-renders
 
-### Phase 2: Governance Voting UI
-- **What:** Simple proposals list + cast vote button
-  - Display 2-3 hardcoded sample proposals (MVP)
-  - User taps "Vote" → registers locally (AsyncStorage)
-  - Show vote count per proposal
-- **Demo note:** "On-chain tallying engine in development."
-- **Files likely touched:** New component + navigation integration
-- **Approval gate:** C.I.C. reviews code diff BEFORE commit
+### Phase 2: Governance Voting UI ✅
+- GovernanceScreen.tsx with 3 hardcoded proposals:
+  1. Wildlife conservation imagery grants (10% community fund)
+  2. Open-source hardware systems for decentralized verification
+  3. Spatial computing and 3D modeling expansion (with winking emoji)
+- ProposalDetailScreen.tsx with Proof-of-Witness voting power:
+  - 1 Verified Capture Session = 1 Witness Credit
+  - Decay indicator (inactive > 7 days)
+  - Vote stored via `StorageService.saveGovernanceVote()`
+- Formspree email waitlist (`https://formspree.io/f/mwvlpqvj`) for community proposals launch notification
+- Survey CTA linking to `indelibleblob.com/survey`
+- Community proposals "coming soon" teaser with dashed border
+- **Bug fix:** Vote power filter changed from `'uploaded'` to `'completed' || 'uploaded'`
+
+### Files Modified (Commit `6655e50`)
+- `mobile/src/components/Settings/SettingsScreen.tsx` — complete rewrite
+- `mobile/src/components/Governance/GovernanceScreen.tsx` — complete rewrite
+- `mobile/src/components/Governance/ProposalDetailScreen.tsx` — vote filter fix + copy updates
+- `mobile/src/services/storage.ts` — shareForResearch defaults + backfill
+
+## 🔴 REMAINING P0 TASK (March 6)
 
 ### Phase 3: Android APK Build
 - **What:** `eas build --platform android --profile preview` or equivalent
-- **Gate:** Phases 1 + 2 merged and tested on Seeker
+- **Gate:** ✅ Phases 1 + 2 merged and tested on Seeker — CLEARED
+- **Current state:** master and sprint-final synchronized at `6655e50`, pushed to origin, tested on Seeker
 - **Approval gate:** C.I.C. triggers build
 
 ## ⛔ RULES FOR THIS SESSION

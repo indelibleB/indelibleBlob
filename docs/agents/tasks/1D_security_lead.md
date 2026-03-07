@@ -13,12 +13,23 @@
 - [x] .gitignore hardened (Zone.Identifier, crash logs, venv blocked)
 - [x] Zone.Identifier NTFS artifacts removed from git tracking (9 files)
 
-## Today's Priorities (March 6)
-1. **Supervise 1A (Gemini) mobile work** — review each code change before commit. C.I.C. approves each phase.
-2. **Security review Creator Allocation UI** — validate slider logic, floor enforcement, no injection vectors
-3. **Security review Governance Voting UI** — validate vote registration, no double-vote, no state corruption
-4. **Pre-APK final audit** — one last pass before APK build
-5. **Update SPRINT_STATUS.md** with Day 3 progress as work completes
+## Completed (March 6 Morning — with C.I.C.)
+- [x] **Creator Allocation UI** — Rewrote SettingsScreen.tsx: extracted Scrubber as top-level React.memo (fixes PanResponder destruction on re-render), useCallback for handler stability, ref-based closures for stale PanResponder access, snap-to-100 on release, 33.33% Treasury floor enforcement
+- [x] **Governance Voting UI** — Rewrote GovernanceScreen.tsx: 3 proposals, Proof-of-Witness voting power (1 session = 1 credit), Formspree email waitlist (same endpoint as website footer), survey CTA linking to indelibleblob.com/survey, community proposals coming-soon teaser
+- [x] **Bug fix: Vote power showing 0** — ProposalDetailScreen.tsx filter was `s.status === 'uploaded'` but sessions are set to `'completed'`. Changed to `completed || uploaded`.
+- [x] **Bug fix: Research consent toggle missing** — Restored with Agent 5 approved copy, Switch toggle, external link
+- [x] **Bug fix: Back button bypassing unsaved guard** — Changed `onPress={onBack}` to `onPress={handleBack}`
+- [x] **Storage defaults fix** — Added `shareForResearch: false` to defaults + backfill for existing stored prefs in storage.ts
+- [x] **Copy audit** — Verified "1 Verified Capture Session = 1 Witness Credit", centered headings, lowercase "indelible" branding
+- [x] **Full code audit** — 8 files reviewed, cross-file type/import consistency verified, no injection vectors, no state corruption paths
+- [x] Committed as `6655e50`, master + sprint-final synchronized and pushed
+- [x] Master tested on Seeker device — confirmed working
+- [x] SPRINT_STATUS.md updated with midday checkpoint
+
+## Remaining Today (March 6)
+1. **Pre-APK final audit** — one last pass before 1A triggers build
+2. **Support 1A + C.I.C. on APK build** if issues arise
+3. **Update coordination docs** as work completes
 
 ## Blockers
 - Gemini (1A) requires step-by-step C.I.C. approval for all code changes (no autonomous commits)

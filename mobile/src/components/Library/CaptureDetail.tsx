@@ -305,18 +305,20 @@ export function CaptureDetail({ capture, onBack }: CaptureDetailProps) {
           </View>
         </View>
 
-        {/* Provenance Grade Placard & Sovereign State */}
+        {/* Provenance Grade & Sovereign State — Inline Badge Row */}
         <View style={styles.truthGradeContainer}>
-          <ProvenanceBadge
-            grade={capture.provenanceGrade || 'UNTRUSTED'}
-            score={capture.forensicScore}
-          />
-          {capture.isSovereign && (
-            <View style={styles.sovereignHeaderBadge}>
-              <Text style={styles.sovereignHeaderIcon}>🧿</Text>
-              <Text style={styles.sovereignHeaderText}>Sovereign Protected</Text>
-            </View>
-          )}
+          <View style={styles.badgeRow}>
+            <ProvenanceBadge
+              grade={capture.provenanceGrade || 'UNTRUSTED'}
+              score={capture.forensicScore}
+            />
+            {capture.isSovereign && (
+              <View style={styles.sovereignHeaderBadge}>
+                <Text style={styles.sovereignHeaderIcon}>🧿</Text>
+                <Text style={styles.sovereignHeaderText}>Sovereign Protected</Text>
+              </View>
+            )}
+          </View>
           {capture.anomalies && capture.anomalies.length > 0 && (
             <View style={styles.anomalyList}>
               {capture.anomalies.map((anomaly, idx) => (
@@ -379,7 +381,12 @@ export function CaptureDetail({ capture, onBack }: CaptureDetailProps) {
               style={[styles.tab, activeTab === tab && styles.tabActive]}
               onPress={() => setActiveTab(tab)}
             >
-              <Text style={[styles.tabText, activeTab === tab && styles.tabTextActive]}>
+              <Text
+                style={[styles.tabText, activeTab === tab && styles.tabTextActive]}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.8}
+              >
                 {tab.charAt(0).toUpperCase() + tab.slice(1)}
               </Text>
             </TouchableOpacity>
@@ -453,12 +460,13 @@ const styles = StyleSheet.create({
   },
   truthGradeContainer: {
     marginHorizontal: 20,
-    marginBottom: 20,
-    padding: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: COLORS.glassBorder,
+    marginBottom: 12,
+  },
+  badgeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
   },
   anomalyList: {
     marginTop: 10,
@@ -503,10 +511,11 @@ const styles = StyleSheet.create({
   tab: {
     flex: 1,
     paddingVertical: 10,
-    paddingHorizontal: 12,
+    paddingHorizontal: 6,
     borderRadius: 8,
     backgroundColor: COLORS.glass,
     alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 1,
     borderColor: COLORS.glassBorder,
   },
@@ -542,10 +551,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(59, 130, 246, 0.15)',
     borderWidth: 1,
     borderColor: 'rgba(59, 130, 246, 0.4)',
-    paddingHorizontal: 12,
+    paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 8,
-    marginLeft: 'auto', // Pushes to the right edge
   },
   sovereignHeaderIcon: {
     fontSize: 14,

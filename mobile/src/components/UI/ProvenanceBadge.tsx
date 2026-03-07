@@ -58,7 +58,6 @@ const styles = StyleSheet.create({
         backgroundColor: '#111',
         paddingRight: 10,
         overflow: 'hidden',
-        alignSelf: 'flex-start',
     },
     iconContainer: {
         padding: 8,
