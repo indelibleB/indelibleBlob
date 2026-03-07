@@ -212,6 +212,16 @@ export interface CaptureSessionData {
   paymentPending?: boolean;                // True if post-session SPL transfer failed
 }
 
+/**
+ * Creator Allocation Preferences for SKR Rewards
+ */
+export interface CreatorAllocationPreferences {
+  treasury: number;
+  creator: number;
+  community: number;
+  shareForResearch: boolean; // Opt-in consent to include allocation data in aggregate research
+}
+
 // ============================================================================
 // UI NAVIGATION TYPES
 // ============================================================================

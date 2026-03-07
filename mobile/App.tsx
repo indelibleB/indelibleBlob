@@ -36,6 +36,9 @@ import { SessionList, SessionDetail, CaptureDetail } from './src/components/Libr
 import { LoadingSpinner } from './src/components/UI';
 import { DiagnosticsHub } from './src/components/Diagnostics/DiagnosticsHub';
 import { LoginModal } from './src/components/Identity/LoginModal'; // [NEW]
+import { SettingsScreen } from './src/components/Settings/SettingsScreen'; // [NEW]
+import { GovernanceScreen } from './src/components/Governance/GovernanceScreen'; // [NEW]
+import { ProposalDetailScreen, GovernanceProposal } from './src/components/Governance/ProposalDetailScreen'; // [NEW]
 
 // Services
 import { LocationService } from './src/services/location';
@@ -76,11 +79,12 @@ function IndelibleBlobApp() {
   });
 
   // Navigation
-  const [currentView, setCurrentView] = useState<'camera' | 'library' | 'session-detail' | 'capture-detail' | 'diagnostics'>('camera');
+  const [currentView, setCurrentView] = useState<'camera' | 'library' | 'session-detail' | 'capture-detail' | 'diagnostics' | 'settings' | 'governance' | 'proposal-detail'>('camera');
 
   // Selected items
   const [selectedSession, setSelectedSession] = useState<CaptureSessionData | null>(null);
   const [selectedCapture, setSelectedCapture] = useState<CapturedPhoto | CapturedVideo | null>(null);
+  const [selectedProposal, setSelectedProposal] = useState<GovernanceProposal | null>(null);
 
   // Location
   const [currentLocation, setCurrentLocation] = useState<GPSData | null>(null);
@@ -306,6 +310,27 @@ function IndelibleBlobApp() {
 
         {currentView === 'diagnostics' && (
           <DiagnosticsHub onBack={() => setCurrentView('camera')} />
+        )}
+
+        {currentView === 'settings' && (
+          <SettingsScreen onBack={() => setCurrentView('camera')} />
+        )}
+
+        {currentView === 'governance' && (
+          <GovernanceScreen
+            onBack={() => setCurrentView('camera')}
+            onViewProposal={(proposal) => {
+              setSelectedProposal(proposal);
+              setCurrentView('proposal-detail');
+            }}
+          />
+        )}
+
+        {currentView === 'proposal-detail' && selectedProposal && (
+          <ProposalDetailScreen
+            proposal={selectedProposal}
+            onBack={() => setCurrentView('governance')}
+          />
         )}
 
         {currentView === 'library' && (

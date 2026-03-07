@@ -28,7 +28,7 @@ import { BlobCaptureButton } from './BlobCaptureButton';
 import { LinearGradient } from 'expo-linear-gradient';
 import {
     ChevronLeft, ChevronRight, Camera as CameraIcon, Video,
-    RotateCcw, Wifi, Shield, ShieldCheck, Info, LogOut, User
+    RotateCcw, Wifi, Shield, ShieldCheck, Info, LogOut, User, Settings, Vote
 } from 'lucide-react-native';
 import { IdentityService } from '../../services/identity';
 import { blobLog } from '../../utils/logger';
@@ -394,8 +394,32 @@ export function VisionCameraView({
                                 </View>
                             )}
 
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 10 }}>
+                                <TouchableOpacity
+                                    style={[styles.disconnectButton, { flex: 1, backgroundColor: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.1)' }]}
+                                    onPress={() => {
+                                        toggleSidebar();
+                                        onNavigate('settings');
+                                    }}
+                                >
+                                    <Settings color={COLORS.text} size={14} />
+                                    <Text style={[styles.disconnectText, { color: COLORS.text }]}>Settings</Text>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity
+                                    style={[styles.disconnectButton, { flex: 1, backgroundColor: 'rgba(20, 241, 149, 0.1)', borderColor: 'rgba(20, 241, 149, 0.2)' }]}
+                                    onPress={() => {
+                                        toggleSidebar();
+                                        onNavigate('governance');
+                                    }}
+                                >
+                                    <Vote color={COLORS.primary} size={14} />
+                                    <Text style={[styles.disconnectText, { color: COLORS.primary }]}>Vote</Text>
+                                </TouchableOpacity>
+                            </View>
+
                             <TouchableOpacity
-                                style={styles.disconnectButton}
+                                style={[styles.disconnectButton, { marginTop: 10 }]}
                                 onPress={() => {
                                     if (activeSession) {
                                         Alert.alert('Action Blocked', 'Cannot disconnect while a capture session is active. Please end the session first.');
@@ -414,6 +438,30 @@ export function VisionCameraView({
                         <View style={styles.identityCard}>
                             <User color={COLORS.textSecondary} size={20} />
                             <Text style={styles.guestText}>Guest Mode</Text>
+
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 10, marginTop: 15 }}>
+                                <TouchableOpacity
+                                    style={[styles.disconnectButton, { flex: 1, backgroundColor: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.1)' }]}
+                                    onPress={() => {
+                                        toggleSidebar();
+                                        onNavigate('settings');
+                                    }}
+                                >
+                                    <Settings color={COLORS.text} size={14} />
+                                    <Text style={[styles.disconnectText, { color: COLORS.text }]}>Settings</Text>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity
+                                    style={[styles.disconnectButton, { flex: 1, backgroundColor: 'rgba(20, 241, 149, 0.1)', borderColor: 'rgba(20, 241, 149, 0.2)' }]}
+                                    onPress={() => {
+                                        toggleSidebar();
+                                        onNavigate('governance');
+                                    }}
+                                >
+                                    <Vote color={COLORS.primary} size={14} />
+                                    <Text style={[styles.disconnectText, { color: COLORS.primary }]}>Vote</Text>
+                                </TouchableOpacity>
+                            </View>
                         </View>
                     )}
 

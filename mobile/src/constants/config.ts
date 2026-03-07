@@ -102,6 +102,8 @@ export const CAPTURE_CONFIG: AppConfig = {
 export const STORAGE_KEYS = {
   SESSIONS: '@indelible_blob_sessions',
   USER_PREFERENCES: '@indelible_blob_preferences',
+  ALLOCATION_PREFERENCES: '@indelible_blob_allocations',
+  GOVERNANCE_VOTES: '@indelible_blob_gov_votes',
   LAST_SYNC: '@indelible_blob_last_sync',
 } as const;
 

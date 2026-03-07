@@ -24,7 +24,7 @@
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { CaptureSessionData } from '@shared/types';
+import { CaptureSessionData, CreatorAllocationPreferences } from '@shared/types';
 import { STORAGE_KEYS } from '../constants/config';
 
 /**
@@ -176,6 +176,86 @@ export class StorageService {
       return true;
     } catch (error) {
       console.error('❌ Data migration failed:', error);
+      return false;
+    }
+  }
+
+  // ============================================================================
+  // CREATOR ALLOCATION PREFERENCES
+  // ============================================================================
+
+  static async loadAllocationPreferences(): Promise<CreatorAllocationPreferences> {
+    const defaultPrefs: CreatorAllocationPreferences = { treasury: 33.34, creator: 33.33, community: 33.33, shareForResearch: false };
+    try {
+      const jsonData = await AsyncStorage.getItem(STORAGE_KEYS.ALLOCATION_PREFERENCES);
+      if (!jsonData) return defaultPrefs;
+
+      const prefs: CreatorAllocationPreferences = JSON.parse(jsonData);
+
+      // Defensive coding against corrupted storage 
+      if (typeof prefs.treasury !== 'number' || typeof prefs.creator !== 'number' || typeof prefs.community !== 'number') {
+        return defaultPrefs;
+      }
+
+      const sum = Math.round(prefs.treasury + prefs.creator + prefs.community);
+      if (sum !== 100 || prefs.treasury < 33.33) {
+        console.warn('⚠️ Invalid allocation preferences (sum != 100 or treasury < floor), resetting to default');
+        return defaultPrefs;
+      }
+
+      // Backfill shareForResearch for prefs saved before this field existed
+      if (typeof prefs.shareForResearch !== 'boolean') {
+        prefs.shareForResearch = false;
+      }
+
+      return prefs;
+    } catch (error) {
+      console.error('❌ Failed to load allocation preferences:', error);
+      return defaultPrefs;
+    }
+  }
+
+  static async saveAllocationPreferences(prefs: CreatorAllocationPreferences): Promise<boolean> {
+    try {
+      await AsyncStorage.setItem(STORAGE_KEYS.ALLOCATION_PREFERENCES, JSON.stringify(prefs));
+      return true;
+    } catch (error) {
+      console.error('❌ Failed to save allocation preferences:', error);
+      return false;
+    }
+  }
+
+  // ============================================================================
+  // GOVERNANCE VOTES
+  // ============================================================================
+
+  static async loadGovernanceVotes(): Promise<Record<string, boolean>> {
+    try {
+      const jsonData = await AsyncStorage.getItem(STORAGE_KEYS.GOVERNANCE_VOTES);
+      if (!jsonData) return {};
+
+      const votes = JSON.parse(jsonData);
+
+      // Defensive coding
+      if (typeof votes !== 'object' || votes === null || Array.isArray(votes)) {
+        return {};
+      }
+
+      return votes as Record<string, boolean>;
+    } catch (error) {
+      console.error('❌ Failed to load governance votes:', error);
+      return {};
+    }
+  }
+
+  static async saveGovernanceVote(proposalId: string): Promise<boolean> {
+    try {
+      const currentVotes = await this.loadGovernanceVotes();
+      currentVotes[proposalId] = true;
+      await AsyncStorage.setItem(STORAGE_KEYS.GOVERNANCE_VOTES, JSON.stringify(currentVotes));
+      return true;
+    } catch (error) {
+      console.error('❌ Failed to save governance vote:', error);
       return false;
     }
   }
