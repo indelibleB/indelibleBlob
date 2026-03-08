@@ -53,10 +53,9 @@ import type { CapturedPhoto, CapturedVideo, GPSData, CaptureSessionData } from '
 
 
 
-// Hide splash screen — unconditional 2s failsafe in case React init crashes
-SplashScreen.preventAutoHideAsync().then(() => {
-  setTimeout(() => SplashScreen.hideAsync().catch(() => {}), 2000);
-});
+// Splash screen: prevent auto-hide, then force-hide after 2s no matter what
+SplashScreen.preventAutoHideAsync().catch(() => {});
+setTimeout(() => { SplashScreen.hideAsync().catch(() => {}); }, 2000);
 
 // =========================================================================
 // ROOT APP COMPONENT (PROVIDERS)
@@ -273,11 +272,6 @@ function IndelibleBlobApp() {
   // ==========================================================================
   // RENDERING
   // ==========================================================================
-
-  if (!fontsLoaded) {
-    // Failsafe timeout at module level will still hide splash after 2s
-    return null;
-  }
 
   return (
     <View style={styles.container}>
