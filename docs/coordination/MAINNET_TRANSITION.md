@@ -401,5 +401,76 @@ This is where **integration bugs** live — each component works correctly in is
 
 ---
 
+---
+
+## Post-Hackathon Security Remediation Roadmap
+
+All items below were identified during the pre-APK security audit (March 5, 2026) and website security review (March 7, 2026). They were triaged, documented, and explicitly deferred to post-hackathon — they are **testnet-acceptable** but **mainnet-blocking**. No item may be skipped; each must be resolved before the mainnet go-live sequence begins.
+
+Reference: `docs/security/SECURITY_AUDIT_LOG.md` for full audit context and findings.
+
+### Priority 1 — Must Fix Before Mainnet Deployment
+
+These directly affect cryptographic integrity, user security, or data correctness on mainnet.
+
+| ID | Severity | Component | Issue | Remediation | Owner | Est. Effort |
+|----|----------|-----------|-------|-------------|-------|-------------|
+| H-1 | HIGH | `services/seal.ts` | AES-GCM IV is fixed across all Seal encryptions. While the per-encryption random key makes this safe today, it deviates from AES-GCM best practice (unique IV per operation) and creates fragility if the key generation logic ever changes. | Generate a fresh random 12-byte IV per encryption using `crypto.getRandomValues()`. Prepend IV to ciphertext so decryption can extract it. Update `HermesAesGcm256` class accordingly. Must verify roundtrip compatibility with Seal SDK reference implementation. | 1A + 1D | 1-2 days |
+| M-2 | MEDIUM | `services/trust.ts` | TEEPIN attestation certificate chain is not validated — we accept any signature that "looks right" without verifying it chains to a known Solana Seeker root CA. On testnet this is acceptable; on mainnet an attacker could forge GOLD-grade attestation with a self-signed cert. | Implement certificate chain validation against Solana Seeker root CA public key. Contact Solana Mobile team for official root CA certificate and validation reference implementation. | 1A + 1D | 2-3 days |
+| M-4 | MEDIUM | `sovereign_blob.move` | Nonce length passed to `seal_approve` is not validated on-chain. Malformed nonce could cause key ID mismatch (permanent inability to decrypt) or allow policy bypass if nonce is empty. | Add `assert!(vector::length(&nonce) == 32, ENonceInvalidLength)` to the Move contract. Requires contract redeployment (acceptable since mainnet deployment hasn't happened yet). | 1A + 1D | 0.5 day |
+| W-1 | CRITICAL | `website/providers/WalletProvider.tsx` | `UnsafeBurnerWalletAdapter` generates throwaway Solana keypairs stored in localStorage. Anyone with browser access can extract the private key. Named "Unsafe" by Solana team for a reason. | Remove `UnsafeBurnerWalletAdapter` entirely. Keep only production adapters (Phantom, Solflare, etc.). If wallet-less demo flow is needed, implement read-only mode instead. | 1E | 0.5 day |
+| W-2 | HIGH | `website/pages/Survey.tsx:145` | `console.log('Encrypted survey:', encrypted)` leaks encrypted survey data to browser console. On mainnet with real user data, this is a privacy violation. | Remove the console.log statement. Replace with structured error logging that respects production mode. | 1E | 0.5 day |
+| W-3 | HIGH | `website/pages/Survey.tsx:148-177` | If Seal encryption fails, the UI shows a green "Thank you!" success toast — user believes submission succeeded when it didn't. Silent data loss. | Show explicit error state when encryption fails. Do not display success messaging unless submission is confirmed. Add retry mechanism. | 1E | 1 day |
+
+### Priority 2 — Should Fix Before Mainnet (Security Hardening)
+
+These reduce attack surface and improve defensive posture. Risk is lower but fixes are straightforward.
+
+| ID | Severity | Component | Issue | Remediation | Owner | Est. Effort |
+|----|----------|-----------|-------|-------------|-------|-------------|
+| M-3 | MEDIUM | `services/trust.ts` | Android StrongBox detection uses a model name heuristic (string matching against known device names). New devices or firmware updates could cause false negatives (SILVER downgraded to no attestation) or false positives. | Replace heuristic with Android KeyStore `isInsideSecureHardware()` API check, which is the canonical way to detect StrongBox/TEE availability. Requires testing across device matrix (Pixel 6+, Galaxy S21+, etc.). | 1A | 1-2 days |
+| L-2 | LOW | `services/seal.ts` | Seal key server network is hardcoded to `'testnet'`. On mainnet, this must point to production key servers with appropriate threshold. | Make Seal network configurable via `APP_CONFIG` alongside other network switches. Add to the mainnet "switch flipping" checklist in Section 4 above. | 1A | 0.5 day |
+| L-4 | LOW | `hooks/useZkLogin.ts` | Ephemeral key epoch expiry is not detected. If a user's zkLogin session spans a Sui epoch boundary, their ephemeral key becomes invalid and transactions silently fail. | Add epoch monitoring: on app foreground, check current Sui epoch vs. the epoch the ephemeral key was created for. If expired, prompt re-authentication. | 1A | 1-2 days |
+| W-4 | MEDIUM | `website/index.html` | No Content Security Policy (CSP) meta tag. On Walrus Sites (static hosting, no server headers), CSP must be set via `<meta>` tag to prevent XSS and unauthorized script injection. | Add `<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.sui.io https://*.walrus.site;">` (adjust domains as needed). | 1E | 0.5 day |
+
+### Priority 3 — Post-Launch Improvements (Quality & Maintainability)
+
+These are code quality and UX improvements that do not block mainnet but should be addressed in the first post-launch sprint.
+
+| ID | Severity | Component | Issue | Remediation | Owner | Est. Effort |
+|----|----------|-----------|-------|-------------|-------|-------------|
+| L-1 | LOW | Multiple mobile files | AsyncStorage used for non-sensitive session metadata (session list, governance votes, allocation preferences). Data is not secret but could be tampered with by a rooted device. | Acceptable for launch. Post-launch: consider migrating session metadata to SQLite with integrity checks (HMAC on stored data). Only cryptographic keys and auth tokens require SecureStore (already migrated). | 1A | 3-5 days |
+| W-5 | MEDIUM | `website/App.tsx` + pages | Double Navigation/Footer rendering — global layout includes Navigation and Footer, but individual pages also render their own copies. Results in duplicate headers/footers. | Remove per-page Navigation/Footer components. Let the global layout handle them. | 1E | 1 day |
+| W-6 | LOW | Multiple website components | Hardcoded external URLs (Calendly, Formspree, social links) scattered across components. Makes URL updates error-prone. | Centralize all external URLs into a `constants/urls.ts` file. Import from single source of truth. | 1E | 0.5 day |
+
+### Resolved During Hackathon Sprint (For Reference)
+
+These were identified and **fixed** during the March 5-7 sprint. Listed here for audit completeness.
+
+| ID | Severity | Issue | Resolution | Date |
+|----|----------|-------|------------|------|
+| H-2 | HIGH | JWT not deleted from SecureStorage after ZK proof stored | Fixed by 1A — JWT purged after proof generation | 2026-03-05 |
+| H-3 | HIGH | Sidebar Disconnect button not blocked during active session | Fixed by 1A — button disabled during active session | 2026-03-05 |
+| M-1 | MEDIUM | Dummy fallback Google Client IDs in production | Fixed by 1A — removed fallback, production-only IDs | 2026-03-05 |
+| L-3 | LOW | ~100+ raw console.log statements in production | Fixed by 1D — `__DEV__` guard + full blobLog migration | 2026-03-07 |
+| W-7 | CRITICAL | BrowserRouter causes 404s on Walrus Sites static hosting | Fixed by 1E — migrated to HashRouter; 1D updated mobile URLs | 2026-03-07 |
+
+### Mainnet Security Gate Checklist
+
+Before flipping the network switches in Sections 1-4 above, **all** Priority 1 items must be resolved and verified. This checklist combines the security remediation with the existing audit and deployment gates.
+
+- [ ] **H-1**: AES-GCM IV randomization implemented and Seal roundtrip verified
+- [ ] **M-2**: TEEPIN certificate chain validation implemented against Solana Seeker root CA
+- [ ] **M-4**: Nonce length validation added to `sovereign_blob.move`
+- [ ] **W-1**: `UnsafeBurnerWalletAdapter` removed from website
+- [ ] **W-2**: Survey console.log removed
+- [ ] **W-3**: Survey encryption failure UX fixed (no silent success on failure)
+- [ ] **External smart contract audit** completed (OtterSec/MoveBit/Zellic — see Section above)
+- [ ] **HermesAesGcm256 compatibility test** passed (encrypt with ours, decrypt with Seal SDK reference)
+- [ ] **End-to-end mainnet dry run** completed (real transactions, real gas, real storage)
+- [ ] **All Priority 2 items** resolved or explicitly risk-accepted with documented rationale
+
+---
+
 **Maintained by:** 1A (Mobile Lead) + 1D (Security/Quality Lead)
-**Last Updated:** March 4, 2026
+**Last Updated:** March 7, 2026
