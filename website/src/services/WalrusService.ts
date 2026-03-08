@@ -33,21 +33,21 @@
  * https://docs.walrus.site/
  */
 
-import { readAsStringAsync, getInfoAsync } from 'expo-file-system/legacy';
-import { CAPTURE_CONFIG } from '../constants/config';
-import type { WalrusData } from '../types';
+import { CAPTURE_CONFIG } from '@shared/constants/config';
+import type { WalrusData } from '@shared/types';
 
 /**
  * Custom error class for Walrus upload failures
  */
 export class WalrusUploadError extends Error {
-  constructor(
-    message: string,
-    public statusCode?: number,
-    public responseBody?: string
-  ) {
+  statusCode?: number;
+  responseBody?: string;
+
+  constructor(message: string, statusCode?: number, responseBody?: string) {
     super(message);
     this.name = 'WalrusUploadError';
+    this.statusCode = statusCode;
+    this.responseBody = responseBody;
   }
 }
 
@@ -75,7 +75,7 @@ class WalrusServiceClass {
         headers: {
           'Content-Type': 'application/octet-stream',
         },
-        body: data,
+        body: data as unknown as BodyInit,
       });
 
       if (!uploadResponse.ok) {
@@ -97,152 +97,13 @@ class WalrusServiceClass {
 
       return {
         blobId,
+        url: this.getBlobUrl(blobId),
         size,
         uploadedAt: Date.now(),
       };
     } catch (error) {
       console.error('❌ Walrus buffer upload failed:', error);
       throw error;
-    }
-  }
-
-  /**
-   * Upload a file to Walrus storage
-   * 
-   * @param fileUri - Local file URI to upload
-   * @returns WalrusData with blob ID and metadata
-   */
-  async uploadFile(fileUri: string): Promise<WalrusData> {
-    const publisherUrl = CAPTURE_CONFIG.WALRUS_PUBLISHER_URL;
-
-    console.log('📤 Uploading to Walrus...');
-    console.log('   Publisher URL:', publisherUrl);
-    console.log('   File URI:', fileUri);
-
-    try {
-      // ========================================================================
-      // STEP 1: Get file info
-      // ========================================================================
-
-      console.log('   Getting file info...');
-      const fileInfo = await getInfoAsync(fileUri);
-
-      if (!fileInfo.exists) {
-        throw new Error('File does not exist');
-      }
-
-      console.log('   File exists, size:', fileInfo.size, 'bytes');
-
-      // ========================================================================
-      // STEP 2: Read file as base64
-      // ========================================================================
-
-      console.log('   Reading file as base64...');
-      const base64Data = await readAsStringAsync(fileUri, {
-        encoding: 'base64',
-      });
-
-      console.log('   Base64 data length:', base64Data.length);
-
-      // ========================================================================
-      // STEP 3: Convert base64 to binary
-      // ========================================================================
-
-      console.log('   Converting to binary...');
-      const binaryString = atob(base64Data);
-      const bytes = new Uint8Array(binaryString.length);
-
-      for (let i = 0; i < binaryString.length; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
-      }
-
-      console.log('   Binary conversion complete, bytes:', bytes.length);
-
-      // ========================================================================
-      // STEP 4: Upload to Walrus
-      // ========================================================================
-
-      console.log('   Uploading to Walrus...');
-      const uploadUrl = `${publisherUrl}/v1/blobs`;
-      console.log('   Upload URL:', uploadUrl);
-
-      const uploadResponse = await fetch(uploadUrl, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/octet-stream',
-        },
-        body: bytes,
-      });
-
-      console.log('   Response status:', uploadResponse.status);
-      console.log('   Response status text:', uploadResponse.statusText);
-
-      // ========================================================================
-      // STEP 5: Handle response
-      // ========================================================================
-
-      if (!uploadResponse.ok) {
-        const errorText = await uploadResponse.text();
-        console.error('   Error response body:', errorText);
-        throw new WalrusUploadError(
-          `Upload failed: ${uploadResponse.status} ${uploadResponse.statusText}`,
-          uploadResponse.status,
-          errorText
-        );
-      }
-
-      const uploadResult = await uploadResponse.json();
-      console.log('   Upload result:', JSON.stringify(uploadResult, null, 2));
-
-      // ========================================================================
-      // STEP 6: Extract blob ID from response
-      // ========================================================================
-
-      let blobId: string;
-      let size: number = 0;
-
-      if (uploadResult.newlyCreated) {
-        // New blob was created
-        blobId = uploadResult.newlyCreated.blobObject.blobId;
-        size = uploadResult.newlyCreated.blobObject.size;
-        console.log('   ✅ New blob created');
-        console.log('      Blob ID:', blobId);
-        console.log('      Size:', size, 'bytes');
-        console.log('      Certified Epoch:', uploadResult.newlyCreated.blobObject.certifiedEpoch);
-
-      } else if (uploadResult.alreadyCertified) {
-        // Blob already exists
-        blobId = uploadResult.alreadyCertified.blobId;
-        console.log('   ✅ Blob already certified');
-        console.log('      Blob ID:', blobId);
-        console.log('      End Epoch:', uploadResult.alreadyCertified.endEpoch);
-
-      } else {
-        console.error('   ❌ Unexpected response format:', uploadResult);
-        throw new WalrusUploadError('Unexpected response format', 500);
-      }
-
-      console.log('✅ Walrus upload successful!');
-      console.log('   Final Blob ID:', blobId);
-
-      return {
-        blobId,
-        size,
-        uploadedAt: Date.now(),
-      };
-
-    } catch (error) {
-      console.error('❌ Walrus upload failed:', error);
-
-      if (error instanceof WalrusUploadError) {
-        throw error;
-      }
-
-      // Wrap other errors
-      throw new WalrusUploadError(
-        error instanceof Error ? error.message : 'Unknown error',
-        500
-      );
     }
   }
 

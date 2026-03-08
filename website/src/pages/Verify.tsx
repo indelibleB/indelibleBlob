@@ -1,17 +1,35 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Shield, Search, Upload, CheckCircle2, AlertTriangle, ExternalLink, Sparkles } from 'lucide-react';
 import Navigation from '../components/Navigation';
-import Footer from '../components/Footer';
 
 export default function Verify() {
-    const [blobId, setBlobId] = useState('');
+    const [searchParams] = useSearchParams();
+    const urlId = searchParams.get('id');
+    const [blobId, setBlobId] = useState(urlId || '');
     const [isVerifying, setIsVerifying] = useState(false);
     const [result, setResult] = useState<'success' | 'failure' | null>(null);
+    const [error, setError] = useState('');
 
-    const handleVerify = (e: React.FormEvent) => {
-        e.preventDefault();
+    useEffect(() => {
+        if (urlId) {
+            setBlobId(urlId);
+        }
+    }, [urlId]);
+
+    const handleVerify = (e?: React.FormEvent) => {
+        if (e) e.preventDefault();
+        setError('');
         if (!blobId) return;
+
+        // Validation for Sui Object ID format (64-char hex with 0x)
+        // If it isn't starting with walrus-, we assume it must be a Sui Object ID.
+        if (!blobId.startsWith('walrus-') && !/^0x[a-fA-F0-9]{64}$/.test(blobId)) {
+            setError("Invalid capture ID format. Must be a 64-character hex with 0x prefix or a Walrus blob ID.");
+            setResult(null);
+            return;
+        }
 
         setIsVerifying(true);
         setResult(null);
@@ -19,7 +37,7 @@ export default function Verify() {
         // Mock verification logic
         setTimeout(() => {
             setIsVerifying(false);
-            if (blobId.startsWith('walrus-')) {
+            if (blobId.startsWith('walrus-') || /^0x[a-fA-F0-9]{64}$/.test(blobId)) {
                 setResult('success');
             } else {
                 setResult('failure');
@@ -75,11 +93,17 @@ export default function Verify() {
                                     <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Walrus Blob ID</label>
                                     <input
                                         type="text"
-                                        placeholder="Enter walrus-..."
-                                        className="w-full bg-black border border-zinc-700 rounded-xl p-4 text-emerald-400 font-mono placeholder-zinc-700 focus:outline-none focus:border-emerald-500 transition-all"
+                                        placeholder="Enter walrus-... or 0x..."
+                                        className={`w-full bg-black border ${error ? 'border-red-500' : 'border-zinc-700'} rounded-xl p-4 text-emerald-400 font-mono placeholder-zinc-700 focus:outline-none focus:border-emerald-500 transition-all`}
                                         value={blobId}
-                                        onChange={(e) => setBlobId(e.target.value)}
+                                        onChange={(e) => {
+                                            setBlobId(e.target.value);
+                                            setError('');
+                                        }}
                                     />
+                                    {error && (
+                                        <p className="text-red-500 text-xs mt-2 font-medium">{error}</p>
+                                    )}
                                 </div>
                                 <button
                                     type="submit"
@@ -131,8 +155,8 @@ export default function Verify() {
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         className={`mt-12 max-w-5xl mx-auto rounded-2xl border p-8 flex flex-col md:flex-row items-center gap-8 ${result === 'success'
-                                ? 'bg-emerald-500/10 border-emerald-500/30'
-                                : 'bg-red-500/10 border-red-500/30'
+                            ? 'bg-emerald-500/10 border-emerald-500/30'
+                            : 'bg-red-500/10 border-red-500/30'
                             }`}
                     >
                         <div className={`w-20 h-20 rounded-full flex items-center justify-center shrink-0 ${result === 'success' ? 'bg-emerald-500/20' : 'bg-red-500/20'
@@ -174,8 +198,6 @@ export default function Verify() {
                     </motion.div>
                 )}
             </main>
-
-            <Footer />
         </div>
     );
 }

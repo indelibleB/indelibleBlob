@@ -21,6 +21,7 @@ import { StorageService } from '../services/storage';
 import { TrustManager } from '../services/trust';
 import { IdentityService } from '../services/identity';
 import { SkrService } from '../services/skr';
+import { blobLog } from '../utils/logger';
 import type { CaptureSessionData, CapturedPhoto, CapturedVideo, GPSData } from '@shared/types';
 
 export function useSessions() {
@@ -38,11 +39,11 @@ export function useSessions() {
 
   useEffect(() => {
     const loadSessions = async () => {
-      console.log('📚 Loading sessions from storage...');
+      blobLog.info('📚 Loading sessions from storage...');
       const loadedSessions = await StorageService.loadSessions();
       setSessions(loadedSessions);
       setLoading(false);
-      console.log(`✅ Loaded ${loadedSessions.length} sessions`);
+      blobLog.info(`✅ Loaded ${loadedSessions.length} sessions`);
     };
 
     loadSessions();
@@ -55,7 +56,7 @@ export function useSessions() {
   useEffect(() => {
     if (!loading && sessions.length > 0) {
       StorageService.saveSessions(sessions);
-      console.log(`💾 Saved ${sessions.length} sessions to storage`);
+      blobLog.info(`💾 Saved ${sessions.length} sessions to storage`);
     }
   }, [sessions, loading]);
 
@@ -68,7 +69,7 @@ export function useSessions() {
   // ============================================================================
 
   const startSession = useCallback(async (location: GPSData, sessionName?: string) => {
-    console.log('🎬 Starting new capture session...');
+    blobLog.info('🎬 Starting new capture session...');
 
     // 1. TEEPIN / SKR Commerce Gating
     const profile = await TrustManager.getDeviceProfile();
@@ -78,7 +79,7 @@ export function useSessions() {
 
     if (profile.grade === 'GOLD') {
       // Seeker Device = Unlimited Free Captures
-      console.log('🛡️  GOLD Grade Detected: Unlimited free captures granted.');
+      blobLog.info('🛡️  GOLD Grade Detected: Unlimited free captures granted.');
       availableCaptures = 'Infinity';
     } else {
       // Non-Seeker = Requires SKR Balance
@@ -87,7 +88,7 @@ export function useSessions() {
         return null;
       }
 
-      console.log('🪙 Reading SKR balance for Non-Seeker device...');
+      blobLog.info('🪙 Reading SKR balance for Non-Seeker device...');
       const skrAfforded = await SkrService.getAvailableCaptures(currentUser.solanaAddress);
 
       if (skrAfforded <= 0) {
@@ -96,7 +97,7 @@ export function useSessions() {
       }
 
       availableCaptures = skrAfforded;
-      console.log(`🪙 Authorized for ${availableCaptures} paid captures.`);
+      blobLog.info(`🪙 Authorized for ${availableCaptures} paid captures.`);
     }
 
     const newSession: CaptureSessionData = {
@@ -117,7 +118,7 @@ export function useSessions() {
     setActiveSession(newSession);
     setSessions(prev => [newSession, ...prev]);
 
-    console.log(`✅ Session started: ${newSession.name}`);
+    blobLog.info(`✅ Session started: ${newSession.name}`);
     Alert.alert('Session Started', `${newSession.name} is now active.`);
 
     return newSession;
@@ -133,12 +134,12 @@ export function useSessions() {
       return;
     }
 
-    console.log(`🏁 Ending session: ${activeSession.name}`);
+    blobLog.info(`🏁 Ending session: ${activeSession.name}`);
 
     // Get the latest session data from sessions array
     const currentSession = sessions.find(s => s.id === activeSession.id);
     if (!currentSession) {
-      console.error('❌ Active session not found in sessions array');
+      blobLog.error('❌ Active session not found in sessions array');
       return;
     }
 
@@ -148,7 +149,7 @@ export function useSessions() {
 
     // 2. SKR Post-Settlement
     if (currentSession.availableCaptures !== 'Infinity' && capturesConsumed > 0) {
-      console.log(`💸 Processing post-session SKR payment for ${capturesConsumed} captures...`);
+      blobLog.info(`💸 Processing post-session SKR payment for ${capturesConsumed} captures...`);
       const success = await SkrService.settleSessionCaptures(capturesConsumed);
 
       if (!success) {
@@ -179,7 +180,7 @@ export function useSessions() {
 
     setActiveSession(null);
 
-    console.log(`✅ Session ended: ${updatedSession.name}`);
+    blobLog.info(`✅ Session ended: ${updatedSession.name}`);
     if (!paymentPending && currentSession.availableCaptures === 'Infinity') {
       Alert.alert('Session Ended', `${updatedSession.name} completed with ${totalCaptures} captures`);
     }
@@ -191,12 +192,12 @@ export function useSessions() {
 
   const addCapture = useCallback((capture: CapturedPhoto | CapturedVideo) => {
     if (!activeSession) {
-      console.error('❌ No active session to add capture to');
+      blobLog.error('❌ No active session to add capture to');
       return;
     }
 
     const isVideo = 'duration' in capture;
-    console.log(`➕ Adding ${isVideo ? 'video' : 'photo'} to session: ${activeSession.name}`);
+    blobLog.info(`➕ Adding ${isVideo ? 'video' : 'photo'} to session: ${activeSession.name}`);
 
     // Use functional updates to avoid stale closure issues
     setSessions(prev => {
@@ -213,7 +214,7 @@ export function useSessions() {
         newConsumed += 1;
 
         if (remaining <= 0) {
-          console.log('⚠️ SKR capacity reached. Enforcing graceful session end soon.');
+          blobLog.info('⚠️ SKR capacity reached. Enforcing graceful session end soon.');
           // NOTE: Cannot auto-end safely within a setState callback because endSession relies on state.
           // A separate effect or component-level check should trigger endSession when availableCaptures === 0.
         }
@@ -228,7 +229,7 @@ export function useSessions() {
         capturesConsumed: newConsumed,
       };
 
-      console.log(`🔍 After adding: ${updatedSession.photos.length} photos, ${updatedSession.videos.length} videos`);
+      blobLog.info(`🔍 After adding: ${updatedSession.photos.length} photos, ${updatedSession.videos.length} videos`);
 
       // Also update activeSession
       setActiveSession(updatedSession);
@@ -236,7 +237,7 @@ export function useSessions() {
       return prev.map(s => s.id === activeSession.id ? updatedSession : s);
     });
 
-    console.log(`✅ Capture added (${isVideo ? 'video' : 'photo'})`);
+    blobLog.info(`✅ Capture added (${isVideo ? 'video' : 'photo'})`);
   }, [activeSession]);
 
   // ============================================================================
@@ -245,7 +246,7 @@ export function useSessions() {
 
   const updateCapture = useCallback((updatedCapture: CapturedPhoto | CapturedVideo) => {
     if (!activeSession) {
-      console.error('❌ No active session to update capture in');
+      blobLog.error('❌ No active session to update capture in');
       return;
     }
 
@@ -276,7 +277,7 @@ export function useSessions() {
       return prev.map(s => s.id === activeSession.id ? updatedSession : s);
     });
 
-    console.log(`✅ Capture updated (${isVideo ? 'video' : 'photo'})`);
+    blobLog.info(`✅ Capture updated (${isVideo ? 'video' : 'photo'})`);
   }, [activeSession]);
 
   // ============================================================================
@@ -287,11 +288,11 @@ export function useSessions() {
     const sessionToDelete = sessions.find(s => s.id === sessionId);
 
     if (!sessionToDelete) {
-      console.error('❌ Session not found:', sessionId);
+      blobLog.error('❌ Session not found:', sessionId);
       return;
     }
 
-    console.log(`🗑️ Deleting session: ${sessionToDelete.name}`);
+    blobLog.info(`🗑️ Deleting session: ${sessionToDelete.name}`);
 
     // If deleting the active session, clear it
     if (activeSession?.id === sessionId) {
@@ -301,7 +302,7 @@ export function useSessions() {
     // Remove from sessions list
     setSessions(prev => prev.filter(s => s.id !== sessionId));
 
-    console.log(`✅ Session deleted: ${sessionToDelete.name}`);
+    blobLog.info(`✅ Session deleted: ${sessionToDelete.name}`);
     Alert.alert(
       'Session Deleted',
       `${sessionToDelete.name} has been removed`

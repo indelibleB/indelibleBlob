@@ -109,7 +109,7 @@ export async function getVideoDuration(videoUri: string): Promise<number> {
 
     return 0;
   } catch (error) {
-    console.error('❌ Failed to get video duration:', error);
+    blobLog.error('❌ Failed to get video duration:', error);
     return 0;
   }
 }
@@ -126,17 +126,17 @@ export async function generateVideoThumbnail(
   timeMs: number = 0
 ): Promise<string | null> {
   try {
-    console.log('🎬 Generating thumbnail for:', videoUri);
+    blobLog.info('🎬 Generating thumbnail for:', videoUri);
 
     const { uri } = await VideoThumbnails.getThumbnailAsync(videoUri, {
       time: timeMs,
       quality: 0.8,
     });
 
-    console.log('✅ Thumbnail generated:', uri);
+    blobLog.info('✅ Thumbnail generated:', uri);
     return uri;
   } catch (error) {
-    console.error('❌ Thumbnail generation failed:', error);
+    blobLog.error('❌ Thumbnail generation failed:', error);
     return null;
   }
 }
@@ -379,7 +379,7 @@ export async function retry<T>(
 
       if (i < maxRetries) {
         const delay = baseDelay * Math.pow(2, i);
-        console.log(`Retry ${i + 1}/${maxRetries} after ${delay}ms...`);
+        blobLog.info(`Retry ${i + 1}/${maxRetries} after ${delay}ms...`);
         await sleep(delay);
       }
     }

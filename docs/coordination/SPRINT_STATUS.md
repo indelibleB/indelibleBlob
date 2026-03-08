@@ -5,9 +5,56 @@
 ---
 
 ## Sprint: MONOLITH Hackathon Final Sprint
-**Submission Target:** March 7, 2026 @ 12:00 PM MST (Noon) | **Days Remaining:** 1
+**Submission Target:** March 7, 2026 @ 12:00 PM MST (Noon) | **Days Remaining:** 0 (SUBMISSION DAY)
 **Hard Deadline:** March 9, 2026 @ 00:00 UTC
-**Last Updated:** March 6, 2026 — EOD Session (Friday — Feature Freeze Day)
+**Last Updated:** March 7, 2026 — EOD Session (Saturday — Submission Day)
+
+---
+
+## Day 4 EOD Checkpoint (March 7, Saturday — Submission Day)
+
+**Session: 1D (Security Lead / Claude Code) + C.I.C. — Final Polish + Security Reviews:**
+
+### Mobile Polish
+- ✅ **Glow ring pixel-perfect refinement** — ~10 rounds of iterative on-device testing. Final positions locked:
+  - Settings: `left:22, top:475` | Vote: `left:111, top:475` | Info: `left:11, top:520` with animated `translateY:[0,53]`, `translateX:[0,-1]`
+- ✅ **Splash screen finalized** — `SPLASH_MIN_MS = 3000` (3s hold). `imageWidth` reverted to 288dp (Android 12+ max; 504 test clipped badly).
+
+### Website Security Reviews (1E Plan)
+- ✅ **Round 1 — 6 issues identified:**
+  - 🔴 CRITICAL: `UnsafeBurnerWalletAdapter` in WalletProvider.tsx — generates throwaway keys in localStorage, must be removed
+  - 🔴 HIGH: `console.log` of encrypted survey data (Survey.tsx:145)
+  - 🔴 HIGH: Silent encryption failure shows success toast (Survey.tsx:148-150, 174-177)
+  - 🟡 MEDIUM: No CSP meta tag for Walrus static deployment
+  - 🟡 MEDIUM: Double Navigation/Footer (global App.tsx + per-page duplicates)
+  - 🟢 LOW: Hardcoded URLs (Calendly, Formspree) scattered across components
+- ✅ **Round 2 — CRITICAL deployment blocker found:**
+  - 🔴 **BrowserRouter + Walrus static hosting = 404s on direct navigation** — No server to redirect `/survey`, `/verify` back to `index.html`. Must switch to HashRouter before Walrus deployment.
+  - Plan APPROVED with 3 pre-deployment conditions + Verify page input validation
+
+### Git State
+- ✅ Mid-session commit `f7b924f` pushed to `feature/sprint-final` (42 files: onboarding, splash, glow positioning, app.json)
+- ⚠️ Post-commit glow ring refinements (~5 additional rounds) — uncommitted on `feature/sprint-final`
+
+**Files modified this session:**
+- `mobile/src/components/Camera/OnboardingOverlay.tsx` — ~10 rounds of glow ring position adjustments
+- `mobile/App.tsx` — splash timing (SPLASH_MIN_MS = 3000)
+- `mobile/app.json` — imageWidth reverted to 288
+- `docs/agents/tasks/1D_security_lead.md` — EOD sync
+- `docs/coordination/SPRINT_STATUS.md` — this file
+- `docs/coordination/WEEK_OF_MAR_2_PART_2.md` — EOD sync
+
+**Submission materials status:**
+
+| Item | Owner | Status |
+|------|-------|--------|
+| Android APK | 1A + C.I.C. | 🔴 Not yet built (EAS setup pending) |
+| GitHub repository (clean README) | Agent 1 + 1A | 🔴 In progress |
+| Demo video (2-3 min) | C.I.C. | 🔴 Not started |
+| Pitch narrative (Align Nexus) | Agent 3 + Agent 4 | 🔴 Draft exists |
+| Walrus Sites URL | 1E + 1C | 🔴 Not yet deployed (BrowserRouter blocker identified) |
+| Sui Explorer link (verified capture) | 1A | ✅ Available |
+| SKR bonus prize eligibility | 1A | ✅ Functional |
 
 ---
 

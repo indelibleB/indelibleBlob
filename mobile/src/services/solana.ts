@@ -126,7 +126,7 @@ export class SolanaService {
             const balance = await this.connection.getBalance(new PublicKey(address));
             return balance / 1e9; // Convert lamports to SOL
         } catch (error) {
-            console.error('❌ Failed to fetch Solana balance:', error);
+            blobLog.error('Failed to fetch Solana balance:', error);
             return 0;
         }
     }
@@ -143,7 +143,7 @@ export class SolanaService {
             ]);
             return true;
         } catch (e) {
-            console.warn('Solana health check failed:', e);
+            blobLog.warn('Solana health check failed:', e);
             return false;
         }
     }

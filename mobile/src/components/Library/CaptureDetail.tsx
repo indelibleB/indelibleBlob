@@ -30,6 +30,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 const VideoModule = require('expo-av');
 const SharingModule = require('expo-sharing');
 import { COLORS } from '../../constants/config';
+import { blobLog } from '../../utils/logger';
 import { StatusTag, MetadataRow, ProvenanceBadge } from '../UI';
 import type { CapturedPhoto, CapturedVideo } from '@shared/types';
 
@@ -86,7 +87,7 @@ export function CaptureDetail({ capture, onBack }: CaptureDetailProps) {
         dialogTitle: `Export indelible.Blob: ${isVideo ? 'Video' : 'Photo'}`,
       });
     } catch (error) {
-      console.error('Export Failed:', error);
+      blobLog.error('Export Failed:', error);
       Alert.alert("Export Error", "Failed to share media.");
     }
   };
@@ -165,7 +166,7 @@ export function CaptureDetail({ capture, onBack }: CaptureDetailProps) {
                 icon="📜"
                 onPressValue={() => {
                   const id = capture.walrusData?.blobId || capture.suiData?.digest;
-                  Linking.openURL(`https://indelible-blob.com/verify?id=${id}`);
+                  Linking.openURL(`https://indelible-blob.com/#/verify?id=${id}`);
                 }}
               />
             )}
@@ -308,10 +309,15 @@ export function CaptureDetail({ capture, onBack }: CaptureDetailProps) {
         {/* Provenance Grade & Sovereign State — Inline Badge Row */}
         <View style={styles.truthGradeContainer}>
           <View style={styles.badgeRow}>
-            <ProvenanceBadge
-              grade={capture.provenanceGrade || 'UNTRUSTED'}
-              score={capture.forensicScore}
-            />
+            <TouchableOpacity
+              onPress={() => Linking.openURL('https://indelible-blob.com/#/teepin')}
+              activeOpacity={0.7}
+            >
+              <ProvenanceBadge
+                grade={capture.provenanceGrade || 'UNTRUSTED'}
+                score={capture.forensicScore}
+              />
+            </TouchableOpacity>
             {capture.isSovereign && (
               <View style={styles.sovereignHeaderBadge}>
                 <Text style={styles.sovereignHeaderIcon}>🧿</Text>
@@ -344,7 +350,7 @@ export function CaptureDetail({ capture, onBack }: CaptureDetailProps) {
                 if (status.didJustFinish) setIsPlaying(false);
               }}
               onError={(error: any) => {
-                console.error('Video Player Error:', error);
+                blobLog.error('Video Player Error:', error);
                 setIsPlaying(false);
                 Alert.alert("Playback Error", "Failed to play video.");
               }}

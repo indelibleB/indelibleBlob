@@ -3,6 +3,7 @@ import { StyleSheet, View, Text, TouchableOpacity, Modal } from 'react-native';
 import { COLORS, FONTS } from '../../constants/config';
 import { IdentityService } from '../../services/identity';
 import { Shield, Wallet, X } from 'lucide-react-native';
+import { blobLog } from '../../utils/logger';
 
 interface IdentityModalProps {
     visible: boolean;
@@ -18,7 +19,7 @@ export const IdentityModal: React.FC<IdentityModalProps> = ({ visible, onClose, 
             onLoginSuccess();
             onClose();
         } catch (error) {
-            console.error('Sui Login Failed:', error);
+            blobLog.error('Sui Login Failed:', error);
         }
     };
 
@@ -28,7 +29,7 @@ export const IdentityModal: React.FC<IdentityModalProps> = ({ visible, onClose, 
             onLoginSuccess();
             onClose();
         } catch (error) {
-            console.error('Solana Login Failed:', error);
+            blobLog.error('Solana Login Failed:', error);
         }
     };
 

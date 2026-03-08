@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Camera } from 'react-native-vision-camera';
 import { LocationService } from '../services/location';
 import { Platform } from 'react-native';
+import { blobLog } from '../utils/logger';
 
 export interface AppPermissions {
     camera: boolean;
@@ -19,19 +20,19 @@ export function usePermissions() {
     });
 
     const requestAllPermissions = useCallback(async () => {
-        console.log('🔐 Requesting all app permissions...'); // Debug log
+        blobLog.info('Requesting all app permissions...');
 
         try {
             // 1. Camera & Mic (Parallel)
             const cameraStatus = await Camera.requestCameraPermission();
             const micStatus = await Camera.requestMicrophonePermission();
 
-            console.log('   📸 Camera:', cameraStatus);
-            console.log('   🎤 Mic:', micStatus);
+            blobLog.info('Camera: ' + cameraStatus);
+            blobLog.info('Mic: ' + micStatus);
 
             // 2. Location (Sequential, as it might trigger a modal)
             const locationGranted = await LocationService.requestPermissions();
-            console.log('   📍 Location:', locationGranted);
+            blobLog.info('Location: ' + locationGranted);
 
             setPermissions({
                 camera: cameraStatus === 'granted',
@@ -47,7 +48,7 @@ export function usePermissions() {
             };
 
         } catch (error) {
-            console.error('❌ Permission request failed:', error);
+            blobLog.error('Permission request failed:', error);
             setPermissions(prev => ({ ...prev, loading: false }));
             return null;
         }

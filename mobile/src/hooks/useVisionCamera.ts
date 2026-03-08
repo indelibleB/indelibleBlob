@@ -60,7 +60,7 @@ export function useVisionCamera() {
 
             return photo; // Returns { path, width, height, ... }
         } catch (e) {
-            console.error('VisionCamera Capture Failed:', e);
+            blobLog.error('VisionCamera Capture Failed:', e);
             return null;
         }
     }, [flash]);
@@ -77,18 +77,18 @@ export function useVisionCamera() {
             camera.current.startRecording({
                 flash: flash === 'on' ? 'on' : 'off',
                 onRecordingFinished: (video) => {
-                    console.log('VisionCamera Recording Finished:', video);
+                    blobLog.success('VisionCamera Recording Finished:', video);
                     setIsRecording(false);
                     onFinished?.(video);
                 },
                 onRecordingError: (error) => {
-                    console.error('Recording Error:', error);
+                    blobLog.error('Recording Error:', error);
                     setIsRecording(false);
                 }
             });
             return true;
         } catch (e) {
-            console.error('Failed to start recording:', e);
+            blobLog.error('Failed to start recording:', e);
             setIsRecording(false);
             return false;
         }

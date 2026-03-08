@@ -13,8 +13,7 @@ WebBrowser.maybeCompleteAuthSession();
 // Setup OAuth configuration
 // Use Expo's proxy in development, or set up Deep Links for production
 const REDIRECT_URI = AuthSession.makeRedirectUri();
-// [SECURITY FIX L-3] Sensitive auth redirect uri removed from production logs
-// console.log('[BLOB_TRACE] 🔑 OAuth REDIRECT_URI:', REDIRECT_URI); // TODO: Remove after Google OAuth setup
+// [SECURITY FIX L-3] Debug log removed — OAuth redirect URI must not leak to console
 const GOOGLE_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID || 'dummy-client-id.apps.googleusercontent.com';
 
 // Legacy keys for migration (deprecated - use SECURE_STORAGE_KEYS instead)

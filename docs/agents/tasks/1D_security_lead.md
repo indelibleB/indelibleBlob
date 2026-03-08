@@ -36,11 +36,32 @@
 - [x] **APK Build Plan review** — identified 4 gaps (EAS CLI, eas.json, versionCode, splash plugin registration)
 - [x] **Coordination docs updated** — SPRINT_STATUS.md, WEEK_OF_MAR_2_PART_2.md, this file
 
-## Remaining (March 7 — Submission Day)
-1. **Commit onboarding work** — stage, commit, merge to master
-2. **app.json fixes** — add `versionCode: 1`, add `expo-splash-screen` to plugins
-3. **Support APK build** — EAS config, troubleshoot native compilation issues
-4. **Final pre-submission audit** — one last pass on APK before submission
+## Completed (March 7 — Submission Day, with C.I.C.)
+
+### Morning–Afternoon: Pixel Polish + Security Reviews
+- [x] **Glow ring pixel-perfect refinement** — ~10 rounds of on-device testing with C.I.C. Final positions:
+  - Settings: `left:22, top:475, 82×28`
+  - Vote: `left:111, top:475, 82×28`
+  - Info: `left:11, top:520, 190×22` with `translateY:[0,53]` and `translateX:[0,-1]` (animates between "Session Bind?" and "Sovereign Mode?" info buttons)
+- [x] **Splash screen timing** — Set `SPLASH_MIN_MS = 3000` (3s hold for APK build). Reverted `imageWidth` to 288dp (Android 12+ max after brief 504 test clipped badly).
+- [x] **Website lead (1E) plan security review — Round 1** — Identified 6 issues:
+  - 🔴 CRITICAL: `UnsafeBurnerWalletAdapter` generates throwaway keys in localStorage — must be removed before production
+  - 🔴 HIGH: `console.log` of encrypted survey data in Survey.tsx:145
+  - 🔴 HIGH: Silent encryption failure shows success toast in Survey.tsx:148-150, 174-177
+  - 🟡 MEDIUM: No Content Security Policy meta tag for Walrus static deployment
+  - 🟡 MEDIUM: Double Navigation/Footer rendering (global in App.tsx + duplicated in Survey, Verify, Transparency)
+  - 🟢 LOW: Hardcoded URLs (Calendly, Formspree) scattered across components
+- [x] **Website lead (1E) plan security review — Round 2 (deep analysis)** — Found CRITICAL deployment blocker:
+  - 🔴 **BrowserRouter + Walrus static hosting = broken routes** — Direct navigation to `/survey`, `/verify`, etc. returns 404 (no server for SPA redirects). Must switch to HashRouter or equivalent before Walrus deployment.
+  - Approved plan with 3 pre-deployment conditions + Verify page input validation note
+- [x] **Mid-session commit** — `f7b924f` pushed to `feature/sprint-final` (42 files: onboarding, splash, glow positioning, app.json fixes)
+- [x] **Post-commit glow ring refinements** — Additional ~5 rounds of sub-pixel adjustments after commit (uncommitted)
+- [x] **EOD coordination docs updated** — This file, SPRINT_STATUS.md, WEEK_OF_MAR_2_PART_2.md
+
+## Remaining
+1. **Commit final glow ring positions + coordination docs** — pending C.I.C. approval
+2. **Support APK build** — EAS config, troubleshoot native compilation issues
+3. **Final pre-submission audit** — one last pass on APK before submission
 
 ## Blockers
 - Gemini (1A) requires step-by-step C.I.C. approval for all code changes (no autonomous commits)

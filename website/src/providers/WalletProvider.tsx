@@ -1,7 +1,6 @@
 import { type FC, type ReactNode, useMemo } from 'react';
 import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
-import { UnsafeBurnerWalletAdapter } from '@solana/wallet-adapter-wallets';
 import {
     WalletModalProvider
 } from '@solana/wallet-adapter-react-ui';
@@ -23,7 +22,6 @@ export const SolanaWalletProvider: FC<{ children: ReactNode }> = ({ children }) 
              * Wallets that support either the standard or legacy method can be automatically connected to.
              * This includes the Solana Mobile Wallet Adapter (Seeker).
              */
-            new UnsafeBurnerWalletAdapter(),
         ],
         // eslint-disable-next-line react-hooks/exhaustive-deps
         [network]

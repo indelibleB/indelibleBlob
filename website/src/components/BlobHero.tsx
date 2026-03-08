@@ -3,7 +3,7 @@ import { MeshDistortMaterial, Float } from '@react-three/drei';
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 import { useRef } from 'react';
 import * as THREE from 'three';
-import { Calendar, ArrowRight } from 'lucide-react';
+import { Calendar, ArrowRight, Download } from 'lucide-react';
 import { landingCopy } from '../data/copy';
 
 function InteractiveBlob({ scrollYProgress }: { scrollYProgress: any }) {
@@ -38,14 +38,19 @@ function InteractiveBlob({ scrollYProgress }: { scrollYProgress: any }) {
                 <sphereGeometry args={[1, 128, 128]} />
                 <MeshDistortMaterial
                     ref={materialRef}
-                    color="#14F195"
-                    emissive="#9945FF"
-                    emissiveIntensity={0.5}
+                    color="#000000"
+                    emissive="#0a001a"
+                    emissiveIntensity={0.2}
                     attach="material"
                     distort={distort.get() as any}
                     speed={speed.get() as any}
-                    roughness={0.1}
-                    metalness={0.9}
+                    roughness={0.2}
+                    metalness={1.0}
+                    clearcoat={1.0}
+                    clearcoatRoughness={0.1}
+                    transmission={0.9}
+                    thickness={1.5}
+                    ior={1.5}
                     transparent={true}
                 />
             </mesh>
@@ -61,9 +66,11 @@ export default function BlobHero() {
         <div className="relative min-h-[120vh] flex items-center overflow-hidden bg-black text-white">
             <div className="fixed inset-0 pointer-events-none z-0">
                 <Canvas camera={{ position: [0, 0, 8], fov: 45 }}>
-                    <ambientLight intensity={0.5} />
-                    <directionalLight position={[10, 10, 5]} intensity={1} />
-                    <pointLight position={[-10, -10, -5]} intensity={0.5} color="#14F195" />
+                    <color attach="background" args={['#0a0512']} />
+                    <ambientLight intensity={0.2} />
+                    <directionalLight position={[-10, 0, 5]} intensity={3} color="#00d4ff" />
+                    <directionalLight position={[10, 0, 5]} intensity={3} color="#9945FF" />
+                    <directionalLight position={[0, 10, -5]} intensity={1} color="#ffffff" />
                     <InteractiveBlob scrollYProgress={scrollYProgress} />
                 </Canvas>
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(20,241,149,0.05)_0%,_transparent_70%)] pointer-events-none" />
@@ -145,6 +152,16 @@ export default function BlobHero() {
                             >
                                 {hero.ctaSurvey}
                                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                            </button>
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    window.location.href = '/app.apk'; // Placeholder for the eventual APK link
+                                }}
+                                className="group px-8 py-4 bg-cyan-500 text-black rounded-full font-bold text-lg hover:bg-white transition-all flex items-center gap-2 shadow-2xl shadow-cyan-500/20 cursor-pointer relative z-[60] pointer-events-auto"
+                            >
+                                Download Android APK
+                                <Download className="w-5 h-5 group-hover:translate-y-1 transition-transform" />
                             </button>
                             <button
                                 className="text-emerald-400 font-bold hover:text-white transition-colors flex items-center gap-2 cursor-pointer relative z-[60] pointer-events-auto"

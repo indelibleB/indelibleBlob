@@ -301,28 +301,8 @@ export interface AppConfig {
 // ============================================================================
 
 /**
- * Custom error types for better error handling
+ * Custom error types for better error handling (Moved to services)
  */
-export class WalrusUploadError extends Error {
-  constructor(message: string, public statusCode?: number) {
-    super(message);
-    this.name = 'WalrusUploadError';
-  }
-}
-
-export class SuiTransactionError extends Error {
-  constructor(message: string, public digest?: string) {
-    super(message);
-    this.name = 'SuiTransactionError';
-  }
-}
-
-export class GPSError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'GPSError';
-  }
-}
 
 // ============================================================================
 // TYPE GUARDS

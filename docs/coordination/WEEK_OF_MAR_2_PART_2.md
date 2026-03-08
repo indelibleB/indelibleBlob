@@ -178,3 +178,72 @@ The primary focus must shift immediately to building the **Creator Allocation UI
 - Pitch narrative finalization (Align Nexus)
 
 **Deadline: March 7 @ 12:00 PM MST (Noon)**
+
+---
+
+## 7. Saturday Full-Day Session (March 7 — Submission Day)
+
+### Session: 1D (Security Lead / Claude Code) + C.I.C.
+
+**Context:** Submission day. Focus split between final mobile pixel polish and website security review to clear 1E for deployment.
+
+### What Was Done
+
+**Glow Ring Pixel-Perfect Refinement (~10 rounds):**
+- Iterative on-device testing with C.I.C. providing specific px deltas per round (up/down/left/right per ring)
+- Settings and Vote rings adjusted together (same vertical plane, horizontal offset)
+- Info ring required both position adjustment AND animated interpolation tuning (translateY for vertical travel between "Session Bind?" and "Sovereign Mode?" info buttons, translateX for slight horizontal drift correction)
+- **Final locked positions:**
+  - Settings: `left:22, top:475, width:82, height:28`
+  - Vote: `left:111, top:475, width:82, height:28`
+  - Info: `left:11, top:520, width:190, height:22` with `translateY:[0,53]`, `translateX:[0,-1]`
+- File: `mobile/src/components/Camera/OnboardingOverlay.tsx`
+
+**Splash Screen Finalization:**
+- Timing: `SPLASH_MIN_MS = 3000` (was 5000 → 3000; 5s felt "draggy")
+- `imageWidth`: Tested 504 (1.8× scale) — Android 12+ clipped badly. Reverted to 288dp (OS max).
+- Known issue: Metro dev mode doesn't honor splash hold timing (black flash between native splash hide and React render). Expected to work correctly in production APK.
+- Files: `mobile/App.tsx`, `mobile/app.json`
+
+**Website Lead (1E) Security Review — Round 1:**
+- Reviewed full website codebase: `website/src/` (providers, pages, components, data)
+- **6 issues identified and documented:**
+  1. 🔴 **CRITICAL — UnsafeBurnerWalletAdapter** (WalletProvider.tsx:26): Generates throwaway Solana keys stored in localStorage. Any user interaction with wallet features creates insecure, unrecoverable keys. Must be removed; use WalletMultiButton with real adapters only.
+  2. 🔴 **HIGH — Encrypted data logged** (Survey.tsx:145): `console.log('Encrypted survey:', encrypted)` leaks user survey responses to browser console in production.
+  3. 🔴 **HIGH — Silent failure shows success** (Survey.tsx:148-150, 174-177): When Seal encryption fails, catch block shows green "Thank you!" toast instead of error. User believes data was securely submitted when it wasn't.
+  4. 🟡 **MEDIUM — No CSP meta tag**: Walrus static hosting has no server for HTTP headers. Need `<meta http-equiv="Content-Security-Policy">` in index.html to restrict script sources.
+  5. 🟡 **MEDIUM — Double Navigation/Footer**: App.tsx renders Navigation + Footer globally, but Survey.tsx, Verify.tsx, and Transparency.tsx also render their own — duplicate headers/footers on those pages.
+  6. 🟢 **LOW — Hardcoded URLs**: Calendly, Formspree, and social links scattered across components instead of centralized config.
+
+**Website Lead (1E) Security Review — Round 2 (Deep Analysis):**
+- Re-read updated plan including BlobHero shader upgrade, footer fix, Verify page update
+- **CRITICAL deployment blocker discovered:**
+  - `BrowserRouter` in `main.tsx:16` requires a server to redirect all paths to `index.html`
+  - Walrus Sites is static file hosting — no server-side redirects
+  - Direct navigation to `/survey`, `/verify`, `/transparency` will return **404**
+  - **Fix:** Switch to `HashRouter` (URLs become `/#/survey`) or pre-render routes
+- Additional notes: MeshDistortMaterial → MeshPhysicalMaterial is non-trivial (distortion is a drei shader, not a three.js material property); Verify page `?id=` param needs input validation against XSS
+- **Plan APPROVED** with 3 pre-deployment conditions:
+  1. Remove `UnsafeBurnerWalletAdapter`
+  2. Fix Survey.tsx silent failure + console.log
+  3. Switch BrowserRouter → HashRouter for Walrus compatibility
+
+**Mid-Session Git Commit:**
+- Committed `f7b924f` to `feature/sprint-final` (42 files)
+- Included: onboarding overlay, splash screen, glow ring positioning, app.json fixes
+- Pushed to origin
+
+**Post-Commit Refinements:**
+- ~5 additional rounds of glow ring sub-pixel adjustments (uncommitted)
+- Final positions match the locked values documented above
+
+### EOD State
+
+**Git:** `feature/sprint-final` has uncommitted glow ring refinements + coordination doc updates. Last commit: `f7b924f`.
+
+**What remains for submission:**
+1. Commit final glow positions + coordination docs (pending C.I.C. approval of this sync)
+2. APK build (EAS setup → build → sideload → validate)
+3. Demo video (2-3 min, Seeker device)
+4. Pitch narrative finalization
+5. Website deployment (1E — independent track, BrowserRouter fix required)

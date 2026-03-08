@@ -18,7 +18,7 @@
  * - Runtime configuration (for dynamic updates)
  */
 
-import { AppConfig } from '../types';
+import type { AppConfig } from '../types';
 
 /**
  * Load environment variables
@@ -26,6 +26,8 @@ import { AppConfig } from '../types';
  * NOTE: In React Native/Expo, environment variables must be prefixed with EXPO_PUBLIC_
  * to be accessible at runtime. For sensitive keys, use expo-secure-store instead.
  */
+declare const process: any;
+
 const ENV = {
   WALRUS_PUBLISHER_URL: process.env.EXPO_PUBLIC_WALRUS_PUBLISHER_URL || 'https://publisher.walrus-testnet.walrus.space',
   WALRUS_AGGREGATOR_URL: process.env.EXPO_PUBLIC_WALRUS_AGGREGATOR_URL || 'https://aggregator.walrus-testnet.walrus.space',

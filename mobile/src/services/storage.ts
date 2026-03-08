@@ -26,6 +26,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CaptureSessionData, CreatorAllocationPreferences } from '@shared/types';
 import { STORAGE_KEYS } from '../constants/config';
+import { blobLog } from '../utils/logger';
 
 /**
  * Storage service class
@@ -52,10 +53,10 @@ export class StorageService {
     try {
       const jsonData = JSON.stringify(sessions);
       await AsyncStorage.setItem(STORAGE_KEYS.SESSIONS, jsonData);
-      console.log('✓ Sessions saved to storage:', sessions.length);
+      blobLog.info('Sessions saved to storage: ' + sessions.length);
       return true;
     } catch (error) {
-      console.error('❌ Failed to save sessions:', error);
+      blobLog.error('Failed to save sessions:', error);
       return false;
     }
   }
@@ -78,22 +79,22 @@ export class StorageService {
       const jsonData = await AsyncStorage.getItem(STORAGE_KEYS.SESSIONS);
 
       if (!jsonData) {
-        console.log('ℹ️ No sessions found in storage');
+        blobLog.info('No sessions found in storage');
         return [];
       }
 
       const sessions: CaptureSessionData[] = JSON.parse(jsonData);
-      console.log('✓ Loaded sessions from storage:', sessions.length);
+      blobLog.info('Loaded sessions from storage: ' + sessions.length);
 
       // Basic validation
       if (!Array.isArray(sessions)) {
-        console.warn('⚠️ Invalid sessions data format, returning empty array');
+        blobLog.warn('Invalid sessions data format, returning empty array');
         return [];
       }
 
       return sessions;
     } catch (error) {
-      console.error('❌ Failed to load sessions:', error);
+      blobLog.error('Failed to load sessions:', error);
       return [];
     }
   }
@@ -108,10 +109,10 @@ export class StorageService {
   static async clearSessions(): Promise<boolean> {
     try {
       await AsyncStorage.removeItem(STORAGE_KEYS.SESSIONS);
-      console.log('✓ Sessions cleared from storage');
+      blobLog.info('Sessions cleared from storage');
       return true;
     } catch (error) {
-      console.error('❌ Failed to clear sessions:', error);
+      blobLog.error('Failed to clear sessions:', error);
       return false;
     }
   }
@@ -147,7 +148,7 @@ export class StorageService {
         estimatedSize,
       };
     } catch (error) {
-      console.error('❌ Failed to get storage stats:', error);
+      blobLog.error('Failed to get storage stats:', error);
       return {
         sessionCount: 0,
         photoCount: 0,
@@ -172,10 +173,10 @@ export class StorageService {
   static async migrateData(): Promise<boolean> {
     try {
       // Future implementation for data migrations
-      console.log('ℹ️ No migrations needed');
+      blobLog.info('No migrations needed');
       return true;
     } catch (error) {
-      console.error('❌ Data migration failed:', error);
+      blobLog.error('Data migration failed:', error);
       return false;
     }
   }
@@ -199,7 +200,7 @@ export class StorageService {
 
       const sum = Math.round(prefs.treasury + prefs.creator + prefs.community);
       if (sum !== 100 || prefs.treasury < 33.33) {
-        console.warn('⚠️ Invalid allocation preferences (sum != 100 or treasury < floor), resetting to default');
+        blobLog.warn('Invalid allocation preferences (sum != 100 or treasury < floor), resetting to default');
         return defaultPrefs;
       }
 
@@ -210,7 +211,7 @@ export class StorageService {
 
       return prefs;
     } catch (error) {
-      console.error('❌ Failed to load allocation preferences:', error);
+      blobLog.error('Failed to load allocation preferences:', error);
       return defaultPrefs;
     }
   }
@@ -220,7 +221,7 @@ export class StorageService {
       await AsyncStorage.setItem(STORAGE_KEYS.ALLOCATION_PREFERENCES, JSON.stringify(prefs));
       return true;
     } catch (error) {
-      console.error('❌ Failed to save allocation preferences:', error);
+      blobLog.error('Failed to save allocation preferences:', error);
       return false;
     }
   }
@@ -243,7 +244,7 @@ export class StorageService {
 
       return votes as Record<string, boolean>;
     } catch (error) {
-      console.error('❌ Failed to load governance votes:', error);
+      blobLog.error('Failed to load governance votes:', error);
       return {};
     }
   }
@@ -255,7 +256,7 @@ export class StorageService {
       await AsyncStorage.setItem(STORAGE_KEYS.GOVERNANCE_VOTES, JSON.stringify(currentVotes));
       return true;
     } catch (error) {
-      console.error('❌ Failed to save governance vote:', error);
+      blobLog.error('Failed to save governance vote:', error);
       return false;
     }
   }
@@ -275,6 +276,6 @@ export class StorageService {
  * 
  * // Get stats
  * const stats = await StorageService.getStorageStats();
- * console.log(`${stats.photoCount} photos, ${stats.videoCount} videos`);
+ * blobLog.info(`${stats.photoCount} photos, ${stats.videoCount} videos`);
  */
 
