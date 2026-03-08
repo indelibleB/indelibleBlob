@@ -5,12 +5,15 @@ import BlobHero from './components/BlobHero'
 import ProblemStatement from './components/ProblemStatement'
 import Solution from './components/Solution'
 import SurveyCTA from './components/SurveyCTA'
-import Sources from './components/Sources'
 import Footer from './components/Footer'
 import Survey from './pages/Survey'
 import Verify from './pages/Verify'
 import Transparency from './pages/Transparency'
 import Admin from './pages/Admin'
+import Research from './pages/Research'
+import Teepin from './pages/Teepin'
+import SessionBind from './pages/SessionBind'
+import SovereignMode from './pages/SovereignMode'
 
 function Landing() {
   return (
@@ -20,7 +23,6 @@ function Landing() {
         <ProblemStatement />
         <Solution />
         <SurveyCTA />
-        <Sources />
       </div>
     </>
   )
@@ -41,6 +43,11 @@ function App() {
             <Route path="/verify" element={<Verify />} />
             <Route path="/transparency" element={<Transparency />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/research" element={<Research />} />
+            <Route path="/research/consent" element={<Research />} />
+            <Route path="/teepin" element={<Teepin />} />
+            <Route path="/session-bind-guide" element={<SessionBind />} />
+            <Route path="/sovereign-guide" element={<SovereignMode />} />
           </Routes>
           <Footer />
         </main>

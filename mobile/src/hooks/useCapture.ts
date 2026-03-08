@@ -77,7 +77,7 @@ export function useCapture() {
     const captureId = capture.uri;
 
     try {
-      console.log('🔄 Starting capture processing pipeline...');
+      blobLog.info('🔄 Starting capture processing pipeline...');
 
       // Add to processing queue
       setProcessingQueue(prev => [...prev, captureId]);
@@ -86,7 +86,7 @@ export function useCapture() {
       // STEP 1: COMPUTING CONTENT HASH & TEEPIN ATTESTATION
       // ========================================================================
 
-      console.log('🛡️  Step 1/4: Computing content hash & TEEPIN signature...');
+      blobLog.info('🛡️  Step 1/4: Computing content hash & TEEPIN signature...');
       updateStatus(captureId, 'verifying');
 
       // [NEW] Apply Verification Stamp (Watermark/Resize)
@@ -155,12 +155,12 @@ export function useCapture() {
         if (capture.uri.endsWith('.mp4')) {
           // TODO: Extract frame for video fingerprinting. using '000' for now or the thumbnail if available?
           // For now, we skip pHash for video until we add frame extraction.
-          console.log('⚠️ Video pHash pending frame extraction implementation.');
+          blobLog.info('⚠️ Video pHash pending frame extraction implementation.');
         } else {
           fingerprint = await createFingerprint(visualStampedUri);
         }
       } catch (e) {
-        console.warn('Fingerprint skipped', e);
+        blobLog.warn('Fingerprint skipped', e);
       }
 
       const captureWithAttestation = {
@@ -210,12 +210,12 @@ export function useCapture() {
           creatorAddress,
           sealNonce
         );
-        console.log('✅ Capture encrypted client-side via Seal IBE');
+        blobLog.info('✅ Capture encrypted client-side via Seal IBE');
 
         // Upload encrypted data to Walrus
         walrusData = await WalrusService.uploadData(encryptedObject);
       } else {
-        console.log('📤 Step 2/4: Uploading public capture to Walrus...');
+        blobLog.info('📤 Step 2/4: Uploading public capture to Walrus...');
         updateStatus(captureId, 'uploading');
         walrusData = await WalrusService.uploadFile(capture.uri);
       }
@@ -244,13 +244,13 @@ export function useCapture() {
       // STEP 3: RECORDING ON SUI
       // ========================================================================
 
-      console.log('⛓️  Step 3/4: Recording metadata on Sui blockchain...');
+      blobLog.info('⛓️  Step 3/4: Recording metadata on Sui blockchain...');
       updateStatus(captureId, 'verifying');
       onStatusChange?.('verifying', captureWithWalrus);
 
       const keypair = undefined; // Legacy local keypair removed
 
-      console.log('   👤 Identity Context:', {
+      blobLog.info('   👤 Identity Context:', {
         user: identityUser,
         creator: creatorAddress,
         suiAddressValid: typeof suiAddr === 'string',
@@ -278,7 +278,7 @@ export function useCapture() {
           const zkProofStr = await SecureStorage.getSecureItem(SECURE_STORAGE_KEYS.ZKLOGIN_PROOF);
 
           if (zkProofStr) {
-            console.log('📦 Delegating signature to Background Ephemeral Key & ZK Proof...');
+            blobLog.info('📦 Delegating signature to Background Ephemeral Key & ZK Proof...');
 
             // The sender is the zkLogin-derived address
             txArgs.transaction.setSender(creatorAddress);
@@ -303,9 +303,9 @@ export function useCapture() {
             const zkProof = zkProofRaw.data || zkProofRaw;
 
             // [SECURITY FIX L-3] Sensitive object structures shouldn't be logged in prod
-            // console.log('🔑 ZK Proof keys:', Object.keys(zkProof));
-            // console.log('🔑 Has proofPoints:', !!zkProof.proofPoints);
-            // console.log('🔑 Has addressSeed:', !!zkProof.addressSeed);
+            // blobLog.info('🔑 ZK Proof keys:', Object.keys(zkProof));
+            // blobLog.info('🔑 Has proofPoints:', !!zkProof.proofPoints);
+            // blobLog.info('🔑 Has addressSeed:', !!zkProof.addressSeed);
 
             // Sign the transaction bytes with the local ephemeral key
             const { signature: ephemeralSig } = await ephemeralKeyPair.signTransaction(rawTxBytes);
@@ -333,7 +333,7 @@ export function useCapture() {
             // ====================================================================
             // FALLBACK: WalletConnect native app popup
             // ====================================================================
-            console.log('📲 Prompting user to sign via WalletConnect...');
+            blobLog.info('📲 Prompting user to sign via WalletConnect...');
             if (!provider) {
               throw new Error('WalletConnect provider not initialized. Cannot sign transaction.');
             }
@@ -358,7 +358,7 @@ export function useCapture() {
         throw new Error('Sui recording failed');
       }
 
-      console.log('✅ Sui recording successful:', suiData.digest);
+      blobLog.info('✅ Sui recording successful:', suiData.digest);
 
       // Update capture with Sui data
       const finalCapture = {
@@ -377,12 +377,12 @@ export function useCapture() {
       // COMPLETE
       // ========================================================================
 
-      console.log('🎉 Capture processing complete!');
-      console.log('  - Walrus Blob ID:', walrusData.blobId);
-      console.log('  - Walrus URL:', `${CAPTURE_CONFIG.WALRUS_AGGREGATOR_URL}/v1/blobs/${walrusData.blobId}`);
-      console.log('  - Sui Transaction:', suiData.digest);
-      console.log('  - Sui Explorer:', `https://suiscan.xyz/testnet/tx/${suiData.digest}`);
-      console.log('  - Content Hash:', contentHash);
+      blobLog.info('🎉 Capture processing complete!');
+      blobLog.info('  - Walrus Blob ID:', walrusData.blobId);
+      blobLog.info('  - Walrus URL:', `${CAPTURE_CONFIG.WALRUS_AGGREGATOR_URL}/v1/blobs/${walrusData.blobId}`);
+      blobLog.info('  - Sui Transaction:', suiData.digest);
+      blobLog.info('  - Sui Explorer:', `https://suiscan.xyz/testnet/tx/${suiData.digest}`);
+      blobLog.info('  - Content Hash:', contentHash);
 
       // Remove from processing queue
       setProcessingQueue(prev => prev.filter(id => id !== captureId));
@@ -390,7 +390,7 @@ export function useCapture() {
       return true;
 
     } catch (error) {
-      console.error('❌ Capture processing failed:', error);
+      blobLog.error('❌ Capture processing failed:', error);
 
       updateStatus(captureId, 'failed');
       onStatusChange?.('failed', capture);
@@ -420,7 +420,7 @@ export function useCapture() {
     captures: (CapturedPhoto | CapturedVideo)[],
     onStatusChange?: (status: UploadStatus, capture: CapturedPhoto | CapturedVideo) => void
   ): Promise<boolean[]> => {
-    console.log(`🔄 Processing batch of ${captures.length} captures...`);
+    blobLog.info(`🔄 Processing batch of ${captures.length} captures...`);
 
     // OPTIMIZED: Run in batches of 3 to prevent memory/network overload
     const BATCH_SIZE = 3;
@@ -436,7 +436,7 @@ export function useCapture() {
     }
 
     const successCount = results.filter(r => r).length;
-    console.log(`✅ Batch processing complete: ${successCount}/${captures.length} successful`);
+    blobLog.info(`✅ Batch processing complete: ${successCount}/${captures.length} successful`);
 
     return results;
   }, [processCapture]);
@@ -456,7 +456,7 @@ export function useCapture() {
   const clearQueue = useCallback(() => {
     setProcessingQueue([]);
     setProcessingStatus({});
-    console.log('🧹 Processing queue cleared');
+    blobLog.info('🧹 Processing queue cleared');
   }, []);
 
   // ============================================================================

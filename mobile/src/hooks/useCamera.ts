@@ -23,6 +23,7 @@ import { Camera } from 'expo-camera';
 import * as FileSystem from 'expo-file-system';
 import { generateVideoThumbnail, getVideoDuration } from '../utils/helpers';
 import type { CapturedPhoto, CapturedVideo, GPSData } from '@shared/types';
+import { blobLog } from '../utils/logger';
 
 export function useCamera() {
   // ============================================================================
@@ -49,7 +50,7 @@ export function useCamera() {
   // ============================================================================
 
   const requestPermissions = useCallback(async () => {
-    console.log('📷 Requesting camera permissions...');
+    blobLog.info('Requesting camera permissions...');
 
     const cameraStatus = await Camera.requestCameraPermissionsAsync();
     const audioStatus = await Camera.requestMicrophonePermissionsAsync();
@@ -64,7 +65,7 @@ export function useCamera() {
       );
     }
 
-    console.log(`${granted ? '✅' : '❌'} Camera permissions: ${granted ? 'granted' : 'denied'}`);
+    blobLog.info(`Camera permissions: ${granted ? 'granted' : 'denied'}`);
     return granted;
   }, []);
 
@@ -78,7 +79,7 @@ export function useCamera() {
       return;
     }
     setCaptureMode(prev => prev === 'photo' ? 'video' : 'photo');
-    console.log(`📷 Switched to ${captureMode === 'photo' ? 'video' : 'photo'} mode`);
+    blobLog.info(`Switched to ${captureMode === 'photo' ? 'video' : 'photo'} mode`);
   }, [isRecording, captureMode]);
 
   // ============================================================================
@@ -91,7 +92,7 @@ export function useCamera() {
       return;
     }
     setCameraType(prev => prev === 'back' ? 'front' : 'back');
-    console.log(`🔄 Flipped to ${cameraType === 'back' ? 'front' : 'back'} camera`);
+    blobLog.info(`Flipped to ${cameraType === 'back' ? 'front' : 'back'} camera`);
   }, [isRecording, cameraType]);
 
   // ============================================================================
@@ -105,7 +106,7 @@ export function useCamera() {
     }
 
     try {
-      console.log('📸 Taking photo...');
+      blobLog.info('Taking photo...');
 
       const photo = await cameraRef.current.takePictureAsync({
         quality: 0.9,
@@ -121,11 +122,11 @@ export function useCamera() {
         uploadStatus: 'local',
       };
 
-      console.log('✅ Photo captured:', photo.uri);
+      blobLog.success('Photo captured: ' + photo.uri);
       return capturedPhoto;
 
     } catch (error) {
-      console.error('❌ Photo capture failed:', error);
+      blobLog.error('Photo capture failed:', error);
       Alert.alert('Capture Failed', 'Failed to take photo');
       return null;
     }
@@ -140,7 +141,7 @@ export function useCamera() {
       return false;
     }
 
-    console.log('🎥 Starting video recording...');
+    blobLog.info('Starting video recording...');
 
     isRecordingRef.current = true;
     setIsRecording(true);
@@ -156,7 +157,7 @@ export function useCamera() {
         maxDuration: 60,
         mute: false,
       }).then((video) => {
-        console.log('✅ Recording completed:', video);
+        blobLog.success('Recording completed:', video);
 
         // Clear timer
         if (recordingTimer.current) {
@@ -172,7 +173,7 @@ export function useCamera() {
           onVideoComplete(video);
         }
       }).catch((error) => {
-        console.error('❌ Recording error:', error);
+        blobLog.error('Recording error:', error);
 
         // Cleanup on error
         if (recordingTimer.current) {
@@ -184,7 +185,7 @@ export function useCamera() {
 
       return true; // Return immediately
     } catch (error) {
-      console.error('❌ Recording failed:', error);
+      blobLog.error('Recording failed:', error);
       isRecordingRef.current = false;
       setIsRecording(false);
       if (recordingTimer.current) {
@@ -203,7 +204,7 @@ export function useCamera() {
       return null;
     }
 
-    console.log('🛑 Stopping video recording...');
+    blobLog.info('Stopping video recording...');
 
     try {
       cameraRef.current?.stopRecording();
@@ -220,7 +221,7 @@ export function useCamera() {
       return null;
 
     } catch (error) {
-      console.error('❌ Stop recording failed:', error);
+      blobLog.error('Stop recording failed:', error);
       return null;
     }
   }, []);
@@ -231,7 +232,7 @@ export function useCamera() {
 
   const processVideo = useCallback(async (videoUri: string, location: GPSData, sessionId: string): Promise<CapturedVideo | null> => {
     try {
-      console.log('🎬 Processing recorded video...');
+      blobLog.info('Processing recorded video...');
 
       // Get video duration
       const duration = await getVideoDuration(videoUri);
@@ -250,11 +251,11 @@ export function useCamera() {
         uploadStatus: 'local',
       };
 
-      console.log('✅ Video processed:', videoUri);
+      blobLog.success('Video processed: ' + videoUri);
       return capturedVideo;
 
     } catch (error) {
-      console.error('❌ Video processing failed:', error);
+      blobLog.error('Video processing failed:', error);
       return null;
     }
   }, []);

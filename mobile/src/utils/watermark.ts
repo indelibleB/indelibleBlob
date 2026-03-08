@@ -1,5 +1,6 @@
 import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
 import { Asset } from 'expo-asset';
+import { blobLog } from './logger';
 
 /**
  * Applies the "indelible.Blob" verification stamp to a captured media file.
@@ -30,11 +31,11 @@ import { Asset } from 'expo-asset';
 export async function applyWatermark(uri: string): Promise<string> {
     try {
         if (uri.toLowerCase().endsWith('.mp4')) {
-            console.log('📽️ Video detected, passing through (Bumper logic handled elsewhere)...');
+            blobLog.info('📽️ Video detected, passing through (Bumper logic handled elsewhere)...');
             return uri;
         }
 
-        console.log('🏗️ Generative Validating: Creating Glassmorphic Passport...');
+        blobLog.info('🏗️ Generative Validating: Creating Glassmorphic Passport...');
 
         // 1. Load the Logo Asset
         const logoAsset = Asset.fromModule(require('../../assets/icon.png'));
@@ -80,11 +81,11 @@ export async function applyWatermark(uri: string): Promise<string> {
         // NOTE: True "Canvas Extension" requires a more powerful library like 'react-native-image-editor' 
         // or 'ffmpeg'. For this stage, we are simulating the "Look" via overlay.
 
-        console.log('✅ Passport Applied:', result.uri);
+        blobLog.info('✅ Passport Applied:', result.uri);
         return result.uri;
 
     } catch (error) {
-        console.error('❌ Passport creation failed:', error);
+        blobLog.error('❌ Passport creation failed:', error);
         return uri;
     }
 }

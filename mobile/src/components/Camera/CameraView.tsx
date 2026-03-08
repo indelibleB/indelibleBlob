@@ -113,69 +113,69 @@ export function CameraView({
   // ==========================================================================
 
   const handleCapture = async () => {
-    console.log('🔘 Capture button pressed');
-    console.log('   Mode:', captureMode);
-    console.log('   Active session:', activeSession?.id || 'NONE');
-    console.log('   Current location:', currentLocation ? 'YES' : 'NO');
-    console.log('   Camera ready:', cameraReady);
-    console.log('   Is recording:', isRecording);
+    blobLog.info('🔘 Capture button pressed');
+    blobLog.info('   Mode:', captureMode);
+    blobLog.info('   Active session:', activeSession?.id || 'NONE');
+    blobLog.info('   Current location:', currentLocation ? 'YES' : 'NO');
+    blobLog.info('   Camera ready:', cameraReady);
+    blobLog.info('   Is recording:', isRecording);
 
     if (!activeSession) {
-      console.log('❌ No active session');
+      blobLog.info('❌ No active session');
       Alert.alert('No Active Session', 'Please start a session first');
       return;
     }
 
     if (!currentLocation) {
-      console.log('❌ No GPS location');
+      blobLog.info('❌ No GPS location');
       Alert.alert('GPS Required', 'Waiting for GPS location...');
       return;
     }
 
     if (!cameraReady) {
-      console.log('❌ Camera not ready');
+      blobLog.info('❌ Camera not ready');
       Alert.alert('Camera Not Ready', 'Please wait...');
       return;
     }
 
     try {
       if (captureMode === 'photo') {
-        console.log('📸 Taking photo...');
+        blobLog.info('📸 Taking photo...');
         const photo = await takePhoto(currentLocation, activeSession.id);
 
         if (photo) {
-          console.log('✅ Photo captured successfully');
+          blobLog.info('✅ Photo captured successfully');
           onCapture(photo, isSovereign);
           Alert.alert('✓ Photo Captured', isSovereign ? 'Encrypted via Sovereign Mode' : 'Saved successfully');
         } else {
-          console.log('❌ Photo capture returned null');
+          blobLog.info('❌ Photo capture returned null');
         }
 
       } else {
         if (!isRecording) {
-          console.log('🎥 Starting video recording...');
+          blobLog.info('🎥 Starting video recording...');
 
           // Pass callback to handle video when recording completes
           const started = await startRecording(async (video) => {
-            console.log('🎬 Video recording finished, processing...');
+            blobLog.info('🎬 Video recording finished, processing...');
             await handleRecordingFinished(video);
           });
 
           if (!started) {
-            console.log('❌ Recording failed to start');
+            blobLog.info('❌ Recording failed to start');
             Alert.alert('Recording Failed', 'Could not start recording');
           } else {
-            console.log('✅ Recording started');
+            blobLog.info('✅ Recording started');
           }
 
         } else {
-          console.log('🛑 Stopping video recording...');
+          blobLog.info('🛑 Stopping video recording...');
           await stopRecording(currentLocation, activeSession.id);
         }
       }
 
     } catch (error) {
-      console.error('❌ Capture error:', error);
+      blobLog.error('❌ Capture error:', error);
       Alert.alert('Capture Failed', error instanceof Error ? error.message : 'Unknown error');
     }
   };
@@ -186,11 +186,11 @@ export function CameraView({
 
   const handleRecordingFinished = async (video: any) => {
     if (!currentLocation || !activeSession) {
-      console.log('❌ Missing location or session for video processing');
+      blobLog.info('❌ Missing location or session for video processing');
       return;
     }
 
-    console.log('🎬 Video recording finished:', video.uri);
+    blobLog.info('🎬 Video recording finished:', video.uri);
 
     const processedVideo = await processVideo(
       video.uri,
@@ -199,11 +199,11 @@ export function CameraView({
     );
 
     if (processedVideo) {
-      console.log('✅ Video processed successfully');
+      blobLog.info('✅ Video processed successfully');
       onCapture(processedVideo, isSovereign);
       Alert.alert('✓ Video Recorded', isSovereign ? 'Encrypted via Sovereign Mode' : `Duration: ${processedVideo.duration}s`);
     } else {
-      console.log('❌ Video processing failed');
+      blobLog.info('❌ Video processing failed');
     }
   };
 
@@ -232,7 +232,7 @@ export function CameraView({
         facing={cameraType}
         mode={captureMode === 'video' ? 'video' : 'picture'}
         onCameraReady={() => {
-          console.log('📷 Camera ready');
+          blobLog.info('📷 Camera ready');
           setCameraReady(true);
         }}
 
@@ -279,7 +279,7 @@ export function CameraView({
           <TouchableOpacity
             style={styles.sidebarButton}
             onPress={() => {
-              console.log('🔄 Mode toggle pressed');
+              blobLog.info('🔄 Mode toggle pressed');
               toggleMode();
             }}
             disabled={isRecording}
@@ -296,7 +296,7 @@ export function CameraView({
           <TouchableOpacity
             style={styles.sidebarButton}
             onPress={() => {
-              console.log('🔄 Flip camera pressed');
+              blobLog.info('🔄 Flip camera pressed');
               flipCamera();
             }}
             disabled={isRecording}
@@ -311,7 +311,7 @@ export function CameraView({
           <TouchableOpacity
             style={[styles.sidebarButton, { borderColor: COLORS.primary }]}
             onPress={() => {
-              console.log('🔍 Diagnostics button pressed');
+              blobLog.info('🔍 Diagnostics button pressed');
               onNavigate('diagnostics');
             }}
           >
@@ -326,7 +326,7 @@ export function CameraView({
               isSovereign && styles.sidebarButtonActive
             ]}
             onPress={() => {
-              console.log('🛡️ Sovereign toggle pressed:', !isSovereign);
+              blobLog.info('🛡️ Sovereign toggle pressed:', !isSovereign);
               setIsSovereign(!isSovereign);
             }}
           >
@@ -395,7 +395,7 @@ export function CameraView({
                   { text: 'Got it', style: 'cancel' },
                   {
                     text: 'Learn More',
-                    onPress: () => Linking.openURL('https://indelible-blob.com/sovereign-guide')
+                    onPress: () => Linking.openURL('https://indelible-blob.com/#/sovereign-guide')
                   }
                 ]
               );

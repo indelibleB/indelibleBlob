@@ -54,20 +54,20 @@ export const landingCopy = {
         description: "A decentralized infrastructure that makes digital content verifiable, permanent, and tamper-proof. Bridging the Walrus Protocol, Sui blockchain, and Solana Ecosystem.",
         features: [
             {
-                title: "Decentralized Storage",
-                desc: "Walrus Protocol distributes data across nodes with erasure coding for redundancy"
+                title: "TEEPIN Attestation",
+                desc: "Hardware-level security grading (GOLD/SILVER) linking the absolute timeline of media to device signatures."
             },
             {
-                title: "Immutable Proof",
-                desc: "Sui blockchain anchors every blob with cryptographic verification"
+                title: "SKR Economies",
+                desc: "Reward structures featuring instant crypto payment to creators upon successfully verified captures."
             },
             {
-                title: "Cost Efficient",
-                desc: "99% cheaper than traditional blockchain storage solutions"
+                title: "Sovereign Mode (🧿)",
+                desc: "Military-grade AES-GCM local device encryption shielding your data until you are ready."
             },
             {
-                title: "Permanent Access",
-                desc: "Content remains accessible as long as the network exists"
+                title: "Proof of Witness",
+                desc: "Democratic voting power through physical presence. 1 Session = 1 Vote. Wealth cannot buy influence."
             }
         ]
     }

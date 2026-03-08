@@ -39,8 +39,16 @@
  * 6. Implement event listening for confirmation
  */
 
-import { SuiData, SuiTransactionError, Capture, WalrusData } from '../types';
-import { CAPTURE_CONFIG, TIMEOUTS } from '../constants/config';
+import type { SuiData, Capture, WalrusData } from '@shared/types';
+
+export class SuiTransactionError extends Error {
+  digest?: string;
+  constructor(message: string, digest?: string) {
+    super(message);
+    this.name = 'SuiTransactionError';
+    this.digest = digest;
+  }
+}
 
 /**
  * Sui service class
@@ -204,7 +212,7 @@ export class SuiService {
     } catch (error) {
       console.error('❌ Sui transaction failed:', error);
       throw new SuiTransactionError(
-        `Failed to record on Sui: ${error.message || 'Unknown error'}`
+        `Failed to record on Sui: ${(error as any).message || 'Unknown error'}`
       );
     }
   }

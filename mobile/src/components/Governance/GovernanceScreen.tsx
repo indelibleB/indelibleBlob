@@ -6,6 +6,7 @@ import { StorageService } from '../../services/storage';
 import { COLORS, FONTS } from '../../constants/config';
 import { CheckCircle2, ArrowLeft, Info, ChevronRight, Mail } from 'lucide-react-native';
 import { GovernanceProposal } from './ProposalDetailScreen';
+import { blobLog } from '../../utils/logger';
 
 // Formspree endpoint — same list as the website footer newsletter signup
 const FORMSPREE_NEWSLETTER_URL = 'https://formspree.io/f/mwvlpqvj';
@@ -80,7 +81,7 @@ export const GovernanceScreen: React.FC<GovernanceScreenProps> = ({ onBack, onVi
                 setEmail('');
             }
         } catch (error) {
-            console.error('Signup error:', error);
+            blobLog.error('Signup error:', error);
             setSignupStatus('success'); // Graceful fallback
             setEmail('');
         }
@@ -146,7 +147,7 @@ export const GovernanceScreen: React.FC<GovernanceScreenProps> = ({ onBack, onVi
                     {/* Survey CTA */}
                     <TouchableOpacity
                         style={styles.surveyBanner}
-                        onPress={() => Linking.openURL('https://indelibleblob.com/survey')}
+                        onPress={() => Linking.openURL('https://indelibleblob.com/#/survey')}
                     >
                         <Text style={styles.surveyText}>
                             Want to share deeper insights to support the Blob's journey? Please jump into our survey portal!

@@ -4,7 +4,6 @@ import { ChevronRight, CheckCircle2, ChevronLeft, Send, Sparkles, Globe, Lock } 
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useCurrentAccount } from '@mysten/dapp-kit';
 import Navigation from '../components/Navigation';
-import Footer from '../components/Footer';
 import { SealService } from '../services/SealService';
 
 type Industry = 'Journalism' | 'Legal' | 'Photography' | 'VFX' | 'Construction' | 'Enterprise' | 'Social' | 'Government';
@@ -140,14 +139,12 @@ export default function Survey() {
                 });
 
                 // Use email as identity for the demo, or wallet.toString()
-                const encryptedBlob = await sealService.encrypt(surveyData, email);
+                await sealService.encrypt(surveyData, email);
 
-                console.log("Seal Encryption Successful. Encrypted Blob (Preview):", encryptedBlob.slice(0, 32));
                 setSubmitted(true);
             } catch (error) {
                 console.error("Sovereign submission failed:", error);
-                alert("Encryption Layer encounterd an error. Falling back to secure demonstration mode.");
-                setSubmitted(true);
+                alert("Encryption Layer encountered an error. Please try again.");
             }
             return;
         }
@@ -171,14 +168,11 @@ export default function Survey() {
             if (response.ok) {
                 setSubmitted(true);
             } else {
-                // If ID is invalid (expected during dev), still show success for UX demo
-                console.warn("Formspree submission failed (likely missing ID). Showing success state.");
-                setSubmitted(true);
+                alert("Submission failed. Please try again.");
             }
         } catch (error) {
             console.error("Submission error:", error);
-            // Fallback for demo
-            setSubmitted(true);
+            alert("Network error. Please try again.");
         }
     };
 
@@ -473,8 +467,6 @@ export default function Survey() {
                     )}
                 </div>
             </main >
-
-            <Footer />
         </div >
     );
 }

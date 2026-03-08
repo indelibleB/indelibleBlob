@@ -598,7 +598,12 @@ export function OnboardingOverlay({
                                 transform: [{
                                     translateY: infoGlowTop.interpolate({
                                         inputRange: [0, 1],
-                                        outputRange: [0, 41],
+                                        outputRange: [0, 53],
+                                    }),
+                                }, {
+                                    translateX: infoGlowTop.interpolate({
+                                        inputRange: [0, 1],
+                                        outputRange: [0, -1],
                                     }),
                                 }],
                             },
@@ -893,8 +898,8 @@ const styles = StyleSheet.create({
     //   Info buttons below card: ~500px and ~541px from screen top
     highlightSettings: {
         position: 'absolute',
-        left: 27,
-        top: 481,
+        left: 22,
+        top: 475,
         width: 82,
         height: 28,
         borderRadius: 6,
@@ -905,8 +910,8 @@ const styles = StyleSheet.create({
     },
     highlightVote: {
         position: 'absolute',
-        left: 117,
-        top: 481,
+        left: 111,
+        top: 475,
         width: 82,
         height: 28,
         borderRadius: 6,
@@ -919,8 +924,8 @@ const styles = StyleSheet.create({
     // translateY animates it down 41px to "What is Sovereign Mode?"
     highlightInfo: {
         position: 'absolute',
-        left: 16,
-        top: 530,
+        left: 11,
+        top: 520,
         width: 190,
         height: 22,
         borderRadius: 11,

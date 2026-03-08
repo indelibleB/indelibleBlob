@@ -2,6 +2,7 @@ import * as ImageManipulator from 'expo-image-manipulator';
 import * as FileSystem from 'expo-file-system';
 import jpeg from 'jpeg-js';
 import { bmvbhash } from 'blockhash-core';
+import { blobLog } from './logger';
 
 /**
  * Neural Hash Utility 🧠
@@ -17,7 +18,7 @@ import { bmvbhash } from 'blockhash-core';
 
 export async function createFingerprint(uri: string): Promise<string> {
     try {
-        console.log('🧠 Neural Hash: Generatring fingerprint...');
+        blobLog.info('🧠 Neural Hash: Generatring fingerprint...');
         const startTime = Date.now();
 
         // 1. Micro-Resize (Native Speed)
@@ -41,12 +42,12 @@ export async function createFingerprint(uri: string): Promise<string> {
         const hash = bmvbhash(decoded, 8); // 8-byte hash (64-bit)
 
         const duration = Date.now() - startTime;
-        console.log(`🧠 Fingerprint Generated: ${hash} (Took ${duration}ms)`);
+        blobLog.info(`🧠 Fingerprint Generated: ${hash} (Took ${duration}ms)`);
 
         return hash;
 
     } catch (error) {
-        console.error('❌ Neural Fingerprinting Failed:', error);
+        blobLog.error('❌ Neural Fingerprinting Failed:', error);
         return '0000000000000000'; // Fail-safe (Null Hash)
     }
 }

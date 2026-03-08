@@ -1,4 +1,5 @@
 import * as SecureStore from 'expo-secure-store';
+import { blobLog } from '../utils/logger';
 
 /**
  * Secure storage wrapper using expo-secure-store
@@ -35,7 +36,7 @@ export class SecureStorage {
         requireAuthentication: false, // Don't require biometrics for every access
       });
     } catch (error) {
-      console.error(`[SecureStorage] Failed to store ${key}:`, error);
+      blobLog.error(`[SecureStorage] Failed to store ${key}:`, error);
       throw new Error(`Secure storage failed for ${key}`);
     }
   }
@@ -51,7 +52,7 @@ export class SecureStorage {
       const value = await SecureStore.getItemAsync(key);
       return value;
     } catch (error) {
-      console.error(`[SecureStorage] Failed to retrieve ${key}:`, error);
+      blobLog.error(`[SecureStorage] Failed to retrieve ${key}:`, error);
       return null;
     }
   }
@@ -65,7 +66,7 @@ export class SecureStorage {
     try {
       await SecureStore.deleteItemAsync(key);
     } catch (error) {
-      console.error(`[SecureStorage] Failed to delete ${key}:`, error);
+      blobLog.error(`[SecureStorage] Failed to delete ${key}:`, error);
       throw new Error(`Secure deletion failed for ${key}`);
     }
   }

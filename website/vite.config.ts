@@ -32,6 +32,9 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
+      workbox: {
+        maximumFileSizeToCacheInBytes: 10000000, // 10MB limit to accommodate larger Three.js/Sui bundles
+      },
       manifest: {
         name: 'Indelible Blob',
         short_name: 'Indelible',
@@ -43,23 +46,23 @@ export default defineConfig({
         start_url: '/',
         icons: [
           {
-            src: 'pwa-192x192.png', // Placeholder, needs actual asset generation
+            src: 'brand/icon-v3-master.png',
             sizes: '192x192',
             type: 'image/png'
           },
           {
-            src: 'pwa-512x512.png', // Placeholder
+            src: 'brand/icon-v3-master.png',
             sizes: '512x512',
             type: 'image/png'
           },
           {
-            src: 'pwa-512x512.png',
+            src: 'brand/icon-v3-master.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any maskable'
           }
         ]
       }
-    })
+    }) as any
   ],
 })

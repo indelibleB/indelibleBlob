@@ -5,6 +5,7 @@ import * as Haptics from 'expo-haptics';
 import { StorageService } from '../../services/storage';
 import { COLORS, FONTS } from '../../constants/config';
 import { ArrowLeft, CheckCircle2, ShieldAlert } from 'lucide-react-native';
+import { blobLog } from '../../utils/logger';
 
 // Exported Interface for global Governance typing
 export interface GovernanceProposal {
@@ -53,7 +54,7 @@ export const ProposalDetailScreen: React.FC<ProposalDetailScreenProps> = ({ prop
                 }
 
             } catch (err) {
-                console.error("Error loading Governance Power:", err);
+                blobLog.error("Error loading Governance Power:", err);
             } finally {
                 setLoading(false);
             }

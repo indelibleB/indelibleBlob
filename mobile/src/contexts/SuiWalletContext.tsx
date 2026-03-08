@@ -13,6 +13,7 @@ import { WalletConnectModal, useWalletConnectModal } from '@walletconnect/modal-
 import UniversalProvider from '@walletconnect/universal-provider';
 import { Modal, Linking } from 'react-native';
 import { SecureStorage, SECURE_STORAGE_KEYS } from '../services/secureStorage';
+import { blobLog } from '../utils/logger';
 
 const WC_PROJECT_ID = process.env.EXPO_PUBLIC_WC_PROJECT_ID || '14ae6da30a9d0557bde031a062358824';
 
@@ -63,7 +64,7 @@ export function SuiWalletProvider({ network = 'testnet', children }: SuiWalletPr
                     setAddress(null);
                 }
             } catch (error) {
-                console.warn('Failed to load wallet address:', error);
+                blobLog.warn('Failed to load wallet address:', error);
             }
         };
 
@@ -85,7 +86,7 @@ export function SuiWalletProvider({ network = 'testnet', children }: SuiWalletPr
 
                     setAddress(extractedAddress);
                     SecureStorage.setSecureItem(SECURE_STORAGE_KEYS.SUI_WALLET_ADDRESS, extractedAddress);
-                    console.log('✅ WalletConnect Session Established:', extractedAddress);
+                    blobLog.success('WalletConnect Session Established: ' + extractedAddress);
                 }
             }
         }
@@ -96,13 +97,13 @@ export function SuiWalletProvider({ network = 'testnet', children }: SuiWalletPr
         if (!wcProvider) return;
 
         const handleDisplayUri = (uri: string) => {
-            console.log('🔗 display_uri intercepted! Deep-linking to Slush...');
+            blobLog.info('display_uri intercepted! Deep-linking to Slush...');
             // Hide our Modal overlay but DO NOT call close() — that kills the relay
             setWcModalVisible(false);
             // Deep-link to the Slush app with the WC pairing URI
             const encoded = encodeURIComponent(uri);
             Linking.openURL(`suiwallet://wc?uri=${encoded}`).catch((err) => {
-                console.warn('Failed to open Slush deep-link:', err);
+                blobLog.warn('Failed to open Slush deep-link:', err);
             });
         };
 
@@ -125,7 +126,7 @@ export function SuiWalletProvider({ network = 'testnet', children }: SuiWalletPr
                     await wcProvider.disconnect();
                 }
             } catch (e) {
-                console.warn('Error disconnecting from WC provider', e);
+                blobLog.warn('Error disconnecting from WC provider', e);
             }
         }
         setAddress(null);

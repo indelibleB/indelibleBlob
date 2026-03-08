@@ -305,7 +305,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack }) => {
                             />
                         </View>
 
-                        <TouchableOpacity onPress={() => Linking.openURL('https://indelibleblob.com/research/consent')}>
+                        <TouchableOpacity onPress={() => Linking.openURL('https://indelibleblob.com/#/research/consent')}>
                             <Text style={styles.consentLink}>Learn more about our research and data policies.</Text>
                         </TouchableOpacity>
                     </View>

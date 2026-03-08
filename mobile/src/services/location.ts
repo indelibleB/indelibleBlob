@@ -54,7 +54,7 @@ class LocationServiceClass {
    * @param callback - Function called with each location update
    */
   async startTracking(callback: (location: GPSData) => void): Promise<void> {
-    console.log('🛰️  Starting location tracking...');
+    blobLog.info('Starting location tracking...');
 
     this.callback = callback;
 
@@ -132,11 +132,11 @@ class LocationServiceClass {
         isRTK: (location.coords.accuracy || 999) < 0.1,
       };
 
-      console.log('✅ GPS: %.6f, %.6f (acc: %.1fm)', gpsData.latitude, gpsData.longitude, gpsData.accuracy);
+      blobLog.success(`GPS: ${gpsData.latitude.toFixed(6)}, ${gpsData.longitude.toFixed(6)} (acc: ${gpsData.accuracy.toFixed(1)}m)`);
       return gpsData;
 
     } catch (error) {
-      console.error('❌ Failed to get current location:', error);
+      blobLog.error('Failed to get current location:', error);
       return null;
     }
   }
