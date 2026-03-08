@@ -55,6 +55,7 @@ import type { CapturedPhoto, CapturedVideo, GPSData, CaptureSessionData } from '
 
 // Keep native splash screen visible while JS bundle & assets load
 SplashScreen.preventAutoHideAsync();
+const SPLASH_MIN_MS = 3000; // Hold splash 3 seconds after JS is ready
 
 // =========================================================================
 // ROOT APP COMPONENT (PROVIDERS)
@@ -276,7 +277,10 @@ function IndelibleBlobApp() {
 
   useEffect(() => {
     if (appReady) {
-      SplashScreen.hideAsync();
+      // Always hold splash for a minimum duration after JS is ready.
+      // Native splash appears before JS loads, so we add a guaranteed
+      // post-ready delay for a smooth, unhurried transition.
+      setTimeout(() => SplashScreen.hideAsync(), SPLASH_MIN_MS);
     }
   }, [appReady]);
 

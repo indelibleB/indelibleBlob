@@ -100,7 +100,12 @@ const Scrubber = React.memo<ScrubberProps>(({ label, description, value, color, 
                     <View style={styles.thumbGrip} />
                 </Animated.View>
             </View>
-            {isLockedMin && <Text style={styles.lockedText}>Protocol minimum: 33.33%</Text>}
+            {isLockedMin && (
+                <>
+                    <Text style={styles.lockedText}>Protocol minimum: 33.33%</Text>
+                    <Text style={styles.lockedText}>This floor will be adjusted through a community governance vote once platform "sustainability" is met. The metrics by which we define "sustainability" will be a community vote of its own.</Text>
+                </>
+            )}
         </View>
     );
 });
@@ -234,8 +239,8 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({ onBack }) => {
 
                 <ScrollView style={styles.scrollContent} contentContainerStyle={styles.scrollContainer}>
                     <Text style={styles.sectionTitle}>Creator Allocations</Text>
-                    <Text style={styles.subtitle}>
-                        Adjust your SKR reward splits. The Indelible protocol requires a minimum 33.33% sustainment fee.
+                    <Text style={[styles.subtitle, { textAlign: 'center' }]}>
+                        Adjust your SKR reward splits. The indelible.Blob appreciates your support of the treasury allocation floor temporarily while the Blob finds its indelibility! :)
                     </Text>
 
                     <Scrubber

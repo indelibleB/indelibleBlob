@@ -308,10 +308,15 @@ export function CaptureDetail({ capture, onBack }: CaptureDetailProps) {
         {/* Provenance Grade & Sovereign State — Inline Badge Row */}
         <View style={styles.truthGradeContainer}>
           <View style={styles.badgeRow}>
-            <ProvenanceBadge
-              grade={capture.provenanceGrade || 'UNTRUSTED'}
-              score={capture.forensicScore}
-            />
+            <TouchableOpacity
+              onPress={() => Linking.openURL('https://indelibleblob.com/teepin')}
+              activeOpacity={0.7}
+            >
+              <ProvenanceBadge
+                grade={capture.provenanceGrade || 'UNTRUSTED'}
+                score={capture.forensicScore}
+              />
+            </TouchableOpacity>
             {capture.isSovereign && (
               <View style={styles.sovereignHeaderBadge}>
                 <Text style={styles.sovereignHeaderIcon}>🧿</Text>

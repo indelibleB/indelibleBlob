@@ -10,7 +10,7 @@
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
+      "resizeMode": "cover",
       "backgroundColor": "#100820"
     },
     "ios": {
@@ -18,10 +18,11 @@
       "bundleIdentifier": "com.indelible.blob"
     },
     "android": {
+      "versionCode": 1,
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "adaptiveIcon": {
-        "foregroundImage": "./assets/emoji_size_blob_icon.png",
+        "foregroundImage": "./assets/adaptive-foreground.png",
         "backgroundColor": "#100820"
       },
       "package": "com.indelible.blob",
@@ -57,10 +58,20 @@
         }
       ],
       "expo-asset",
-      "expo-font"
+      "expo-font",
+      ["expo-splash-screen", {
+        "image": "./assets/splash-icon.png",
+        "backgroundColor": "#100820",
+        "imageWidth": 288
+      }]
     ],
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "b13ad4eb-fb1d-49da-9118-a389442befac"
+      }
     }
   }
 }
