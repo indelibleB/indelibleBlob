@@ -53,9 +53,8 @@ import type { CapturedPhoto, CapturedVideo, GPSData, CaptureSessionData } from '
 
 
 
-// Keep native splash screen visible while JS bundle & assets load
+// Keep native splash screen visible until fonts are loaded
 SplashScreen.preventAutoHideAsync();
-const SPLASH_MIN_MS = 3000; // Hold splash 3 seconds after JS is ready
 
 // =========================================================================
 // ROOT APP COMPONENT (PROVIDERS)
@@ -273,23 +272,17 @@ function IndelibleBlobApp() {
   // SPLASH SCREEN — Hide when all assets are ready
   // ==========================================================================
 
-  const appReady = fontsLoaded && !sessionsLoading && !permissions.loading;
-
   useEffect(() => {
-    if (appReady) {
-      // Always hold splash for a minimum duration after JS is ready.
-      // Native splash appears before JS loads, so we add a guaranteed
-      // post-ready delay for a smooth, unhurried transition.
-      setTimeout(() => SplashScreen.hideAsync(), SPLASH_MIN_MS);
+    if (fontsLoaded) {
+      SplashScreen.hideAsync();
     }
-  }, [appReady]);
+  }, [fontsLoaded]);
 
   // ==========================================================================
   // RENDERING
   // ==========================================================================
 
-  if (!appReady) {
-    // Native splash screen is still visible — render nothing behind it
+  if (!fontsLoaded) {
     return null;
   }
 
