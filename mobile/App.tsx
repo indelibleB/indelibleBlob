@@ -53,8 +53,10 @@ import type { CapturedPhoto, CapturedVideo, GPSData, CaptureSessionData } from '
 
 
 
-// Keep native splash screen visible until fonts are loaded
-SplashScreen.preventAutoHideAsync();
+// Hide splash screen — unconditional 2s failsafe in case React init crashes
+SplashScreen.preventAutoHideAsync().then(() => {
+  setTimeout(() => SplashScreen.hideAsync().catch(() => {}), 2000);
+});
 
 // =========================================================================
 // ROOT APP COMPONENT (PROVIDERS)
@@ -269,20 +271,11 @@ function IndelibleBlobApp() {
   }, [addCapture, processCapture, updateCapture]);
 
   // ==========================================================================
-  // SPLASH SCREEN — Hide when all assets are ready
-  // ==========================================================================
-
-  useEffect(() => {
-    if (fontsLoaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [fontsLoaded]);
-
-  // ==========================================================================
   // RENDERING
   // ==========================================================================
 
   if (!fontsLoaded) {
+    // Failsafe timeout at module level will still hide splash after 2s
     return null;
   }
 
