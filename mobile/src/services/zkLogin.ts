@@ -14,7 +14,7 @@ WebBrowser.maybeCompleteAuthSession();
 // Use Expo's proxy in development, or set up Deep Links for production
 const REDIRECT_URI = AuthSession.makeRedirectUri();
 // [SECURITY FIX L-3] Debug log removed — OAuth redirect URI must not leak to console
-const GOOGLE_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID || 'dummy-client-id.apps.googleusercontent.com';
+const GOOGLE_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID || process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || '';
 
 // Legacy keys for migration (deprecated - use SECURE_STORAGE_KEYS instead)
 const STORAGE_KEY_EPHEMERAL = 'indelible_zklogin_ephemeral_key';

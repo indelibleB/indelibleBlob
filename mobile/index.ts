@@ -4,7 +4,8 @@
  * ============================================================================
  */
 
-import '@walletconnect/react-native-compat'; // [FIX] Must be the ABSOLUTE FIRST line executed in the app
+import './ua-polyfill'; // Must be FIRST — polyfills navigator.userAgent before any Web3 lib touches it
+import '@walletconnect/react-native-compat';
 import './shim';
 
 import { registerRootComponent } from 'expo';

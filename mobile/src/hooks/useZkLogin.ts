@@ -58,6 +58,7 @@ export function useZkLogin() {
     const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
         webClientId: GOOGLE_WEB_CLIENT_ID,
         androidClientId: GOOGLE_ANDROID_CLIENT_ID,
+        clientId: GOOGLE_WEB_CLIENT_ID, // [FIX] Fallback explicitly required to prevent "Missing required parameter: client_id" in release APKs when resolution fails
         // The critically important nonce mapping to bind identity
         ...(nonce ? { extraParams: { nonce } } : {}),
     });

@@ -22,6 +22,14 @@ class LocationServiceClass {
   private callback: ((location: GPSData) => void) | null = null;
 
   /**
+   * Check location permission status without requesting
+   */
+  async checkPermissions(): Promise<boolean> {
+    const { status } = await Location.getForegroundPermissionsAsync();
+    return status === 'granted';
+  }
+
+  /**
    * Request location permissions from the user
    */
   async requestPermissions(): Promise<boolean> {

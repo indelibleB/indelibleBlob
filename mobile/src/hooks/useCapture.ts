@@ -21,7 +21,9 @@ import { Alert } from 'react-native';
 import { WalrusService } from '@shared/services/walrus';
 import { SuiService } from '@shared/services/sui';
 import * as Haptics from 'expo-haptics';
-import { SealService } from '@shared/services/seal';
+// LAZY IMPORT: @mysten/seal crashes Hermes with "property is not configurable"
+// when loaded at module init time. Defer to runtime only when sovereign mode is used.
+// import { SealService } from '@shared/services/seal';
 import { blobLog } from '../utils/logger';
 import { CAPTURE_CONFIG } from '../constants/config';
 import { IdentityService } from '../services/identity';
@@ -195,6 +197,9 @@ export function useCapture() {
       if (isSovereign) {
         blobLog.info('🔒 Step 2/4: Encrypting capture via Seal (Sovereign Mode)...');
         updateStatus(captureId, 'uploading');
+
+        // Lazy import: @mysten/seal crashes Hermes at module init, so load only when needed
+        const { SealService } = await import('@shared/services/seal');
 
         // Generate unique nonce for this capture (CSPRNG, 32 bytes)
         sealNonce = SealService.generateNonce();

@@ -8,7 +8,7 @@
 
 import 'react-native-get-random-values'; // Required crypto polyfill for WalletConnect v2
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Alert, ToastAndroid, Platform } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Alert, ToastAndroid, Platform, Linking } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MotiView } from 'moti';
@@ -54,8 +54,8 @@ import type { CapturedPhoto, CapturedVideo, GPSData, CaptureSessionData } from '
 
 
 // Splash screen: prevent auto-hide, then force-hide after 2s no matter what
-SplashScreen.preventAutoHideAsync().catch(() => {});
-setTimeout(() => { SplashScreen.hideAsync().catch(() => {}); }, 2000);
+SplashScreen.preventAutoHideAsync().catch(() => { });
+setTimeout(() => { SplashScreen.hideAsync().catch(() => { }); }, 2000);
 
 // =========================================================================
 // ROOT APP COMPONENT (PROVIDERS)
@@ -100,8 +100,8 @@ function IndelibleBlobApp() {
   const [loginModalVisible, setLoginModalVisible] = useState(false);
   const [identityLoading, setIdentityLoading] = useState(false);
 
-  // Permissions
-  const { permissions } = usePermissions();
+  // Permissions — sequential, user-driven
+  const { permissions, currentStep, requestCurrentPermission, allGranted } = usePermissions();
 
   // Hooks
   const {
@@ -270,8 +270,59 @@ function IndelibleBlobApp() {
   }, [addCapture, processCapture, updateCapture]);
 
   // ==========================================================================
+  // PERMISSION GATE — Sequential permission requests before main UI
+  // ==========================================================================
+
+  const permissionInfo: Record<string, { title: string; description: string; icon: string }> = {
+    camera: {
+      title: 'Camera Access',
+      description: 'indelible.Blob needs camera access to capture verified photos and videos with cryptographic provenance.',
+      icon: '📷',
+    },
+    microphone: {
+      title: 'Microphone Access',
+      description: 'Audio recording is required for verified video captures with full sensory provenance.',
+      icon: '🎙️',
+    },
+    location: {
+      title: 'Location Access',
+      description: 'GPS coordinates are embedded in each capture to prove where and when media was recorded.',
+      icon: '📍',
+    },
+  };
+
+  // ==========================================================================
   // RENDERING
   // ==========================================================================
+
+  // Show permission gate if not all permissions are granted
+  if (!permissions.loading && !allGranted && currentStep !== 'complete') {
+    const info = permissionInfo[currentStep];
+    return (
+      <View style={styles.container}>
+        <StatusBar style="light" />
+        <LinearGradient colors={[COLORS.backgroundDark, COLORS.background]} style={styles.permissionGate}>
+          <Text style={styles.permissionIcon}>{info.icon}</Text>
+          <Text style={styles.permissionTitle}>{info.title}</Text>
+          <Text style={styles.permissionDescription}>{info.description}</Text>
+
+          <View style={styles.permissionProgress}>
+            <View style={[styles.permissionDot, permissions.camera && styles.permissionDotActive]} />
+            <View style={[styles.permissionDot, permissions.microphone && styles.permissionDotActive]} />
+            <View style={[styles.permissionDot, permissions.location && styles.permissionDotActive]} />
+          </View>
+
+          <TouchableOpacity style={styles.permissionButton} onPress={requestCurrentPermission}>
+            <Text style={styles.permissionButtonText}>Grant Permission</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.permissionSettingsButton} onPress={() => Linking.openSettings()}>
+            <Text style={styles.permissionSettingsText}>Open Settings Instead</Text>
+          </TouchableOpacity>
+        </LinearGradient>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -355,7 +406,6 @@ function IndelibleBlobApp() {
         )}
       </MotiView>
 
-
       {/* Identity Loading Overlay */}
       {identityLoading && (
         <View style={styles.identityOverlay}>
@@ -420,5 +470,64 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.85)',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  permissionGate: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 32,
+  },
+  permissionIcon: {
+    fontSize: 64,
+    marginBottom: 24,
+  },
+  permissionTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: COLORS.text,
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  permissionDescription: {
+    fontSize: 15,
+    color: COLORS.textSecondary,
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: 32,
+    maxWidth: 300,
+  },
+  permissionProgress: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 32,
+  },
+  permissionDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+  },
+  permissionDotActive: {
+    backgroundColor: COLORS.primary,
+  },
+  permissionButton: {
+    backgroundColor: COLORS.primary,
+    paddingVertical: 16,
+    paddingHorizontal: 48,
+    borderRadius: 28,
+    marginBottom: 16,
+  },
+  permissionButtonText: {
+    color: '#000',
+    fontSize: 17,
+    fontWeight: '700',
+  },
+  permissionSettingsButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+  },
+  permissionSettingsText: {
+    color: COLORS.textSecondary,
+    fontSize: 14,
   },
 });
