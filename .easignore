@@ -1,0 +1,52 @@
+# EAS Build Ignore — only upload what the mobile build needs
+# When .easignore exists, it REPLACES .gitignore (not additive)
+# EAS reads this from the monorepo root (where .git lives)
+
+# Node modules (EAS installs fresh on build server)
+node_modules/
+**/node_modules/
+
+# Other workspaces (not needed for mobile APK)
+website/
+docs/
+contracts/
+tools/
+tests/
+mcp/
+_legacy_backup/
+
+# Git and CI
+.git/
+.github/
+
+# Build artifacts and caches
+mobile/android/app/build/
+mobile/android/build/
+mobile/android/.gradle/
+mobile/ios/
+mobile/.expo/
+mobile/dist/
+mobile/web-build/
+
+# Dev tooling
+.vscode/
+.claude/
+
+# Env files
+.env
+.env.local
+
+# Large binaries
+tools/sui/
+*.abi3.so
+*.cpython-*.so
+
+# WSL metadata
+*Zone.Identifier
+*:Zone.Identifier
+
+# Crash logs
+crash_log*.txt
+
+# Python venvs
+mcp/venv/

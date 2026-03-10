@@ -1,0 +1,14 @@
+src/services/SuiService.ts(42,10): error TS1484: 'SuiData' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/services/SuiService.ts(42,19): error TS1484: 'Capture' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/services/SuiService.ts(42,28): error TS1484: 'WalrusData' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/services/SuiService.ts(43,1): error TS6133: 'CAPTURE_CONFIG' is declared but its value is never read.
+src/services/SuiService.ts(46,32): error TS1294: This syntax is not allowed when 'erasableSyntaxOnly' is enabled.
+src/services/WalrusService.ts(45,5): error TS1294: This syntax is not allowed when 'erasableSyntaxOnly' is enabled.
+src/services/WalrusService.ts(46,5): error TS1294: This syntax is not allowed when 'erasableSyntaxOnly' is enabled.
+src/services/WalrusService.ts(77,25): error TS2322: Type 'Uint8Array<ArrayBufferLike>' is not assignable to type 'BlobPart'.
+  Type 'Uint8Array<ArrayBufferLike>' is not assignable to type 'ArrayBufferView<ArrayBuffer>'.
+    Types of property 'buffer' are incompatible.
+      Type 'ArrayBufferLike' is not assignable to type 'ArrayBuffer'.
+        Type 'SharedArrayBuffer' is not assignable to type 'ArrayBuffer'.
+          Types of property '[Symbol.toStringTag]' are incompatible.
+            Type '"SharedArrayBuffer"' is not assignable to type '"ArrayBuffer"'.
