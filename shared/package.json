@@ -6,7 +6,7 @@
     "dependencies": {
         "@mysten/seal": "^0.9.6",
         "@mysten/sui": "^1.21.1",
-        "expo-file-system": "~18.0.0",
+        "expo-file-system": "~55.0.10",
         "buffer": "^6.0.3"
     }
 }
