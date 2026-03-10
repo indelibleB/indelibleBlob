@@ -56,7 +56,7 @@
     "expo-video-thumbnails": "~9.0.0",
     "expo-web-browser": "~14.0.2",
     "jpeg-js": "^0.4.4",
-    "lucide-react-native": "^0.563.0",
+    "lucide-react-native": "^0.577.0",
     "framer-motion": "^10.18.0",
     "moti": "0.30.0",
     "process": "^0.11.10",
