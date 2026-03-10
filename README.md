@@ -1,33 +1,35 @@
-
 # indelible.Blob
 
-> **The Digital Truth Machine.** A protocol for anchoring digital reality in silicon and math.
+> **In·del·i·ble** *(adj.)*: Marks that cannot be removed, washed away, or erased. In the physical world, it's the ink that survives the flood. In the digital world, it's **the truth that survives the algorithm.**
 
-## Quick Start
+## What is indelible.Blob?
 
-To get started with local development, see the **[Local Development Setup Guide](docs/guides/LOCAL_DEVELOPMENT.md)**.
+**indelible.Blob** is decentralized truth infrastructure for the age of synthetic media. It fuses hardware-level device attestation with the immutable ledgers of **Solana** and **Sui** to prove that photos and videos are real at the exact **moment of capture,** not after. Not generated, nor edited by human or machine alike.
 
-## Project Documentation
+We turn fleeting digital signals into permanent "Blobs" of verifiable evidence, stored across the censorship-resistant **Walrus** network. The "Blob" is the fluid, organic truth; the "Cube" is the rigid, cryptographic container that protects it.
 
-All project documentation, including the Constitution, architecture, decision logs, and agent protocols, can be found in the **[/docs](docs/)** directory. The `docs/README.md` file serves as the central navigation index for all documentation.
+## Why This Matters Right Now
 
-## Sprint Status
+We are entering an era where seeing is no longer believing. 96% of AI-generated deepfakes now bypass traditional detection, and the ["liar's dividend"](https://isps.yale.edu/research/publications/isps24-07) allows the powerful to dismiss real evidence as fake. This is not a technical glitch. It is a **crisis of trust** that threatens our interpersonal respect, our legal systems, and our shared global reality.
 
-For the latest sprint status, see **[SPRINT_STATUS.md](docs/SPRINT_STATUS.md)**.
+Every existing solution tries to *detect* lies after they spread. That is a losing game. **indelible.Blob** shifts the burden of proof from detection to **verification at the source**.
 
-## Mission
+- **For You:** The power to defend your own eyes and your own work.
 
-To restore trust to human interaction by proving that what you see is what was captured. We are building the infrastructure for verifiable, immutable, and legally defensible digital media.
+- **For the Community:** A return to a shared ground of facts.
 
-## The Sovereign Stack
+- **For the World:** A path toward a global culture where authenticity is valued and the media that connects us can be trusted again.
 
-| Layer | Technology | Function |
-|---|---|---|
-| **Hardware Root of Trust** | Solana Seeker TEEPIN | Cryptographically sign media at the moment of capture. |
-| **Immutable Notary** | Sui Blockchain | Record the cryptographic proof of each capture. |
-| **Decentralized Storage** | Walrus Protocol | Store the captured media in a censorship-resistant network. |
-| **Identity & Commerce** | Solana Blockchain | Manage user identity and the SKR token economy. |
+## Get Started
+
+Download and install the APK directly:
+
+```
+indelible.Blob.apk
+```
+
+The APK is located in the root of this repository. Install it on your **Solana Mobile Seeker** or any compatible Android device to begin capturing verifiable truth.
 
 ---
 
-*This repository is managed by a hybrid human-agent team. For details on our structure and protocols, see the [Constitution](docs/foundation/CONSTITUTION.md) and [Communication Protocols](docs/agents/protocols/COMMUNICATION_PROTOCOLS.md).*
+*Capture the truth. Make it indelible.*
