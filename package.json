@@ -1,0 +1,13 @@
+{
+  "name": "indelible-blob-monorepo",
+  "private": true,
+  "workspaces": [
+    "website",
+    "shared"
+  ],
+  "scripts": {
+    "website:dev": "npm run dev -w website",
+    "shared:build": "npm run build -w shared"
+  },
+  "version": "1.0.0"
+}

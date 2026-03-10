@@ -1,0 +1,26 @@
+nohup: ignoring input
+🚀 Enhanced MCP Server for indelible.Blob
+============================================================
+✅ Connected to GitHub: illuminatedmovement/indelible-blob
+
+✅ Server Status:
+   GitHub: True
+   Repository: illuminatedmovement/indelible-blob
+   Cache: 1 files
+
+📝 Testing: Post instruction to Antigravity
+✅ Saved to GitHub: mcp-data/mcp-data-store.json
+   Instruction posted to antigravity: Claude Code Integration
+
+📋 Testing: Get pending instructions
+   Found 2 instruction(s)
+
+============================================================
+✅ Enhanced MCP Server initialized successfully!
+
+📌 Next Steps:
+   1. Copy mcp_server_enhanced.py to your local machine
+   2. Copy mcp_client_antigravity.py to your local machine
+   3. Set GITHUB_TOKEN environment variable
+   4. Run: python mcp_server_enhanced.py
+   5. In Antigravity, run: python mcp_client_antigravity.py get-instructions

@@ -1,0 +1,44 @@
+node_modules/
+.expo/
+dist/
+web-build/
+.vscode/
+
+# Build artifacts
+android/app/build/
+android/build/
+android/.gradle/
+ios/Pods/
+ios/build/
+
+# Env
+.env
+.env.local
+
+# Tools & Binaries
+tools/sui/sui-debug
+tools/sui/sui-node
+tools/sui/sui
+tools/sui/move-analyzer
+
+# WSL/Windows NTFS metadata artifacts
+*Zone.Identifier
+*:Zone.Identifier
+
+# Crash logs
+crash_log*.txt
+
+# Python virtual environments
+mcp/venv/
+
+# Python virtual environments
+.venv*/
+venv/
+mcp/venv/
+
+# Claude worktrees
+.claude/worktrees/
+
+# Local-only files
+seeker_logs*.txt
+read_pdf.py

@@ -1,0 +1,251 @@
+# indelible.Blob — Final Sprint Coordination Sync
+
+**Classification:** All Agents — Mandatory Read
+
+**From:** Coordination Hub (Manus) + C.I.C.
+
+**Date:** March 4, 2026
+
+**Sprint Deadline:** March 7, 2026 @ 12:00 PM MST (Noon) — **3.5 days remaining**
+
+**Submission Window Closes:** March 8, 2026 @ 00:00 UTC (hard deadline)
+
+**Filed at:** `docs/coordination/WEEK_OF_MAR_2.md` (append)
+
+---
+
+## 🎉 Milestone: Full Capture-to-Chain Pipeline Confirmed
+
+**This is the most important update of the entire project.**
+
+As of March 4, 2026, the complete capture-to-chain pipeline is confirmed operational on a live Solana Seeker device. The following was verified end-to-end in a single session:
+
+| Step | Result |
+| --- | --- |
+| TEEPIN Hardware Attestation | ✅ GOLD grade — `"Solana Seeker Hardware Enclave (TEEPIN) Active"` |
+| zkLogin (Google OAuth → Enoki → ZK Proof → Sui Address) | ✅ Address `0xcf674ec930b7ce3f18bcfbad638cc854a14ebe8215187479cc5f9c8b5d7669dd` derived |
+| Session Bind (Seed Vault signature, zero popups) | ✅ `T6EMYtbPyu0CyLVp...` — no MWA popup during capture |
+| Neural Fingerprint (pHash) | ✅ Generated in 23–75ms |
+| BlobMark Glassmorphic Passport | ✅ Applied to all captures |
+| Walrus Upload | ✅ Blob ID `dyejKf7s-6RQV12NILkS4lMLsxnLqavY5Prh8xnhcqg` |
+| Sui Blockchain Recording | ✅ Digest `GST9BVMuuvH4GqEJA1wneEG1xvQ9aijs3J6grNXFKYzb` |
+| Video capture (4.7s, 1080p) | ✅ Full pipeline processed |
+
+**The core product works.** Every remaining task is polish, features, and presentation. The team should internalize this: we are shipping a working product, not a demo.
+
+---
+
+## The Schedule — Non-Negotiable
+
+With a noon March 7 submission target, we have **3.5 days** structured as follows:
+
+| Day | Date | Focus | Hard Cutoff |
+| --- | --- | --- | --- |
+| **Day 1** | March 4 (today) | SKR integration + Seal encryption layer | EOD: Auth + SKR gating complete |
+| **Day 2** | March 5 | Verification endpoint + Creator Allocation UI + Security audit | EOD: All P0 features complete |
+| **Day 3** | March 6 | Website polish + Walrus Sites deployment + Demo recording | EOD: APK built, website live |
+| **Day 3.5** | March 7 AM | Submission creation, pitch video, final polish | 12:00 PM MST: Submit |
+
+**March 6 EOD is the feature freeze. It may even be nice to accelerate the feature freeze to March 6 at 1 MST as a buffer for final debugging and final freeze by March 6 EOD.** No new code after that point. March 7 morning is exclusively for submission materials.
+
+---
+
+## Complete Task List by Priority
+
+### P0 — Must Ship (Required for Submission)
+
+These are non-negotiable. If any P0 item is not complete by March 6 EOD, we ship without it and document the gap honestly.
+
+| # | Task | Owner | Target | Notes |
+| --- | --- | --- | --- | --- |
+| P0-1 | **SKR balance check** — SPL token read via Solana RPC; gates paid captures; Seeker holders get free tier | 1A | March 4 EOD | Depends on auth pipeline (now complete) |
+| P0-2 | **SKR capture credits** — SPL token transfer via MWA for paid captures | 1A | March 4 EOD | Follows P0-1 |
+| P0-3 | **Seeker device detection** — TEEPIN boolean for free tier gating | 1A | March 4 (exists in `trust.ts`, wire to SKR gate) | Already in codebase |
+| P0-4 | **Seal Encryption Layer — "Sovereign Mode"** | 1A + 1D | March 5 EOD | See full scope below |
+| P0-5 | **Security audit of all new code** (SKR, Seal, Session Keys) | 1D | March 5 EOD | Claude Code assisted |
+| P0-6 | **Android APK build** — final production build, tested on Seeker | 1A | March 6 EOD | Must run clean on device |
+| P0-7 | **Website polish** — final copy, verified captures showcase, live verification portal | 1E | March 6 EOD | See website scope below |
+| P0-8 | **Walrus Sites deployment** — website published to Walrus mainnet, publicly accessible | 1E + 1C | March 6 EOD | See deployment scope below |
+| P0-9 | **Demo video** (2–3 min, capture → attestation → Walrus → Sui → verify) | C.I.C. + all agents | March 7 AM | Recorded on Seeker device |
+| P0-10 | **Submission text** — pitch narrative for Align Nexus platform | Agent 3 + Agent 4 | March 7 AM | Draft exists, needs finalization |
+| P0-11 | **GitHub repository** — clean, documented, submission-ready | 1A + Agent 1 | March 6 EOD | README updated, no debug artifacts |
+
+### Security Review Gate (Pre-Push)
+
+**CRITICAL RULE:** Before any code from the local `feature/sprint-final` branch is pushed to the remote GitHub repository, **1D Security Lead MUST review all commits.** 
+- **Focus:** No exposed keys (especially `jayson` testnet SKR authority).
+- **Process:** 1A alerts 1D when the branch is local-locked. 1D audits and approves the push.
+
+### P1 — Build If Time (Strengthens Submission)
+
+These are high-value but not blockers. Attempt in order. Stop when time runs out.
+
+| # | Task | Owner | Target | Notes |
+| --- | --- | --- | --- | --- |
+| P1-1 | **Verification endpoint** (`POST /verify`) — REST API querying Sui, Walrus, Solana | 1B | March 6 | Enables live demo of verification flow |
+| P1-2 | **Signed Data Package** — JSON + Ed25519 signature for verification responses | 1B | March 6 | Follows P1-1 |
+| P1-3 | **Creator Allocation UI** — three-slider interface with 33.33% Treasury floor | 1A | March 6 | Present in demo even if not fully wired |
+| P1-4 | **Basic governance voting UI** — SKR balance check + on-chain vote recording | 1A | March 6 | Mockup acceptable for demo |
+| P1-5 | **Slush wallet integration** — if one more fix resolves pairing | 1A | March 5 | Decision: max 1 hour; ship zkLogin only if blocked |
+
+### Present in Demo (Not Build)
+
+These are story elements for the pitch deck and demo narrative. No engineering required.
+
+- Creator Rewards flywheel diagram
+
+- Social Entrepreneurship Research Instrument framework
+
+- C2PA hybrid positioning ("C2PA can be stripped; blockchain cannot")
+
+- Enterprise API pricing tiers and multi-currency payment model
+
+- Peer-to-peer marketplace roadmap (post-hackathon)
+
+---
+
+## Seal Encryption Layer — Full Scope (P0-4)
+
+**Why this is P0:** Seal is the "Sovereign Mode" that makes indelible.Blob a privacy-first product, not just a transparency tool. It is the feature that differentiates us from every other media verification product. Without it, we are a notarization app. With it, we are a self-sovereign truth infrastructure.
+
+**What already exists:**
+
+- `shared/services/seal.ts` — SealClient initialized, `encrypt()` method implemented with AES-GCM-256, threshold-1, testnet server configs confirmed
+
+- `website/src/services/SealService.ts` — Web implementation exists
+
+**What needs to be built (mobile integration):**
+
+| Component | Description | File(s) |
+| --- | --- | --- |
+| **Sovereign Mode toggle** | UI switch in capture settings — "Public Blob" vs. "Sovereign Blob (Seal-encrypted)" | New component in `mobile/src/components/` |
+| **Seal encrypt on capture** | When Sovereign Mode is active, encrypt the media file using `SealService.encrypt(file, userSuiAddress)` before Walrus upload | Modify `mobile/src/services/capture.ts` or equivalent pipeline file |
+| **Encrypted Walrus upload** | Upload the encrypted blob (not the raw file) to Walrus when in Sovereign Mode | Modify Walrus upload step in pipeline |
+| **Sui access policy** | Record the Seal policy ID on-chain alongside the Walrus Blob ID in `record_capture()` — so only the authorized identity can decrypt | Modify `contracts/sui/sources/indelible_blob.move` or the Sui recording step |
+| **Decryption on view** | When the owner views a Sovereign Blob, call `SealService.decrypt()` using their zkLogin/session identity | New flow in gallery/viewer |
+| **Trust grade indicator** | Sovereign Blobs display a distinct "🔒 Sovereign" badge alongside the existing GOLD/SILVER grade | UI update |
+
+**Security constraints (1D must verify):**
+
+- Encryption key is derived from the user's Sui address (identity-based encryption) — never stored server-side
+
+- Seal key servers are threshold-based (2-of-2 testnet config already in `seal.ts`) — no single point of failure
+
+- Decryption requires the user's active zkLogin session — cannot be delegated to a session key
+
+- Sovereign Blobs are never transmitted unencrypted — encrypt before upload, decrypt after download
+
+**Seal SDK reference:** `@mysten/seal` package, `SealClient.encrypt()` and `SealClient.decrypt()` methods. Package ID `0x58dce5d91278bceb65d44666ffa225ab397fc3ae9d8398c8c779c5530bd978c2` (testnet).
+
+---
+
+## Website & Walrus Sites Deployment Scope (P0-7, P0-8)
+
+**Website polish (1E — March 6 EOD):**
+
+- Final hero copy: "Signify & Verify. The decentralized truth infrastructure for the age of synthetic media."
+
+- Live verification portal (already exists — ensure it queries the testnet Sui contract correctly)
+
+- Showcase of verified captures from the successful March 4 test session (Walrus URLs + Sui explorer links)
+
+- SKR integration section: Capture Credits, Creator Rewards, Governance — brief, visual
+
+- Sovereign Mode explainer: what it is, why it matters
+
+- Team/mission section aligned with Constitution values
+
+- Mobile download CTA (links to APK / dApp Store listing)
+
+**Walrus Sites deployment (1E + 1C — March 6 EOD):**
+
+The website must be deployed to Walrus mainnet using the `site-builder` CLI tool. This makes it censorship-resistant and permanently accessible — a direct embodiment of our values and a compelling story for the judges.
+
+Steps:
+
+1. Build the website to a static output directory (`npm run build` or equivalent)
+
+1. Install `site-builder` binary (Ubuntu x86_64 mainnet binary from Mysten)
+
+1. Configure `~/.config/walrus/sites-config.yaml` with mainnet context
+
+1. Run `site-builder publish <build-directory>` — returns a Site Object ID and portal URL
+
+1. Record the portal URL (format: `https://<site-object-id>.walrus.site` ) in the submission
+
+1. Update `docs/SPRINT_STATUS.md` with the live URL
+
+**The Walrus Sites URL becomes part of the submission.** It is the proof that we don't just talk about decentralization — we deploy to it.
+
+---
+
+## Submission Materials — March 7 AM (Hard Deadline: 12:00 PM MST)
+
+All submission materials must be ready before noon. The following is the complete checklist:
+
+| Item | Owner | Status | Notes |
+| --- | --- | --- | --- |
+| Android APK | 1A | Not yet built | Final build March 6 EOD |
+| GitHub repository (clean) | Agent 1 | In progress | README update needed |
+| Demo video (2–3 min) | C.I.C. | Not started | Record on Seeker, show full pipeline |
+| Pitch narrative (Align Nexus text) | Agent 3 + Agent 4 | Draft exists | Finalize March 7 AM |
+| Walrus Sites URL | 1E + 1C | Not yet deployed | Deploy March 6 |
+| Sui Explorer link (verified capture) | 1A | ✅ Available now | `GST9BVMuuvH4GqEJA1wneEG1xvQ9aijs3J6grNXFKYzb` |
+| SKR bonus prize eligibility | 1A | Pending P0-1/P0-2 | Must have functional SKR integration |
+
+**Demo video narrative (suggested arc — 2.5 minutes):**
+
+1. **Hook (0:00–0:20):** "A deepfake just went viral. The damage is done before anyone can verify it. What if truth was provable at the moment of capture?"
+
+1. **The capture (0:20–1:00):** Open indelible.Blob on Seeker. Show GOLD grade. Take a photo. Show zero popups. Show the BlobMark passport applied.
+
+1. **The chain (1:00–1:40):** Show the Walrus upload completing. Show the Sui transaction recording on-chain. Show the Sui Explorer link — live, verifiable.
+
+1. **The verification (1:40–2:10):** Open the public verification portal. Paste the Blob ID. Show the full chain of custody — device, identity, timestamp, GPS, hash.
+
+1. **The vision (2:10–2:30):** "This is not just a photo app. This is the protocol for reality."
+
+---
+
+## Agent Assignments — Final Sprint
+
+| Agent | Primary Focus | Secondary Focus | Hard Deadline |
+| --- | --- | --- | --- |
+| **1A (Mobile Lead)** | SKR integration (P0-1, P0-2, P0-3) → Seal Sovereign Mode (P0-4) → Creator Allocation UI (P1-3) | Slush (max 1hr, then drop) | March 6 EOD: APK built |
+| **1B (Backend Lead)** | Verification endpoint + Signed Data Package (P1-1, P1-2) | Coordinate with 1A on API contract | March 6 EOD |
+| **1C (Storage/Infra Lead)** | Walrus Sites deployment support (P0-8) | Ensure testnet Walrus stability | March 6 EOD: Site live |
+| **1D (Security Lead)** | Audit all new code: SKR, Seal, Session Keys (P0-5) | Claude Code assisted review | March 5 EOD: Audit complete |
+| **1E (Web Lead)** | Website polish (P0-7) + Walrus Sites build prep | Coordinate with 1C on deployment | March 6 EOD: Site deployed |
+| **Agent 3 (Business Strategy)** | Finalize pitch narrative for Align Nexus | Review SKR bonus prize eligibility criteria | March 7 AM |
+| **Agent 4 (Content)** | Demo video script finalization | Social announcement draft (post-submission) | March 7 AM |
+| **Agent 5 (Research)** | Transparency Dashboard data model (coordinate with 1A on allocation UI output format) | Phase 2 research protocol | Post-hackathon |
+| **Claude Code** | Security review of Seal integration + SKR token handling | Architecture consistency check | March 5 EOD |
+
+---
+
+## Decisions — Locked, Do Not Revisit
+
+The following decisions are final. Any agent proposing to reopen these during the sprint should be redirected to post-hackathon discussion.
+
+| Decision | Outcome |
+| --- | --- |
+| Session Keys architecture | Immutable. Zero-popup capture is non-negotiable. |
+| zkLogin as primary auth | Ship with zkLogin. Slush is P1 with a 1-hour time cap. |
+| Public verification | Free forever. No exceptions. |
+| Seal Sovereign Mode | P0 — must ship with first launch. |
+| Creator-Directed Allocation | 33.33% Treasury floor. Three-slider UI. |
+| Walrus Sites for website | Deploy to mainnet. This is the submission URL. |
+| Submission deadline | March 7, 12:00 PM MST. Non-negotiable. |
+
+---
+
+## Values Reminder
+
+We are shipping infrastructure for truth in an age of synthetic media. The capture-to-chain pipeline working on a real Seeker device is proof that this is not a concept — it is a product. Every hour of the next 3.5 days is in service of getting that product in front of the world.
+
+**Truth above all. Decentralization. Self-custody. Ethical technology. Transparency.**
+
+---
+
+*Prepared by: Coordination Hub (Manus) in partnership with C.I.C.**Pending C.I.C. approval before dissemination to all agents.**Upon approval: append to **`docs/coordination/WEEK_OF_MAR_2.md`** and update **`docs/SPRINT_STATUS.md`**.*
+

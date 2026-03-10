@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls:*)",
+      "Bash(find:*)",
+      "Bash(cd:*)",
+      "Bash(npm audit:*)"
+    ],
+    "additionalDirectories": [
+      "\\home\\theil\\indelible-blob\\docs"
+    ]
+  }
+}

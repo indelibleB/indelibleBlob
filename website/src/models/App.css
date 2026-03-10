@@ -1,0 +1,39 @@
+/* Override Solana Wallet Adapter Styles */
+.wallet-adapter-button-trigger {
+  display: flex;
+  align-items: center;
+}
+
+.wallet-adapter-button {
+  font-family: inherit;
+  font-weight: 600;
+  border-radius: 9999px;
+  height: 2.5rem;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  background-color: transparent;
+  color: #fff;
+  transition: all 0.2s;
+}
+
+.wallet-adapter-button:not([disabled]):hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.wallet-adapter-modal-wrapper {
+  background: #09090b !important; /* zinc-950 */
+  border: 1px solid #27272a !important; /* zinc-800 */
+  border-radius: 1rem !important;
+}
+
+.wallet-adapter-modal-title {
+  color: #fff !important;
+}
+
+.wallet-adapter-modal-button-close {
+  background-color: #27272a !important; /* zinc-800 */
+}
+
+.wallet-adapter-modal-button-close svg {
+  fill: #a1a1aa !important; /* zinc-400 */
+}
