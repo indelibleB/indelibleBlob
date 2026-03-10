@@ -10,7 +10,7 @@ jobs:
   security-scan:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
       - name: Run Claude Code Scan
         run: |
           # Claude Code scanning via GitHub Actions
