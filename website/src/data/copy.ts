@@ -13,17 +13,20 @@ export const landingCopy = {
         stats: [
             {
                 value: "51%",
-                label: "Identification accuracy human perception is essentially a coin toss",
+                labelHighlight: "Identification Accuracy",
+                labelRest: "human perception is essentially a coin toss",
                 color: "text-red-400"
             },
             {
                 value: "70%",
-                label: "Reproducibility gap in scientific research unverifiable origins",
+                labelHighlight: "Reproducibility Gap",
+                labelRest: "in scientific research unverifiable origins",
                 color: "text-orange-400"
             },
             {
                 value: "$78B",
-                label: "Global annual cost of misinformation impact on the economy",
+                labelHighlight: "Global Annual Cost",
+                labelRest: "of misinformation impact on the economy",
                 color: "text-emerald-400"
             }
         ],
@@ -51,19 +54,19 @@ export const landingCopy = {
     },
     solution: {
         title: "The Solution: indelible.Blob",
-        description: "A decentralized infrastructure that makes digital content verifiable, permanent, and tamper-proof. Bridging the Walrus Protocol, Sui blockchain, and Solana Ecosystem.",
+        description: "A decentralized infrastructure that makes digital content verifiable, permanent, and tamper-proof. Bridging the Solana, Seeker Mobile, and Sui Ecosystems with a special shoutout to the supportive infrastructure rails of Walrus and Seal Protocols.",
         features: [
             {
                 title: "TEEPIN Attestation",
-                desc: "Hardware-level security grading (GOLD/SILVER) linking the absolute timeline of media to device signatures."
+                desc: "Hardware-level security grading linking the absolute timeline of media to device signatures."
             },
             {
-                title: "SKR Economies",
-                desc: "Reward structures featuring instant crypto payment to creators upon successfully verified captures."
+                title: "SKR Alignment",
+                desc: "SKR ecosystem alignment puts the communities built on top of it firmly into their proper role, Value Creators and Owners."
             },
             {
                 title: "Sovereign Mode (🧿)",
-                desc: "Military-grade AES-GCM local device encryption shielding your data until you are ready."
+                desc: "AES-GCM local device encryption through Seal Protocol, shielding your data until you dictate what happens with it."
             },
             {
                 title: "Proof of Witness",

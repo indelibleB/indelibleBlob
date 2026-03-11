@@ -22,10 +22,10 @@ export default function Research() {
                         Research Initiatives
                     </div>
                     <h1 className="text-4xl md:text-6xl font-black mb-6 tracking-tighter">
-                        HELP US BUILD A <span className="bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">FAIRER CREATOR ECONOMY</span>
+                        HELP US BUILD A <span className="bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent">STRONGER, LONGEVITY-MINDED, CREATIVE ECONOMY</span>
                     </h1>
                     <p className="text-xl text-zinc-400 max-w-3xl mx-auto font-medium">
-                        The Indelible Blob protocol is actively studying the mechanics of sovereign ownership. By participating, you help us design better, community-directed economic models.
+                        The indelible.Blob protocol is actively studying the mechanics of sovereign ownership. By participating, you help us design better, community-directed economic models.
                     </p>
                 </motion.div>
 
@@ -42,7 +42,7 @@ export default function Research() {
                         <ul className="space-y-4 text-zinc-300">
                             <li className="flex items-start gap-3">
                                 <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 mt-2 shrink-0" />
-                                <span><strong className="text-white">Revenue Distribution:</strong> Analyzing fair splits between creators and distribution networks.</span>
+                                <span><strong className="text-white">Revenue Distribution:</strong> Analyzing splits between creators and distribution networks.</span>
                             </li>
                             <li className="flex items-start gap-3">
                                 <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 mt-2 shrink-0" />
@@ -94,7 +94,7 @@ export default function Research() {
             <div className="w-full bg-black/50 border-t border-zinc-900 pt-16 mt-auto relative z-10 shadow-[0_-20px_50px_rgba(0,0,0,0.5)]">
                 <div className="text-center mb-12 px-6">
                     <h2 className="text-3xl font-bold mb-4">Foundation of Truth</h2>
-                    <p className="text-zinc-400">The academic and technical research powering the Indelible Blob protocol.</p>
+                    <p className="text-zinc-400">The academic and technical research powering the indelible.Blob protocol.</p>
                 </div>
                 <div className="pb-12 text-center">
                     <Sources />

@@ -166,12 +166,16 @@ export default function Sources() {
                     transition={{ delay: 0.3, duration: 0.6 }}
                     className="mt-20 text-center"
                 >
-                    <div className="p-8 bg-zinc-900/20 border border-emerald-500/5 rounded-2xl max-w-4xl mx-auto backdrop-blur-sm">
-                        <p className="text-[11px] text-zinc-500 uppercase tracking-widest mb-2 font-bold">Bottom-Up Market Validation</p>
-                        <p className="text-sm text-zinc-400 leading-relaxed">
-                            Total projections represent a tiered adoption scale starting from the Pacific Northwest (PNW) and expanding globally.
-                            Our models account for <span className="text-emerald-400/80">5.56B internet users</span> and a growing <span className="text-emerald-400/80">$8.5B 3D verification market</span>.
-                        </p>
+                    <div className="p-8 bg-zinc-900/20 border border-emerald-500/5 rounded-2xl max-w-4xl mx-auto backdrop-blur-sm flex flex-col items-center gap-6">
+                        <p className="text-[11px] text-zinc-500 uppercase tracking-widest font-bold">Bottom-Up Market Validation</p>
+                        <h3 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-emerald-400 via-cyan-300 to-purple-400 bg-clip-text text-transparent tracking-tight">
+                            Let Reality Speak
+                        </h3>
+                        <img
+                            src="/branding/icon.png"
+                            alt="indelible.Blob"
+                            className="w-32 h-32 md:w-40 md:h-40 object-contain rounded-2xl"
+                        />
                     </div>
                 </motion.div>
             </div>

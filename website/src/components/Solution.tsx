@@ -8,7 +8,7 @@ const architecture = [
     { step: '2', title: 'Store', desc: 'Walrus distributes across nodes' },
     { step: '3', title: 'Anchor', desc: 'Sui records blob ID + metadata' },
     { step: '4', title: 'Signify/Verify', desc: 'Anyone can verify authenticity' },
-    { step: '5', title: 'Solana', desc: 'Powers Seeker hardware capture and the Truth Marketplace' },
+    { step: '5', title: 'Solana', desc: "Powers Seeker hardware capture and the Truth Marketplace (Under Development, C'mon!)" },
 ];
 
 export default function Solution() {

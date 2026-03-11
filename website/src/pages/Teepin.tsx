@@ -24,7 +24,7 @@ export default function Teepin() {
                         UNDERSTANDING <span className="text-white">TEEPIN</span> PROVENANCE
                     </h1>
                     <p className="text-lg text-zinc-400 max-w-2xl mx-auto font-medium">
-                        The Indelible Blob protocol grades the cryptographic integrity of captured media based on the hardware execution environment of the capturing device.
+                        The indelible.Blob protocol grades the cryptographic integrity of captured media based on the hardware execution environment of the capturing device.
                     </p>
                 </motion.div>
 
