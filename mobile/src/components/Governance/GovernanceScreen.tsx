@@ -147,7 +147,7 @@ export const GovernanceScreen: React.FC<GovernanceScreenProps> = ({ onBack, onVi
                     {/* Survey CTA */}
                     <TouchableOpacity
                         style={styles.surveyBanner}
-                        onPress={() => Linking.openURL('https://indelibleblob.com/#/survey')}
+                        onPress={() => Linking.openURL('https://indelibleblob.wal.app/#/survey')}
                     >
                         <Text style={styles.surveyText}>
                             Want to share deeper insights to support the Blob's journey? Please jump into our survey portal!

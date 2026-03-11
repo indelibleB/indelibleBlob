@@ -395,7 +395,7 @@ export function CameraView({
                   { text: 'Got it', style: 'cancel' },
                   {
                     text: 'Learn More',
-                    onPress: () => Linking.openURL('https://indelible-blob.com/#/sovereign-guide')
+                    onPress: () => Linking.openURL('https://indelibleblob.wal.app/#/sovereign-guide')
                   }
                 ]
               );

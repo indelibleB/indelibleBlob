@@ -166,7 +166,7 @@ export function CaptureDetail({ capture, onBack }: CaptureDetailProps) {
                 icon="📜"
                 onPressValue={() => {
                   const id = capture.walrusData?.blobId || capture.suiData?.digest;
-                  Linking.openURL(`https://indelible-blob.com/#/verify?id=${id}`);
+                  Linking.openURL(`https://indelibleblob.wal.app/#/verify?id=${id}`);
                 }}
               />
             )}
@@ -310,7 +310,7 @@ export function CaptureDetail({ capture, onBack }: CaptureDetailProps) {
         <View style={styles.truthGradeContainer}>
           <View style={styles.badgeRow}>
             <TouchableOpacity
-              onPress={() => Linking.openURL('https://indelible-blob.com/#/teepin')}
+              onPress={() => Linking.openURL('https://indelibleblob.wal.app/#/teepin')}
               activeOpacity={0.7}
             >
               <ProvenanceBadge
