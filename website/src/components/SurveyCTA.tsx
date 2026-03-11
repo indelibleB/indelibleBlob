@@ -1,8 +1,10 @@
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { MessageSquare, ArrowRight, Sparkles } from 'lucide-react';
 import { useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export default function SurveyCTA() {
+    const navigate = useNavigate();
     const sectionRef = useRef<HTMLElement>(null);
     const { scrollYProgress } = useScroll({
         target: sectionRef,
@@ -62,7 +64,7 @@ export default function SurveyCTA() {
                         </div>
                         <div className="p-8 bg-zinc-900/40 border border-zinc-800/50 rounded-2xl backdrop-blur-sm group hover:border-emerald-500/30 transition-all">
                             <div className="text-emerald-400 font-black text-xs uppercase tracking-widest mb-4">Direct Influence</div>
-                            <p className="text-zinc-400 font-bold text-lg leading-tight">Shape the Indelible roadmap.</p>
+                            <p className="text-zinc-400 font-bold text-lg leading-tight">Shape the indelible roadmap.</p>
                         </div>
                     </div>
 
@@ -73,7 +75,7 @@ export default function SurveyCTA() {
                     >
                         <button
                             className="group relative inline-flex items-center px-12 py-6 bg-emerald-500 text-black text-xl font-black rounded-2xl hover:bg-emerald-400 transition-all shadow-[0_20px_40px_rgba(16,185,129,0.3)] hover:shadow-[0_25px_50px_rgba(16,185,129,0.4)]"
-                            onClick={() => window.location.href = '/survey'}
+                            onClick={() => navigate('/survey')}
                         >
                             Take the Truth Survey
                             <ArrowRight className="ml-3 w-6 h-6 group-hover:translate-x-2 transition-transform" />

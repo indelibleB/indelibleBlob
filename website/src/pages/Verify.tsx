@@ -170,7 +170,7 @@ export default function Verify() {
                         <div className="flex-1 text-center md:text-left">
                             <h3 className={`text-2xl font-bold mb-2 ${result === 'success' ? 'text-emerald-400' : 'text-red-500'
                                 }`}>
-                                {result === 'success' ? 'Indelible Origin Verified' : 'Integrity Check Failed'}
+                                {result === 'success' ? 'indelible Origin Verified' : 'Integrity Check Failed'}
                             </h3>
                             <p className="text-zinc-400 text-sm mb-4">
                                 {result === 'success'

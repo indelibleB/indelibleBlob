@@ -1,22 +1,37 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Calendar, Menu, X } from 'lucide-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { ConnectButton } from '@mysten/dapp-kit';
 
 const navItems = [
-    { label: 'Problem', href: '/#problem' },
-    { label: 'Solution', href: '/#solution' },
-    { label: 'Research', href: '/#sources' },
+    { label: 'Problem', href: '#problem', isAnchor: true },
+    { label: 'Solution', href: '#solution', isAnchor: true },
+    { label: 'Research', href: '/research', isInternal: true },
     { label: 'Verify', href: '/verify', isInternal: true },
     { label: 'Survey', href: '/survey', isInternal: true },
     { label: 'Transparency', href: '/transparency', isInternal: true },
+    { label: 'Guides', href: '/guides', isInternal: true },
 ];
 
 export default function Navigation() {
     const [scrolled, setScrolled] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    const scrollToSection = (sectionId: string) => {
+        const id = sectionId.replace('#', '');
+        if (location.pathname !== '/') {
+            navigate('/');
+            setTimeout(() => {
+                document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+        } else {
+            document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+        }
+    };
 
     useEffect(() => {
         const handleScroll = () => {
@@ -36,16 +51,27 @@ export default function Navigation() {
             <div className="container mx-auto px-6 flex items-center justify-between py-4">
                 <Link
                     to="/"
-                    className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent"
+                    className="flex items-center gap-2"
                     onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                 >
-                    indelible.Blob
+                    <img src="/branding/emoji_size_blob_icon.png" alt="" className="w-8 h-8 rounded-lg" />
+                    <span className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
+                        indelible.Blob
+                    </span>
                 </Link>
 
                 {/* Desktop Nav */}
                 <div className="hidden md:flex items-center gap-8">
                     {navItems.map((item) => (
-                        item.isInternal ? (
+                        item.isAnchor ? (
+                            <button
+                                key={item.href}
+                                onClick={() => scrollToSection(item.href)}
+                                className="text-sm font-medium text-gray-400 hover:text-emerald-400 transition-colors cursor-pointer bg-transparent border-none"
+                            >
+                                {item.label}
+                            </button>
+                        ) : item.isInternal ? (
                             <Link
                                 key={item.href}
                                 to={item.href}
@@ -105,7 +131,15 @@ export default function Navigation() {
                     >
                         <div className="flex flex-col p-6 gap-4">
                             {navItems.map((item) => (
-                                item.isInternal ? (
+                                item.isAnchor ? (
+                                    <button
+                                        key={item.href}
+                                        onClick={() => { scrollToSection(item.href); setMobileMenuOpen(false); }}
+                                        className="text-lg font-medium text-gray-400 hover:text-emerald-400 transition-colors text-left bg-transparent border-none cursor-pointer"
+                                    >
+                                        {item.label}
+                                    </button>
+                                ) : item.isInternal ? (
                                     <Link
                                         key={item.href}
                                         to={item.href}

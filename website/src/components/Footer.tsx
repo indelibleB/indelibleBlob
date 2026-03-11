@@ -92,7 +92,7 @@ export default function Footer() {
                     </h2>
                     <div className="flex items-center justify-between mb-4 max-w-md mx-auto">
                         <p className="text-gray-400 text-sm">
-                            {submissionMode === 'public' ? "Public Newsletter" : "Encrypted Updates"}
+                            {submissionMode === 'public' ? "Traditional (Outdated) Systems" : "Solana Native, Seal Encrypted Form Management Under Development!"}
                         </p>
                         <div className="flex bg-zinc-800 rounded-lg p-1">
                             <button
@@ -161,22 +161,31 @@ export default function Footer() {
 
                 <div className="border-t border-zinc-800 pt-8">
                     <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-                        <div className="text-center md:text-left">
+                        <div className="text-center md:text-left flex items-center gap-4">
                             <Link
                                 to="/"
-                                className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent mb-2 inline-block"
                                 onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                                className="shrink-0"
                             >
-                                indelible.Blob
+                                <img src="/branding/adaptive-foreground.png" alt="indelible.Blob" className="w-14 h-14 rounded-xl hover:scale-110 transition-transform" />
                             </Link>
-                            <p className="text-sm text-gray-500">
-                                Decentralized Truth Infrastructure
-                            </p>
+                            <div>
+                                <Link
+                                    to="/"
+                                    className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent mb-1 inline-block"
+                                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                                >
+                                    indelible.Blob
+                                </Link>
+                                <p className="text-sm text-gray-500">
+                                    Protocol for Reality
+                                </p>
+                            </div>
                         </div>
 
                         <div className="text-center md:text-right text-sm text-gray-500">
                             <p>© 2026 indelible.Blob. All Rights Reserved.</p>
-                            <p className="mt-1">Powering the Walrus, Sui, & Solana Ecosystems.</p>
+                            <p className="mt-1">Powered by Solana, Seeker, Sui, Walrus, Seal</p>
                         </div>
                     </div>
                 </div>

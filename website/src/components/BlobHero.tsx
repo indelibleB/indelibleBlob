@@ -3,7 +3,8 @@ import { MeshDistortMaterial, Float } from '@react-three/drei';
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 import { useRef } from 'react';
 import * as THREE from 'three';
-import { Calendar, ArrowRight, Download } from 'lucide-react';
+import { Calendar, ArrowRight, ExternalLink } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { landingCopy } from '../data/copy';
 
 function InteractiveBlob({ scrollYProgress }: { scrollYProgress: any }) {
@@ -60,6 +61,7 @@ function InteractiveBlob({ scrollYProgress }: { scrollYProgress: any }) {
 
 export default function BlobHero() {
     const { scrollYProgress } = useScroll();
+    const navigate = useNavigate();
     const { hero } = landingCopy;
 
     return (
@@ -146,7 +148,7 @@ export default function BlobHero() {
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    window.location.href = '/survey';
+                                    navigate('/survey');
                                 }}
                                 className="group px-8 py-4 bg-emerald-500 text-black rounded-full font-bold text-lg hover:bg-white transition-all flex items-center gap-2 shadow-2xl shadow-emerald-500/20 cursor-pointer relative z-[60] pointer-events-auto"
                             >
@@ -156,12 +158,12 @@ export default function BlobHero() {
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    window.location.href = '/app.apk'; // Placeholder for the eventual APK link
+                                    window.open('https://github.com/indelibleB/indelibleBlob', '_blank');
                                 }}
                                 className="group px-8 py-4 bg-cyan-500 text-black rounded-full font-bold text-lg hover:bg-white transition-all flex items-center gap-2 shadow-2xl shadow-cyan-500/20 cursor-pointer relative z-[60] pointer-events-auto"
                             >
                                 Download Android APK
-                                <Download className="w-5 h-5 group-hover:translate-y-1 transition-transform" />
+                                <ExternalLink className="w-5 h-5 group-hover:translate-y-1 transition-transform" />
                             </button>
                             <button
                                 className="text-emerald-400 font-bold hover:text-white transition-colors flex items-center gap-2 cursor-pointer relative z-[60] pointer-events-auto"

@@ -66,8 +66,9 @@ export default function ProblemStatement() {
                                             <div className={`text-5xl md:text-6xl font-bold mb-2 ${item.color} tabular-nums tracking-tighter`}>
                                                 {item.value}
                                             </div>
-                                            <p className="text-zinc-400 font-medium text-lg leading-snug">
-                                                {item.label}
+                                            <p className="font-medium text-lg leading-snug">
+                                                <span className={item.color}>{item.labelHighlight}</span>{' '}
+                                                <span className="text-white">{item.labelRest}</span>
                                             </p>
                                         </div>
                                     </div>

@@ -53,7 +53,7 @@ const industryQuestions: Record<Industry, Question[]> = {
         { id: 'q3', text: 'How do you verify the exact time/location of "Proof of Progress" photos with what level of accuracy?', placeholder: 'Timestamps, GPS metadata (if not stripped)...' },
         { id: 'q4', text: 'What would the value be of "Undisputable Progressive Truth" for real-time positioning & install verifications?', placeholder: 'Cost savings, reduced liability...' },
         { id: 'q5', text: 'How do you handle visual documentation for distributed teams across many sites?', placeholder: 'Cloud storage, messaging apps, manual reporting...' },
-        { id: 'q6', text: 'How could Indelible Blobs streamline the "Final Handover" of a building?', placeholder: 'Historical truth record, transparent build-log...' }
+        { id: 'q6', text: 'How could indelible Blobs streamline the "Final Handover" of a building?', placeholder: 'Historical truth record, transparent build-log...' }
     ],
     Enterprise: [
         { id: 'q1', text: 'What is your organization\'s biggest concern regarding corporate deepfakes?', placeholder: 'CEO fraud, brand reputation, internal communication leaks...' },
@@ -61,7 +61,7 @@ const industryQuestions: Record<Industry, Question[]> = {
         { id: 'q3', text: 'Describe your current costs for "Brand Protection" and monitoring online misinformation.', placeholder: 'Agencies, software tools, man-hours...' },
         { id: 'q4', text: 'How could a "Corporate Seal of Truth" on video/audio save your legal team time?', placeholder: 'Reduced fraud, instant verification of executive comms...' },
         { id: 'q5', text: 'What is the main barrier to adopting blockchain-based verification in your workflow?', placeholder: 'Complexity, onboarding, technical overhead...' },
-        { id: 'q6', text: 'If every corporate asset was "Indelible," how much market capital could be protected?', placeholder: 'Percentage of brand value, fraud prevention...' }
+        { id: 'q6', text: 'If every corporate asset was "indelible," how much market capital could be protected?', placeholder: 'Percentage of brand value, fraud prevention...' }
     ],
     Social: [
         { id: 'q1', text: 'As a creator, how often do you have to verify your identity or content origin?', placeholder: 'Blue checkmarks, linking to other accounts...' },
@@ -75,7 +75,7 @@ const industryQuestions: Record<Industry, Question[]> = {
         { id: 'q1', text: 'How are public service announcements (PSAs) verified as official by the public?', placeholder: 'Official channels, verified social media handles...' },
         { id: 'q2', text: 'What is the national security risk of un-verifiable "State Level" deepfakes?', placeholder: 'Disinformation, election interference, public panic...' },
         { id: 'q3', text: 'Describe current protocols for archiving historical government media.', placeholder: 'Centralized archives, digital preservation standards...' },
-        { id: 'q4', text: 'How could Indelible infrastructure help in "Crisis Communication"?', placeholder: 'Real-time verified alerts, irrefutable public safety info...' },
+        { id: 'q4', text: 'How could indelible infrastructure help in "Crisis Communication"?', placeholder: 'Real-time verified alerts, irrefutable public safety info...' },
         { id: 'q5', text: 'What is the role of "Transparency" in government-citizen trust today?', placeholder: 'Open data initiatives, FOIA requests...' },
         { id: 'q6', text: 'How would on-chain "Source of Truth" change public policy on misinformation?', placeholder: 'Protocol-level regulation, clear attribution requirements...' }
     ]
@@ -241,29 +241,34 @@ export default function Survey() {
                                     </p>
                                 </button>
 
-                                <button
-                                    onClick={() => {
-                                        if (!connected) {
-                                            alert("Please connect your wallet (Top Right) to proceed with Sovereign Mode.");
-                                        } else {
-                                            setSubmissionMode('private');
-                                        }
-                                    }}
-                                    className="p-8 rounded-2xl border border-zinc-700 bg-zinc-800/50 hover:bg-purple-500/10 hover:border-purple-500/50 transition-all group text-left"
-                                >
-                                    <div className="w-12 h-12 rounded-full bg-purple-500/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                                        <Lock className="w-6 h-6 text-purple-400" />
-                                    </div>
-                                    <h3 className="text-xl font-bold text-white mb-2">Web 3.0 Sovereign</h3>
-                                    <p className="text-gray-400 text-sm leading-relaxed">
-                                        Cryptographically sign with your wallet. Zero-knowledge proof of origin.
-                                    </p>
-                                    {!connected && (
-                                        <div className="mt-4 px-3 py-1 bg-red-500/20 text-red-400 text-xs font-bold rounded-full inline-block">
-                                            Wallet Not Connected
+                                <div className="relative overflow-hidden rounded-2xl">
+                                    {/* Diagonal "Under Development" overlay banner */}
+                                    <div className="absolute inset-0 z-10 pointer-events-none">
+                                        <div className="absolute inset-0 bg-black/40" />
+                                        <div
+                                            className="absolute top-10 -right-10 w-56 text-center py-1.5 bg-purple-600/90 text-white text-[10px] font-bold uppercase tracking-widest shadow-lg"
+                                            style={{ transform: 'rotate(35deg)' }}
+                                        >
+                                            Under Development
                                         </div>
-                                    )}
-                                </button>
+                                    </div>
+
+                                    <button
+                                        onClick={() => {}}
+                                        className="w-full p-8 rounded-2xl border border-zinc-700 bg-zinc-800/50 cursor-default text-left"
+                                    >
+                                        <div className="w-12 h-12 rounded-full bg-purple-500/20 flex items-center justify-center mb-6">
+                                            <Lock className="w-6 h-6 text-purple-400" />
+                                        </div>
+                                        <h3 className="text-xl font-bold text-white mb-2">Web 3.0 Sovereign</h3>
+                                        <p className="text-gray-400 text-sm leading-relaxed">
+                                            Cryptographically sign with your wallet. Zero-knowledge proof of origin.
+                                        </p>
+                                        <div className="mt-4 px-3 py-1 bg-purple-500/20 text-purple-300 text-xs font-bold rounded-full inline-block">
+                                            Seal Encrypted — Coming Soon
+                                        </div>
+                                    </button>
+                                </div>
                             </div>
 
                             <button
@@ -304,7 +309,7 @@ export default function Survey() {
                                             {consentChecked && <CheckCircle2 className="w-4 h-4 text-black" />}
                                         </div>
                                         <span className="text-sm text-gray-300 leading-snug">
-                                            I consent to my responses being processed via Formspree and stored in the Indelible Blob public dataset.
+                                            I consent to my responses being processed via Formspree and stored in the indelible.Blob public dataset.
                                         </span>
                                     </div>
                                 </div>
@@ -312,7 +317,7 @@ export default function Survey() {
                                 <>
                                     <div className="space-y-4 text-gray-400 text-sm md:text-base mb-8">
                                         <p>
-                                            At Indelible Blob, we believe truth is a human right. To uphold this, we handle your data with the same integrity we apply to our infrastructure:
+                                            At indelible.Blob, we believe truth is a human right. To uphold this, we handle your data with the same integrity we apply to our infrastructure:
                                         </p>
                                         <ul className="list-disc pl-5 space-y-2">
                                             <li><strong className="text-white">Sovereign Storage:</strong> Your survey responses are stored as <strong className="text-emerald-400">immutable blobs</strong> on the Walrus Protocol.</li>
@@ -326,7 +331,7 @@ export default function Survey() {
                                             {consentChecked && <CheckCircle2 className="w-4 h-4 text-black" />}
                                         </div>
                                         <span className="text-sm text-gray-300 leading-snug">
-                                            I consent to my responses being stored as an Indelible Blob and used to improve the Truth Engine for the **{industry}** sector.
+                                            I consent to my responses being stored as an indelible.Blob and used to improve the Truth Engine for the **{industry}** sector.
                                         </span>
                                     </div>
                                 </>

@@ -46,7 +46,7 @@ export default function Guides() {
                             UNDERSTANDING <span className="text-white">TEEPIN</span> PROVENANCE
                         </h2>
                         <p className="text-lg text-zinc-400 max-w-2xl mx-auto font-medium">
-                            The Indelible Blob protocol grades the cryptographic integrity of captured media based on the hardware execution environment of the capturing device.
+                            The indelible.Blob protocol grades the cryptographic integrity of captured media based on the hardware execution environment of the capturing device.
                         </p>
                     </motion.div>
 
@@ -171,7 +171,7 @@ export default function Guides() {
                             >
                                 <h4 className="text-xl font-bold mb-4">Frictionless Capture</h4>
                                 <p className="text-zinc-400 leading-relaxed">
-                                    Reality moves fast. The traditional Web3 flow of signing a transaction for every action is too slow for journalism. Session Bind batches authorizations into a single, time-limited cryptographic handshake.
+                                    Reality moves fast. The traditional Web3 flow of signing a transaction for every action is too slow. Session Bind batches authorizations into a single, time-limited cryptographic handshake.
                                 </p>
                             </motion.div>
 
@@ -227,10 +227,10 @@ export default function Guides() {
                             <div className="relative z-10 max-w-2xl">
                                 <h3 className="text-2xl font-bold mb-4 flex items-center gap-3">
                                     <Shield className="w-6 h-6 text-red-400" />
-                                    Secured by the Seal Protocol (Walrus)
+                                    Secured by the Seal Protocol
                                 </h3>
                                 <p className="text-zinc-300 leading-relaxed mb-8">
-                                    Entering Sovereign Mode activates military-grade local device encryption (AES-GCM). Your media is encrypted on-device the millisecond it hits the sensor, before it is ever written to storage or uploaded.
+                                    Entering Sovereign Mode activates local device encryption (AES-GCM). Your media is encrypted on-device the millisecond it hits the sensor, before it is ever written to storage or uploaded.
                                 </p>
 
                                 <div className="grid sm:grid-cols-2 gap-6">
