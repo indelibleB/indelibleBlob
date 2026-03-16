@@ -138,49 +138,71 @@ export class SuiService {
         }
 
         try {
-          // Build Transaction (No Client needed to just build)
+          // Build Transaction — step-tracked for production error diagnosis
+          let suiStep = 'TX_INIT';
+
+          suiStep = 'new Transaction()';
           const tx = new Transaction();
 
-
-
-          // Helper function to safely encode JS string to Move vector<u8>
-          // The newer SDK requires explicit BCS type annotations  
+          suiStep = 'TextEncoder';
           const encoder = new TextEncoder();
+
+          // Test tx.pure availability before building arguments
+          suiStep = 'tx.pure check';
+          if (!tx.pure || typeof tx.pure.vector !== 'function') {
+            throw new Error(`tx.pure.vector is ${typeof tx.pure?.vector} — SDK incompatible with Hermes`);
+          }
+
+          suiStep = 'toVecU8 helper';
           const toVecU8 = (str: string) => tx.pure.vector('u8', Array.from(encoder.encode(str)));
 
+          suiStep = 'first toVecU8 (blobId)';
+          const arg_blobId = toVecU8(walrusData.blobId);
+
+          suiStep = 'toVecU8 (contentHash)';
+          const arg_contentHash = toVecU8(capture.contentHash || '');
+
+          suiStep = 'tx.pure.u64 (timestamp)';
+          const arg_timestamp = tx.pure.u64(capture.timestamp);
+
+          suiStep = 'moveCall arguments build';
+          const moveArgs = [
+            arg_blobId,
+            arg_contentHash,
+            arg_timestamp,
+            // GPS — lossless signed storage: absolute value + sign boolean
+            tx.pure.u64(Math.abs(Math.round(metadata.gps_latitude))),
+            tx.pure.bool(metadata.gps_latitude < 0),
+            tx.pure.u64(Math.abs(Math.round(metadata.gps_longitude))),
+            tx.pure.bool(metadata.gps_longitude < 0),
+            tx.pure.u64(Math.abs(Math.round(metadata.gps_altitude))),
+            tx.pure.bool(metadata.gps_altitude < 0),
+            tx.pure.u64(Math.round(metadata.gps_accuracy)),
+            tx.pure.bool(metadata.is_rtk),
+            toVecU8(metadata.session_id),
+            toVecU8(metadata.capture_type),
+            tx.pure.bool(metadata.is_sovereign),
+            toVecU8(metadata.teepin_signature),
+            toVecU8(metadata.teepin_public_key),
+            toVecU8(metadata.provenance_grade),
+            tx.pure.u64(metadata.forensic_score),
+            // Accelerometer — lossless signed storage: absolute value + sign boolean
+            tx.pure.u64(Math.abs(Math.round(metadata.accel_x * 1000))),
+            tx.pure.bool(metadata.accel_x < 0),
+            tx.pure.u64(Math.abs(Math.round(metadata.accel_y * 1000))),
+            tx.pure.bool(metadata.accel_y < 0),
+            tx.pure.u64(Math.abs(Math.round(metadata.accel_z * 1000))),
+            tx.pure.bool(metadata.accel_z < 0),
+            tx.pure.u64(Math.round(Math.abs(metadata.compass_heading * 100))),
+          ];
+
+          suiStep = 'tx.moveCall';
           tx.moveCall({
             target: `${CAPTURE_CONFIG.INDELIBLE_BLOB_PACKAGE_ID}::capture::record_capture`,
-            arguments: [
-              toVecU8(walrusData.blobId),
-              toVecU8(capture.contentHash || ''),
-              tx.pure.u64(capture.timestamp),
-              // GPS — lossless signed storage: absolute value + sign boolean
-              tx.pure.u64(Math.abs(Math.round(metadata.gps_latitude))),
-              tx.pure.bool(metadata.gps_latitude < 0),
-              tx.pure.u64(Math.abs(Math.round(metadata.gps_longitude))),
-              tx.pure.bool(metadata.gps_longitude < 0),
-              tx.pure.u64(Math.abs(Math.round(metadata.gps_altitude))),
-              tx.pure.bool(metadata.gps_altitude < 0),
-              tx.pure.u64(Math.round(metadata.gps_accuracy)),
-              tx.pure.bool(metadata.is_rtk),
-              toVecU8(metadata.session_id),
-              toVecU8(metadata.capture_type),
-              tx.pure.bool(metadata.is_sovereign),
-              toVecU8(metadata.teepin_signature),
-              toVecU8(metadata.teepin_public_key),
-              toVecU8(metadata.provenance_grade),
-              tx.pure.u64(metadata.forensic_score),
-              // Accelerometer — lossless signed storage: absolute value + sign boolean
-              tx.pure.u64(Math.abs(Math.round(metadata.accel_x * 1000))),
-              tx.pure.bool(metadata.accel_x < 0),
-              tx.pure.u64(Math.abs(Math.round(metadata.accel_y * 1000))),
-              tx.pure.bool(metadata.accel_y < 0),
-              tx.pure.u64(Math.abs(Math.round(metadata.accel_z * 1000))),
-              tx.pure.bool(metadata.accel_z < 0),
-              tx.pure.u64(Math.round(Math.abs(metadata.compass_heading * 100))),
-            ],
+            arguments: moveArgs,
           });
 
+          suiStep = 'signTransaction callback';
           const result = await signTransaction({
             transaction: tx,
             options: {
@@ -206,11 +228,13 @@ export class SuiService {
           }
 
         } catch (netError: any) {
-          console.error('⚠️ [FATAL] Sui Transaction build/sign failed:', netError);
-          console.error('   Error Stack:', netError.stack);
-          // If in strict mode or production, rethrow
+          const stepMsg = `[Sui:${suiStep}] ${netError?.message || netError}`;
+          console.error('⚠️ [FATAL] Sui Transaction failed at step:', suiStep);
+          console.error('   Original error:', netError?.message);
+          console.error('   Error Stack:', netError?.stack);
+          // Rethrow with step context so the Alert shows exactly where it failed
           if (process.env.NODE_ENV === 'production' || !CAPTURE_CONFIG.ENABLE_SIMULATION) {
-            throw netError;
+            throw new Error(stepMsg);
           }
 
           // Should never hit this based on the above throw, but satisfies TypeScript Promise return

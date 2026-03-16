@@ -28,7 +28,7 @@ config.resolver.extraNodeModules = {
     stream: require.resolve('stream-browserify'),
     events: require.resolve('events'),
     vm: require.resolve('vm-browserify'),
-    pino: path.resolve(projectRoot, 'pino-stub.js'),
+    pino: path.resolve(projectRoot, 'shims', 'pino-stub.js'),
 };
 
 // 6. WSL2 NETWORKING FIX: Bridge Metro to Windows
@@ -39,10 +39,17 @@ config.server = {
 
 // 7. Intercept pino — Hermes cannot run pino@10's class syntax.
 //    WalletConnect uses pino for debug logging only; relay is unaffected.
-const pinoStub = path.resolve(projectRoot, 'pino-stub.js');
+// 8. Intercept react-native-url-polyfill — RN 0.74+ has built-in URL.
+//    @walletconnect/react-native-compat imports it, causing
+//    "Cannot read property 'prototype' of undefined" crash on Hermes.
+const pinoStub = path.resolve(projectRoot, 'shims', 'pino-stub.js');
+const urlPolyfillNoop = path.resolve(projectRoot, 'shims', 'url-polyfill-noop.js');
 config.resolver.resolveRequest = (context, moduleName, platform) => {
     if (moduleName === 'pino' || moduleName.startsWith('pino/')) {
         return { type: 'sourceFile', filePath: pinoStub };
+    }
+    if (moduleName === 'react-native-url-polyfill/auto' || moduleName === 'react-native-url-polyfill') {
+        return { type: 'sourceFile', filePath: urlPolyfillNoop };
     }
     return context.resolveRequest(context, moduleName, platform);
 };

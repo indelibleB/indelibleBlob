@@ -21,6 +21,7 @@ import {
     View, StyleSheet, Text, TouchableOpacity, Animated,
     Alert, Linking, ScrollView
 } from 'react-native';
+import * as Clipboard from 'expo-clipboard';
 import { Camera, useCameraDevice } from 'react-native-vision-camera';
 import { useVisionCamera } from '../../hooks/useVisionCamera';
 import { COLORS, FONTS } from '../../constants/config';
@@ -28,7 +29,7 @@ import { BlobCaptureButton } from './BlobCaptureButton';
 import { LinearGradient } from 'expo-linear-gradient';
 import {
     ChevronLeft, ChevronRight, Camera as CameraIcon, Video,
-    RotateCcw, Wifi, Shield, ShieldCheck, Info, LogOut, User, Settings, Vote
+    RotateCcw, Wifi, Shield, ShieldCheck, Info, LogOut, User, Settings, Vote, Copy
 } from 'lucide-react-native';
 import { IdentityService } from '../../services/identity';
 import { blobLog } from '../../utils/logger';
@@ -96,6 +97,8 @@ export function VisionCameraView({
     const [sidebarAnim] = useState(new Animated.Value(-220));
     const [isSovereign, setIsSovereign] = useState(false);
     const [recordingDuration, setRecordingDuration] = useState(0);
+    // Gas is fully sponsored by Enoki — no balance display needed for users
+    // Future: SKR + SOL balance indicators for Solana commerce layer
 
     // ========================================================================
     // SKR / RECORDING TIMER / AUTO-END
@@ -375,22 +378,47 @@ export function VisionCameraView({
 
                             {/* Sui zkLogin Address */}
                             {currentUser.suiAddress && (
-                                <View style={styles.bindRow}>
+                                <TouchableOpacity
+                                    style={styles.bindRow}
+                                    activeOpacity={0.6}
+                                    onPress={async () => {
+                                        await Clipboard.setStringAsync(currentUser.suiAddress!);
+                                        Alert.alert('Copied', 'Sui address copied to clipboard');
+                                    }}
+                                >
                                     <Text style={styles.bindRoleLabel}>🔵 Sui Metadata</Text>
-                                    <Text style={styles.identityAddress} numberOfLines={1} ellipsizeMode="middle">
-                                        {currentUser.suiAddress}
-                                    </Text>
-                                </View>
+                                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                                        <Text style={styles.identityAddress} numberOfLines={1} ellipsizeMode="middle">
+                                            {currentUser.suiAddress}
+                                        </Text>
+                                        <Copy color="rgba(255,255,255,0.5)" size={12} />
+                                    </View>
+                                    <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4 }}>
+                                        <Text style={{ color: '#4ade80', fontSize: 10, fontFamily: 'Inter_400Regular' }}>
+                                            ● No fees for Seeker Mobile users — gas covered by indelible.Blob
+                                        </Text>
+                                    </View>
+                                </TouchableOpacity>
                             )}
 
                             {/* Solana Seed Vault Address */}
                             {currentUser.solanaAddress && (
-                                <View style={styles.bindRow}>
+                                <TouchableOpacity
+                                    style={styles.bindRow}
+                                    activeOpacity={0.6}
+                                    onPress={async () => {
+                                        await Clipboard.setStringAsync(currentUser.solanaAddress!);
+                                        Alert.alert('Copied', 'Solana address copied to clipboard');
+                                    }}
+                                >
                                     <Text style={styles.bindRoleLabel}>🟢 Solana Commerce</Text>
-                                    <Text style={styles.identityAddress} numberOfLines={1} ellipsizeMode="middle">
-                                        {currentUser.solanaAddress}
-                                    </Text>
-                                </View>
+                                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                                        <Text style={styles.identityAddress} numberOfLines={1} ellipsizeMode="middle">
+                                            {currentUser.solanaAddress}
+                                        </Text>
+                                        <Copy color="rgba(255,255,255,0.5)" size={12} />
+                                    </View>
+                                </TouchableOpacity>
                             )}
 
                             {currentUser.provenanceGrade && (

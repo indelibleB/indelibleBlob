@@ -6,7 +6,17 @@
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "1009377387792-remq6uk45f2cbh8b03bddg93sj15qhn8.apps.googleusercontent.com",
+        "EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID": "1009377387792-t594cnljr592tr6bdscf2320ak1sq7c8.apps.googleusercontent.com",
+        "EXPO_PUBLIC_GOOGLE_CLIENT_ID": "1009377387792-remq6uk45f2cbh8b03bddg93sj15qhn8.apps.googleusercontent.com",
+        "EXPO_PUBLIC_ENOKI_API_KEY": "enoki_public_63c5f934ce6146151d344d8604952578",
+        "EXPO_PUBLIC_ENOKI_SPONSOR_KEY": "enoki_private_8dea128ed54ea2658597d74fb4bd64dd"
+      }
     },
     "preview": {
       "android": {
@@ -17,7 +27,8 @@
         "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "1009377387792-remq6uk45f2cbh8b03bddg93sj15qhn8.apps.googleusercontent.com",
         "EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID": "1009377387792-t594cnljr592tr6bdscf2320ak1sq7c8.apps.googleusercontent.com",
         "EXPO_PUBLIC_GOOGLE_CLIENT_ID": "1009377387792-remq6uk45f2cbh8b03bddg93sj15qhn8.apps.googleusercontent.com",
-        "EXPO_PUBLIC_ENOKI_API_KEY": "enoki_public_63c5f934ce6146151d344d8604952578"
+        "EXPO_PUBLIC_ENOKI_API_KEY": "enoki_public_63c5f934ce6146151d344d8604952578",
+        "EXPO_PUBLIC_ENOKI_SPONSOR_KEY": "enoki_private_8dea128ed54ea2658597d74fb4bd64dd"
       }
     },
     "production": {
@@ -26,7 +37,8 @@
         "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "1009377387792-remq6uk45f2cbh8b03bddg93sj15qhn8.apps.googleusercontent.com",
         "EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID": "1009377387792-t594cnljr592tr6bdscf2320ak1sq7c8.apps.googleusercontent.com",
         "EXPO_PUBLIC_GOOGLE_CLIENT_ID": "1009377387792-remq6uk45f2cbh8b03bddg93sj15qhn8.apps.googleusercontent.com",
-        "EXPO_PUBLIC_ENOKI_API_KEY": "enoki_public_63c5f934ce6146151d344d8604952578"
+        "EXPO_PUBLIC_ENOKI_API_KEY": "enoki_public_63c5f934ce6146151d344d8604952578",
+        "EXPO_PUBLIC_ENOKI_SPONSOR_KEY": "enoki_private_8dea128ed54ea2658597d74fb4bd64dd"
       }
     }
   },

@@ -34,6 +34,8 @@ import { SensorForensics } from '../services/forensics';
 import { hashFile } from '../utils/helpers';
 import { useSuiWallet } from '../contexts/SuiWalletContext';
 import { useSlushWallet } from './useSlushWallet';
+// Gas manager no longer needed — Enoki sponsors all transactions
+// import { activeGasManager } from '../services/gas';
 import type { CapturedPhoto, CapturedVideo, UploadStatus, Capture } from '@shared/types';
 import { readAsStringAsync } from 'expo-file-system';
 import { Buffer } from 'buffer';
@@ -253,6 +255,9 @@ export function useCapture() {
       updateStatus(captureId, 'verifying');
       onStatusChange?.('verifying', captureWithWalrus);
 
+      // Gas is handled by Enoki Sponsored Transactions — no faucet needed
+      blobLog.info('⛓️  Step 3a: Using Enoki sponsored transactions (gas-free for user)');
+
       const keypair = undefined; // Legacy local keypair removed
 
       blobLog.info('   👤 Identity Context:', {
@@ -268,6 +273,7 @@ export function useCapture() {
       const ephemeralSender = identityUser?.ephemeralKeypair?.getPublicKey().toSuiAddress();
 
       // Record captures metadata including TEEPIN signature
+      blobLog.info('⛓️  Step 3 ENTER: Calling SuiService.recordCapture...');
       const suiData = await SuiService.recordCapture(
         captureWithWalrus,
         walrusData,
@@ -283,56 +289,136 @@ export function useCapture() {
           const zkProofStr = await SecureStorage.getSecureItem(SECURE_STORAGE_KEYS.ZKLOGIN_PROOF);
 
           if (zkProofStr) {
-            blobLog.info('📦 Delegating signature to Background Ephemeral Key & ZK Proof...');
+            // ================================================================
+            // ENOKI SPONSORED TRANSACTION + ZKLOGIN
+            // ================================================================
+            //
+            // ⚠️ HACKATHON TESTNET DEMO — SECURITY ARCHITECTURE NOTE ⚠️
+            //
+            // The ENOKI_SPONSOR_KEY (private) is embedded client-side here
+            // ONLY for this Monolith hackathon testnet demonstration.
+            //
+            // PRODUCTION ARCHITECTURE:
+            // - Private sponsor key lives on a backend server (e.g. Vercel
+            //   Edge Function) that proxies sponsorship requests
+            // - Mobile app sends unsigned txKindBytes to our backend
+            // - Backend authenticates the user, applies rate limits, and
+            //   calls Enoki's sponsor API with the private key
+            // - This prevents key extraction from decompiled APKs
+            //
+            // This testnet-only key will be BURNED and permanently revoked
+            // before any mainnet deployment. A fresh private key will be
+            // generated and secured server-side with proper infrastructure.
+            //
+            // ================================================================
+            blobLog.info('📦 Using Enoki Sponsored Transaction + zkLogin...');
+            let currentStep = '3b: setSender';
 
-            // The sender is the zkLogin-derived address
-            txArgs.transaction.setSender(creatorAddress);
-            const rawTxBytes = await txArgs.transaction.build({ client });
+            try {
+              const ENOKI_SPONSOR_KEY = process.env.EXPO_PUBLIC_ENOKI_SPONSOR_KEY;
+              if (!ENOKI_SPONSOR_KEY) {
+                throw new Error('Missing ENOKI_SPONSOR_KEY for sponsored transactions');
+              }
 
-            // Rehydrate the ephemeral keypair and session data
-            const ephemeralKeySecret = await SecureStorage.getSecureItem(SECURE_STORAGE_KEYS.ZKLOGIN_EPHEMERAL);
-            const maxEpochStr = await SecureStorage.getSecureItem(SECURE_STORAGE_KEYS.ZKLOGIN_MAX_EPOCH);
-            const randomnessStr = await SecureStorage.getSecureItem(SECURE_STORAGE_KEYS.ZKLOGIN_RANDOMNESS);
+              // Step 3b: Set sender
+              txArgs.transaction.setSender(creatorAddress);
 
-            if (!ephemeralKeySecret || !maxEpochStr || !randomnessStr) {
-              throw new Error('Capture failed: Missing ephemeral key data for ZK Execution');
+              // Step 3c: Build transaction KIND bytes (no gas — Enoki sponsors it)
+              currentStep = '3c: build txKind';
+              const txKindBytes = await txArgs.transaction.build({ client, onlyTransactionKind: true });
+              blobLog.info('📦 Step 3c: Transaction kind built OK, size:', txKindBytes.length);
+
+              // Step 3d: Request sponsorship from Enoki
+              currentStep = '3d: Enoki sponsor';
+              const sponsorRes = await fetch('https://api.enoki.mystenlabs.com/v1/transaction-blocks/sponsor', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${ENOKI_SPONSOR_KEY}`,
+                },
+                body: JSON.stringify({
+                  network: 'testnet',
+                  transactionBlockKindBytes: Buffer.from(txKindBytes).toString('base64'),
+                  sender: creatorAddress,
+                  allowedAddresses: [creatorAddress],
+                }),
+              });
+
+              if (!sponsorRes.ok) {
+                const errText = await sponsorRes.text();
+                throw new Error(`Enoki sponsor failed (${sponsorRes.status}): ${errText}`);
+              }
+
+              const sponsorData = await sponsorRes.json();
+              const { digest, bytes: sponsoredTxBytes } = sponsorData.data || sponsorData;
+              blobLog.info('📦 Step 3d: Enoki sponsorship received, digest:', digest);
+
+              // Step 3e: Rehydrate ephemeral keypair
+              currentStep = '3e: rehydrate keypair';
+              const ephemeralKeySecret = await SecureStorage.getSecureItem(SECURE_STORAGE_KEYS.ZKLOGIN_EPHEMERAL);
+              const maxEpochStr = await SecureStorage.getSecureItem(SECURE_STORAGE_KEYS.ZKLOGIN_MAX_EPOCH);
+
+              if (!ephemeralKeySecret || !maxEpochStr) {
+                throw new Error('Missing ephemeral key data for ZK Execution');
+              }
+
+              const { secretKey } = decodeSuiPrivateKey(ephemeralKeySecret);
+              const ephemeralKeyPair = Ed25519Keypair.fromSecretKey(secretKey);
+
+              // Step 3f: Parse ZK proof
+              currentStep = '3f: parse zkProof';
+              const zkProofRaw = JSON.parse(zkProofStr);
+              const zkProof = zkProofRaw.data || zkProofRaw;
+
+              // Step 3g: Sign the SPONSORED tx bytes with ephemeral key
+              currentStep = '3g: ephemeral sign';
+              const sponsoredBytes = Uint8Array.from(Buffer.from(sponsoredTxBytes, 'base64'));
+              const { signature: ephemeralSig } = await ephemeralKeyPair.signTransaction(sponsoredBytes);
+
+              // Step 3h: Assemble zkLogin signature
+              currentStep = '3h: zkLoginSig';
+              const zkLoginSig = getZkLoginSignature({
+                inputs: {
+                  proofPoints: zkProof.proofPoints,
+                  issBase64Details: zkProof.issBase64Details,
+                  headerBase64: zkProof.headerBase64,
+                  addressSeed: zkProof.addressSeed,
+                },
+                maxEpoch: Number(maxEpochStr),
+                userSignature: ephemeralSig,
+              });
+
+              // Step 3i: Execute sponsored transaction via Enoki
+              currentStep = '3i: Enoki execute';
+              const execRes = await fetch(`https://api.enoki.mystenlabs.com/v1/transaction-blocks/sponsor/${digest}`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${ENOKI_SPONSOR_KEY}`,
+                },
+                body: JSON.stringify({
+                  signature: zkLoginSig,
+                }),
+              });
+
+              if (!execRes.ok) {
+                const errText = await execRes.text();
+                throw new Error(`Enoki execute failed (${execRes.status}): ${errText}`);
+              }
+
+              const execData = await execRes.json();
+              const txDigest = execData.data?.digest || execData.digest || digest;
+              blobLog.success('✅ Step 3i: Sponsored transaction executed! Digest:', txDigest);
+
+              // Fetch full effects for the caller
+              return await client.getTransactionBlock({
+                digest: txDigest,
+                options: { showEffects: true, showObjectChanges: true },
+              });
+
+            } catch (stepErr: any) {
+              throw new Error(`[Step ${currentStep}] ${stepErr?.message || stepErr}`);
             }
-
-            // getSecretKey() returns bech32 (suiprivkey1q...), not raw bytes
-            const { secretKey } = decodeSuiPrivateKey(ephemeralKeySecret);
-            const ephemeralKeyPair = Ed25519Keypair.fromSecretKey(secretKey);
-
-            const zkProofRaw = JSON.parse(zkProofStr);
-
-            // Enoki wraps proof in { data: { ... } }, public prover does not
-            const zkProof = zkProofRaw.data || zkProofRaw;
-
-            // [SECURITY FIX L-3] Sensitive object structures shouldn't be logged in prod
-            // blobLog.info('🔑 ZK Proof keys:', Object.keys(zkProof));
-            // blobLog.info('🔑 Has proofPoints:', !!zkProof.proofPoints);
-            // blobLog.info('🔑 Has addressSeed:', !!zkProof.addressSeed);
-
-            // Sign the transaction bytes with the local ephemeral key
-            const { signature: ephemeralSig } = await ephemeralKeyPair.signTransaction(rawTxBytes);
-
-            // Assemble the mathematical proof that the ephemeral key is authorized
-            const zkLoginSig = getZkLoginSignature({
-              inputs: {
-                proofPoints: zkProof.proofPoints,
-                issBase64Details: zkProof.issBase64Details,
-                headerBase64: zkProof.headerBase64,
-                addressSeed: zkProof.addressSeed,
-              },
-              maxEpoch: Number(maxEpochStr),
-              userSignature: ephemeralSig,
-            });
-
-            // Execute it directly without prompting the user!
-            return await client.executeTransactionBlock({
-              transactionBlock: rawTxBytes,
-              signature: zkLoginSig,
-              options: { showEffects: true, showObjectChanges: true }
-            });
 
           } else {
             // ====================================================================
