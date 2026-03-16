@@ -5,7 +5,7 @@
     "license": "MIT",
     "dependencies": {
         "@mysten/seal": "^0.9.6",
-        "@mysten/sui": "^1.21.1",
+        "@mysten/sui": "^2.8.0",
         "expo-file-system": "~18.0.0",
         "buffer": "^6.0.3"
     }
