@@ -7,6 +7,13 @@
  */
 
 import 'react-native-get-random-values'; // Required crypto polyfill for WalletConnect v2
+
+// Hermes polyfills — must be explicit global assignment before any SDK loads
+import { TextEncoder, TextDecoder } from 'text-encoding';
+import { Buffer } from 'buffer';
+(global as any).TextEncoder = (global as any).TextEncoder || TextEncoder;
+(global as any).TextDecoder = (global as any).TextDecoder || TextDecoder;
+(global as any).Buffer = (global as any).Buffer || Buffer;
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Alert, ToastAndroid, Platform, Linking } from 'react-native';
 import { StatusBar } from 'expo-status-bar';

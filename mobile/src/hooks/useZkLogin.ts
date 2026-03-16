@@ -7,6 +7,8 @@ import { decodeSuiPrivateKey } from '@mysten/sui/cryptography';
 import { generateNonce, generateRandomness, jwtToAddress } from '@mysten/sui/zklogin';
 import { SuiClient, getFullnodeUrl } from '@mysten/sui/client';
 import { SecureStorage, SECURE_STORAGE_KEYS } from '../services/secureStorage';
+// Gas manager no longer needed — Enoki sponsors all transactions
+// import { activeGasManager } from '../services/gas';
 import { blobLog } from '../utils/logger';
 
 WebBrowser.maybeCompleteAuthSession();
@@ -155,6 +157,10 @@ export function useZkLogin() {
                     await SecureStorage.deleteSecureItem(SECURE_STORAGE_KEYS.ZKLOGIN_JWT); // Security Fix: H-2 Delete JWT to prevent replay
 
                     blobLog.success('zkLogin: Successfully derived address & fetched proof:', address);
+
+                    // Gas is now handled by Enoki Sponsored Transactions at capture time
+                    // No faucet or pre-funding needed
+
                     setDerivedAddress(address);
                 } catch (err: any) {
                     blobLog.error('zkLogin: Failed to derive address', err);
