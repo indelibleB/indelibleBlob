@@ -4,7 +4,7 @@
     "main": "index.ts",
     "license": "MIT",
     "dependencies": {
-        "@mysten/seal": "^0.9.6",
+        "@mysten/seal": "^1.1.1",
         "@mysten/sui": "^1.21.1",
         "expo-file-system": "~18.0.0",
         "buffer": "^6.0.3"
